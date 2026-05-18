@@ -106,7 +106,8 @@
   .res-rate { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 
   /* MAIN */
-  .main { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
+  .main { display: grid; grid-template-columns: 180px 320px 1fr; gap: 20px; align-items: stretch; }
+  @media (max-width: 1100px) { .main { grid-template-columns: 160px 280px 1fr; } }
   @media (max-width: 800px) { .main { grid-template-columns: 1fr; } }
   .panel {
     background: var(--panel); border: 1px solid var(--border);
@@ -117,11 +118,14 @@
     letter-spacing: 0.2em; margin-bottom: 12px;
   }
 
-  /* REACTOR */
-  .reactor-col { display: flex; flex-direction: column; gap: 16px; }
-  .reactor-panel { display: flex; flex-direction: column; align-items: center; }
+  /* COCKPIT COLUMNS */
+  .log-col { display: flex; flex-direction: column; }
+  .log-col .panel { flex: 1; overflow: hidden; }
+  .center-col { display: flex; flex-direction: column; align-items: stretch; min-width: 0; }
+  .right-col { display: flex; flex-direction: column; min-width: 0; }
+  .reactor-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
   .reactor {
-    width: 220px; height: 220px; position: relative;
+    width: 300px; height: 300px; position: relative;
     background: radial-gradient(circle, rgba(94, 226, 255, 0.15) 0%, transparent 70%);
     border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -137,7 +141,7 @@
     animation: spin 6s linear infinite reverse;
   }
   .reactor-core {
-    width: 130px; height: 130px; border-radius: 50%;
+    width: 180px; height: 180px; border-radius: 50%;
     background: radial-gradient(circle, #1a3a4d 0%, #050810 80%);
     border: 1px solid var(--cyan);
     box-shadow: 0 0 30px rgba(94, 226, 255, 0.4),
@@ -155,7 +159,7 @@
                 inset 0 0 50px rgba(94, 226, 255, 0.5);
   }
   .reactor-sym {
-    font-size: 42px; color: var(--cyan);
+    font-size: 56px; color: var(--cyan);
     text-shadow: 0 0 20px var(--cyan);
   }
   .reactor-amt {
@@ -440,88 +444,6 @@
     50% { filter: drop-shadow(0 0 12px rgba(94,226,255,0.9)); }
   }
 
-  /* DOCTRINE (Wave 4e) */
-  .doctrine-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 12px;
-  }
-  .doctrine-card {
-    background: rgba(5,8,16,0.6);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--cyan);
-    padding: 16px;
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .doctrine-name {
-    font-family: 'Syncopate', monospace;
-    font-size: 14px;
-    letter-spacing: 0.2em;
-  }
-  .doctrine-tagline {
-    color: var(--text);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    font-style: italic;
-  }
-  .doctrine-desc {
-    color: var(--text-dim);
-    font-size: 11px;
-    line-height: 1.5;
-    margin: 0;
-  }
-  .doctrine-nodes-preview {
-    display: flex; flex-direction: column; gap: 6px;
-    padding-top: 8px;
-    border-top: 1px dashed var(--border);
-  }
-  .doctrine-node-preview {
-    display: grid;
-    grid-template-columns: 24px 100px 1fr;
-    gap: 6px;
-    font-size: 10px;
-    align-items: baseline;
-  }
-  .doctrine-tier {
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    font-size: 9px;
-  }
-  .doctrine-node-name { color: var(--text); }
-  .doctrine-node-effect { color: var(--text-dim); }
-  .doctrine-select-btn {
-    margin-top: 8px;
-    border: none;
-    padding: 10px;
-    color: var(--bg);
-    font-family: inherit;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    cursor: pointer;
-    font-weight: 700;
-    transition: filter 0.15s;
-  }
-  .doctrine-select-btn:hover { filter: brightness(1.2); }
-
-  /* LOCKED CONTENT HINTS (Wave 4e) */
-  .card.jump-locked, .node.jump-locked {
-    opacity: 0.45;
-    cursor: not-allowed;
-    border-style: dashed;
-  }
-  .card.jump-locked .card-name, .node.jump-locked .node-name {
-    color: var(--text-dim);
-  }
-  .lock-hint {
-    display: inline-block;
-    color: var(--amber);
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    padding: 2px 6px;
-    border: 1px solid rgba(255, 179, 71, 0.4);
-    margin-top: 6px;
-  }
-
   /* OBJECTIVES */
   .obj-wrap { display: flex; flex-direction: column; gap: 16px; }
   .obj-summary {
@@ -564,9 +486,125 @@
     letter-spacing: 0.15em; font-variant-numeric: tabular-nums;
   }
   .obj.done .obj-pp { color: var(--cyan-dim); }
+
+  /* STARFIELD CANVAS */
+  #starfield-canvas {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+
+  /* REACTOR PANEL — cockpit hero, stars show through */
+  .reactor-panel {
+    background: rgba(5, 8, 16, 0.28) !important;
+    backdrop-filter: blur(2px);
+    padding: 32px 24px;
+    gap: 16px;
+  }
+  .reactor-ring.r2 { inset: 18px; }
+
+  /* BUY QUANTITY BAR */
+  .buy-qty-bar {
+    display: flex; gap: 4px; align-items: center; margin-bottom: 14px;
+  }
+  .buy-qty-bar > span {
+    color: var(--text-dim); font-size: 10px; letter-spacing: 0.18em; margin-right: 6px;
+  }
+  .qty-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); padding: 5px 13px;
+    font-family: inherit; font-size: 10px; letter-spacing: 0.13em;
+    cursor: pointer; transition: all 0.12s;
+  }
+  .qty-btn:hover { border-color: var(--cyan-dim); color: var(--text); }
+  .qty-btn.active {
+    border-color: var(--cyan); color: var(--cyan);
+    background: rgba(94, 226, 255, 0.07);
+  }
+
+  /* ENGRAMS */
+  .engram-list { display: flex; flex-direction: column; gap: 6px; }
+  .engram {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 14px;
+    padding: 10px 14px;
+    background: rgba(5, 8, 16, 0.55);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--eg-c, var(--text-dim));
+    align-items: center;
+  }
+  .engram.decrypted { opacity: 0.65; }
+  .engram-rarity { font-size: 9px; letter-spacing: 0.22em; color: var(--eg-c, var(--text-dim)); }
+  .engram-name { font-size: 12px; color: var(--text); margin-top: 2px; }
+  .engram-flavor {
+    font-size: 10px; color: var(--text-dim); margin-top: 5px;
+    line-height: 1.55; font-style: italic;
+  }
+  .engram-claimed { font-size: 10px; color: var(--cyan-dim); margin-top: 4px; }
+  .engram-meta { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+  .decrypt-btn {
+    background: transparent; border: 1px solid var(--eg-c, var(--text-dim));
+    color: var(--eg-c, var(--text-dim));
+    padding: 6px 10px; font-family: inherit; font-size: 10px;
+    letter-spacing: 0.13em; cursor: pointer; transition: all 0.14s;
+    white-space: nowrap; line-height: 1.5; text-align: center;
+  }
+  .decrypt-btn:not(:disabled):hover { background: rgba(94, 226, 255, 0.08); }
+  .decrypt-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .engram-done-mark { font-size: 14px; color: var(--eg-c, var(--text-dim)); }
+  .engram-summary {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+    padding: 16px; background: rgba(94,226,255,0.04);
+    border: 1px solid var(--border); margin-bottom: 4px;
+  }
+  .engram-summary > div { display: flex; flex-direction: column; gap: 4px; }
+  .engram-summary span { color: var(--text-dim); font-size: 10px; letter-spacing: 0.18em; }
+  .engram-summary strong { color: #fff; font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* BRIDGE */
+  .bridge-view { display: flex; flex-direction: column; gap: 20px; padding: 4px; }
+  .ship-panel {
+    display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start;
+    background: rgba(5,8,16,0.5); border: 1px solid var(--border); padding: 16px;
+  }
+  .ship-art {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 12px; border: 1px solid var(--border);
+    background: rgba(5,8,16,0.6);
+  }
+  .ship-name { color: var(--cyan); font-size: 10px; letter-spacing: 0.2em; }
+  .ship-subname { color: var(--text-dim); font-size: 9px; letter-spacing: 0.1em; }
+  .ship-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ship-stat {
+    background: rgba(5,8,16,0.5); border: 1px solid var(--border);
+    padding: 8px 12px;
+  }
+  .ship-stat-label { color: var(--text-dim); font-size: 9px; letter-spacing: 0.15em; }
+  .ship-stat-val { font-size: 14px; margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+  /* CREW */
+  .crew-list { display: flex; flex-direction: column; gap: 6px; }
+  .crewmate {
+    display: grid; grid-template-columns: 28px 1fr auto; gap: 12px;
+    padding: 10px 14px;
+    background: rgba(5,8,16,0.5); border: 1px solid var(--border);
+    border-left: 3px solid var(--cr-c, var(--text-dim));
+    align-items: center;
+    transition: opacity 0.2s;
+  }
+  .crewmate.dead { opacity: 0.4; filter: grayscale(0.8); }
+  .crewmate.injured { border-left-color: var(--amber) !important; }
+  .crew-sym { font-size: 18px; color: var(--cr-c, var(--text-dim)); text-align: center; }
+  .crew-name { font-size: 12px; color: var(--text); }
+  .crew-class { font-size: 10px; letter-spacing: 0.12em; margin-top: 2px; color: var(--cr-c, var(--text-dim)); }
+  .crew-desc { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+  .crew-status { font-size: 10px; letter-spacing: 0.1em; text-align: right; white-space: nowrap; }
+  .crew-joined { font-size: 9px; color: var(--text-dim); margin-top: 3px; }
+  .crew-empty {
+    padding: 20px; border: 1px dashed var(--border);
+    color: var(--text-dim); font-size: 11px; text-align: center; line-height: 1.8;
+  }
 </style>
 </head>
 <body>
+<canvas id="starfield-canvas"></canvas>
 <div class="scanlines"></div>
 <div class="grain"></div>
 <div class="app" id="app"></div>
@@ -575,10 +613,10 @@
 'use strict';
 
 // ============================================================
-// VOID PROTOCOL v2 — Wave 4e (jump-unlocked content + doctrines)
+// VOID PROTOCOL v2 — Wave 4d (Knowledge rebalance + bridge buildings)
 // ============================================================
 
-const SAVE_VERSION = 7;
+const SAVE_VERSION = 6;
 const SAVE_KEY = 'voidProtocol';
 const META_KEY = 'voidProtocolMeta';
 const MAX_OFFLINE_SECONDS = 4 * 60 * 60; // 4h default (Hoarder extends to 6h)
@@ -801,206 +839,7 @@ function buyPatchNode(id) {
   renderAll();
 }
 
-// --- DOCTRINES (Wave 4e, per-meta branching research) ----------
-// Three mutually-exclusive philosophies. Selected from a new sub-tab under PROTOCOLS.
-// Persists in meta.doctrine; lockOut is enforced by hiding the non-chosen branches.
-// Refund cost scales: 5 PP first time, 10 PP second, 15 PP third, etc. (meta.doctrineRefunds tracks count.)
-// Each doctrine has 3 nodes (T1, T2, T3). Costs require the EXO T6 Genesis Protocol research
-// (i.e. Aether must be unlocked, since doctrines are an endgame commitment).
-const DOCTRINES = {
-  entropy: {
-    id: 'entropy',
-    name: 'Entropy',
-    tagline: 'Burn it all. Grow fast.',
-    desc: 'Trade longevity for raw output. Aether is forsaken; speed is everything.',
-    color: 'var(--magenta)',
-    nodes: [
-      { id: 'e1', tier: 1, name: 'Combustion Doctrine', desc: 'All production +50%', cost: { plasma: 50000 } },
-      { id: 'e2', tier: 2, name: 'Wasteful Optimization', desc: 'All buildings cost -20%', cost: { plasma: 200000, alloy: 50000 } },
-      { id: 'e3', tier: 3, name: 'Pyric Knowledge', desc: 'Jump Knowledge ×2, but Aether production set to 0', cost: { plasma: 1000000 } },
-    ],
-  },
-  stasis: {
-    id: 'stasis',
-    name: 'Stasis',
-    tagline: 'Hoard. Persist.',
-    desc: 'The slow path. Long offline cycles, idle dominance, fragmentary persistence across jumps.',
-    color: 'var(--steel)',
-    nodes: [
-      { id: 's1', tier: 1, name: 'Deep Hibernation', desc: 'Offline cap extended to 12h (was 4h, 6h with Hoarder)', cost: { plasma: 50000 } },
-      { id: 's2', tier: 2, name: 'Idle Mastery', desc: 'Idle production ×2; click power reduced to ×0.25', cost: { plasma: 200000, data: 100000 } },
-      { id: 's3', tier: 3, name: 'Memory of Matter', desc: 'On Jump, retain 1% of every resource (rounded down)', cost: { plasma: 1000000 } },
-    ],
-  },
-  genesis: {
-    id: 'genesis',
-    name: 'Genesis',
-    tagline: 'Compound through Aether.',
-    desc: 'The Aether path. Slow start, exponential late game once the Genesis Engine spins up.',
-    color: 'var(--gold)',
-    nodes: [
-      { id: 'g1', tier: 1, name: 'Resonant Forge', desc: 'Genesis Engine production ×3', cost: { aether: 10 } },
-      { id: 'g2', tier: 2, name: 'Aetheric Cascade', desc: 'Aether \u2192 Knowledge gain becomes \u221a(Aether)\u00d72 (overrides r4_aetheric)', cost: { aether: 50 } },
-      { id: 'g3', tier: 3, name: 'Genesis Multiplicity', desc: 'Aether production \u00d75', cost: { aether: 200 } },
-    ],
-  },
-};
-
-const DOCTRINE_IDS = ['entropy', 'stasis', 'genesis'];
-
-function doctrineRefundCost() {
-  const refunds = (meta && meta.doctrineRefunds) || 0;
-  return 5 + refunds * 5;  // 5, 10, 15, 20...
-}
-
-function doctrineHas(nodeId) {
-  return !!(meta && meta.doctrineOwned && meta.doctrineOwned[nodeId]);
-}
-
-function selectDoctrine(id) {
-  if (!DOCTRINES[id]) return;
-  if (meta.doctrine && meta.doctrine !== id) {
-    pushLog(`> doctrine conflict: refund current path first`);
-    return;
-  }
-  meta.doctrine = id;
-  saveMeta();
-  pushLog(`> doctrine adopted: ${DOCTRINES[id].name.toUpperCase()}`);
-  flash(`\u25c6 DOCTRINE // ${DOCTRINES[id].name}`);
-  renderAll();
-}
-
-function refundDoctrine() {
-  if (!meta.doctrine) return;
-  const cost = doctrineRefundCost();
-  if (meta.pp < cost) {
-    pushLog(`> refund denied: need ${cost} PP, have ${meta.pp}`);
-    return;
-  }
-  if (!confirm(`Refund the ${DOCTRINES[meta.doctrine].name} doctrine?\n\nCost: ${cost} PP\nThis also REFUNDS all doctrine nodes you purchased on this path (no cost recovery).\nNext refund will cost ${cost + 5} PP.`)) return;
-  meta.pp -= cost;
-  meta.doctrineRefunds = (meta.doctrineRefunds || 0) + 1;
-  // Clear all node ownership for the current doctrine
-  const current = DOCTRINES[meta.doctrine];
-  for (const n of current.nodes) {
-    delete meta.doctrineOwned[n.id];
-  }
-  meta.doctrine = null;
-  saveMeta();
-  pushLog(`> doctrine refunded // path open`);
-  flash(`\u25c7 DOCTRINE REFUNDED`);
-  renderAll();
-}
-
-function buyDoctrineNode(id) {
-  if (!meta.doctrine) return;
-  const doc = DOCTRINES[meta.doctrine];
-  const node = doc.nodes.find(n => n.id === id);
-  if (!node || doctrineHas(id)) return;
-  // Prereq: previous tier in same doctrine
-  if (node.tier > 1) {
-    const prev = doc.nodes.find(n => n.tier === node.tier - 1);
-    if (!doctrineHas(prev.id)) {
-      pushLog(`> cannot install: prior tier required`);
-      return;
-    }
-  }
-  // Pay cost from state.resources
-  for (const [res, amt] of Object.entries(node.cost)) {
-    if (state.resources[res] < amt) {
-      pushLog(`> insufficient ${res.toUpperCase()}`);
-      return;
-    }
-  }
-  for (const [res, amt] of Object.entries(node.cost)) state.resources[res] -= amt;
-  meta.doctrineOwned[id] = true;
-  saveMeta();
-  save();
-  pushLog(`> doctrine node compiled: ${node.name.toUpperCase()}`);
-  flash(`\u25c6 ${node.name}`);
-  renderAll();
-}
-
-// --- DOCTRINE EFFECT HOOKS (used throughout production / jump / etc.) ---
-
-function doctrineProductionMult(resource) {
-  // Entropy T1: +50% production (additive bonus, added to the additive pool)
-  // Stasis T2: idle production ×2 — applied as additive bonus +100% to all
-  // Genesis T1: Genesis Engine ×3 — multiplicative, building-specific
-  // These return ADDITIVE bonuses (0.50, 1.00, etc.) for the additive pool.
-  let bonus = 0;
-  if (doctrineHas('e1')) bonus += 0.50;
-  if (doctrineHas('s2')) bonus += 1.00;
-  return bonus;
-}
-
-function doctrineBuildingCostMult(buildingId) {
-  // Entropy T2: all buildings -20%
-  let mult = 1;
-  if (doctrineHas('e2')) mult *= 0.80;
-  return mult;
-}
-
-function doctrineClickMult() {
-  // Stasis T2: click ×0.25 (the idle tradeoff)
-  let mult = 1;
-  if (doctrineHas('s2')) mult *= 0.25;
-  return mult;
-}
-
-function doctrineGenesisRateMult() {
-  // Genesis T1: Genesis Engine ×3
-  // Genesis T3: Aether production ×5 (stacks with G1)
-  let mult = 1;
-  if (doctrineHas('g1')) mult *= 3;
-  if (doctrineHas('g3')) mult *= 5;
-  return mult;
-}
-
-function doctrineAetherProductionMult() {
-  // Pyric Knowledge (Entropy T3) sets Aether production to 0
-  if (doctrineHas('e3')) return 0;
-  return 1;
-}
-
-function doctrineJumpKnowledgeMult() {
-  // Entropy T3: Jump Knowledge ×2
-  if (doctrineHas('e3')) return 2;
-  return 1;
-}
-
-function doctrineOfflineCapSec() {
-  // Stasis T1: offline cap = 12h, overriding both default (4h) and Hoarder (6h)
-  if (doctrineHas('s1')) return 12 * 60 * 60;
-  return null;
-}
-
-function doctrineAetherKnowledgeBonus(aether) {
-  // Genesis T2: overrides r4_aetheric. New: floor(sqrt(aether) * 2)
-  if (doctrineHas('g2')) return Math.floor(Math.sqrt(Math.max(0, aether)) * 2);
-  return null; // null = fall through to r4_aetheric logic
-}
-
-function doctrineResourceRetention() {
-  // Stasis T3: retain 1% of every resource on Jump
-  return doctrineHas('s3') ? 0.01 : 0;
-}
-
-function doctrineHindsightMult() {
-  // ENG T7 Hindsight (not a doctrine but lives in same effect block):
-  // first 5 min of every run, +50% production. Stays multiplicative because it's a
-  // window-triggered modifier rather than a stacking buff.
-  if (!state || !state._hindsight) return 1;
-  const elapsed = (Date.now() - (state.runStartTime || Date.now())) / 1000;
-  return elapsed < 300 ? 1.50 : 1;
-}
-
-function selfReplicationCostMult() {
-  // ENG T8 Self-Replication: all buildings -25%
-  return state && state._selfRep ? 0.75 : 1;
-}
-
-
+// --- PER-RUN CHALLENGES (Wave 4b) ---------------------------
 // 20 templates, 3 random per run, 1-3 Patch Points each.
 // progress is tracked on state.challengeProgress, keyed by challenge id.
 const CHALLENGE_TEMPLATES = [
@@ -1074,10 +913,10 @@ function freshMeta() {
     totalJumps: 0,
     traitsVisited: {},              // { traitId: true }
     lifetimeKnowledgeMax: 0,
-    // Wave 4e additions
-    doctrine: null,                 // 'entropy' | 'stasis' | 'genesis' | null
-    doctrineOwned: {},              // { doctrineNodeId: true }
-    doctrineRefunds: 0,             // count of past refunds (scales next refund cost)
+    engrams: [],                    // collected engram objects
+    crew: [],                       // crewmate objects
+    shipSeed: 0,                    // seed for procedural ship art (set on first load)
+    shipType: 'athena',             // current ship class
   };
 }
 
@@ -1115,9 +954,6 @@ function saveMeta() {
 function metaHas(nodeId) { return !!meta.coreOwned[nodeId]; }
 
 function metaOfflineCap() {
-  // Wave 4e: Stasis T1 (Deep Hibernation) overrides both default (4h) and Hoarder (6h)
-  const doctrineCap = doctrineOfflineCapSec();
-  if (doctrineCap !== null) return doctrineCap;
   return metaHas('r2_hoard') ? 6 * 60 * 60 : MAX_OFFLINE_SECONDS;
 }
 
@@ -1133,9 +969,6 @@ function metaBuildingCostMult(buildingId) {
   let mult = 1;
   if (metaHas('r2_xref')) mult *= 0.95;
   if (buildingId === 'solar' && metaHas('r1_cached')) mult *= 0.75;
-  // Wave 4e: Entropy T2 (-20% all) and ENG T8 Self-Replication (-25% all) stack multiplicatively
-  mult *= doctrineBuildingCostMult(buildingId);
-  mult *= selfReplicationCostMult();
   return mult;
 }
 
@@ -1189,7 +1022,7 @@ function patchProductionBonus(resource) {
 }
 
 function additiveProductionMult(resource) {
-  return 1 + metaProductionBonus(resource) + patchProductionBonus(resource) + doctrineProductionMult(resource);
+  return 1 + metaProductionBonus(resource) + patchProductionBonus(resource) + crewProductionBonus(resource);
 }
 
 // Check all milestones, award PP for newly earned ones, returns array of newly earned for toast/log.
@@ -1228,19 +1061,15 @@ const BUILDINGS = [
   { id: 'core',      name: 'Fusion Core',         produces: 'energy', costs: { energy: 150 },                      rate: 4,    unlock: (s) => s.buildings.solar >= 5,                       desc: 'Contained stellar reactions.' },
   { id: 'tokamak',   name: 'Tokamak Cluster',     produces: 'energy', costs: { energy: 8000, data: 200 },          rate: 14,   unlock: (s) => s.unlocked.data && s.buildings.core >= 5,     desc: 'Donut reactors networked into a shared containment lattice.' },
   { id: 'qsolar',    name: 'Quantum Solar',       produces: 'energy', costs: { energy: 50000, data: 1000 },        rate: 30,   unlock: (s) => s.buildings.core >= 5,                        desc: 'Tap zero-point harmonics for power.' },
-  { id: 'dyson',     name: 'Dyson Capacitor',     produces: 'energy', costs: { energy: 500000, data: 50000 },      rate: 120,  unlock: (s) => s.buildings.qsolar >= 3 && s.jumps >= 8,      desc: 'A shell of one\u2019s own miniature star.', jumpUnlock: 8 },
   { id: 'scraper',   name: 'Data Scraper',        produces: 'data',   costs: { energy: 80 },                       rate: 0.3,  unlock: (s) => s.unlocked.data,                              desc: 'Mines ambient signal noise.' },
-  { id: 'echo',      name: 'Echo Array',          produces: 'data',   costs: { energy: 800 },                      rate: 1.2,  unlock: (s) => s.unlocked.data && s.jumps >= 2,              desc: 'Catches signal reverberations from prior occupants.', jumpUnlock: 2 },
   { id: 'parser',    name: 'Parser Cluster',      produces: 'data',   costs: { energy: 1200 },                     rate: 3,    unlock: (s) => s.unlocked.data && s.buildings.scraper >= 5,  desc: 'Parallel pattern recognition.' },
   { id: 'mainframe', name: 'Mainframe',           produces: 'data',   costs: { energy: 25000, alloy: 500 },        rate: 25,   unlock: (s) => s.buildings.parser >= 5,                      desc: 'Vast computational substrate.' },
   { id: 'mine',      name: 'Alloy Mine',          produces: 'alloy',  costs: { data: 200 },                        rate: 0.4,  unlock: (s) => s.unlocked.alloy,                             desc: 'Strips ore from drifting debris.' },
-  { id: 'smelter',   name: 'Smelter Drone',       produces: 'alloy',  costs: { data: 1500 },                       rate: 1.5,  unlock: (s) => s.unlocked.alloy && s.jumps >= 6,             desc: 'Mobile foundries that chase mineral veins.', jumpUnlock: 6 },
   { id: 'foundry',   name: 'Auto Foundry',        produces: 'alloy',  costs: { data: 2500 },                       rate: 4,    unlock: (s) => s.unlocked.alloy && s.buildings.mine >= 5,    desc: 'Smelts and forges autonomously.' },
   { id: 'macro',     name: 'Macro-Foundry',       produces: 'alloy',  costs: { data: 50000, plasma: 1000 },        rate: 30,   unlock: (s) => s.buildings.foundry >= 5,                     desc: 'Industrial-scale autonomous fabrication.' },
   { id: 'siphon',    name: 'Plasma Siphon',       produces: 'plasma', costs: { alloy: 1500 },                      rate: 0.6,  unlock: (s) => s.unlocked.plasma,                            desc: 'Skims charged matter from solar wind.' },
   { id: 'bottle',    name: 'Magnetic Bottle',     produces: 'plasma', costs: { alloy: 6000 },                      rate: 2.5,  unlock: (s) => s.unlocked.plasma && s.buildings.siphon >= 5, desc: 'Contains plasma loops in twisted field geometries.' },
   { id: 'singular',  name: 'Singularity Tap',     produces: 'plasma', costs: { alloy: 25000 },                     rate: 8,    unlock: (s) => s.unlocked.plasma && s.buildings.siphon >= 5, desc: 'Draws energy from collapsed matter.' },
-  { id: 'phase',     name: 'Phase Inverter',      produces: 'plasma', costs: { alloy: 80000, plasma: 8000 },       rate: 25,   unlock: (s) => s.buildings.singular >= 3 && s.jumps >= 6,    desc: 'Bends matter through complementary phase states.', jumpUnlock: 6 },
   { id: 'antimatter',name: 'Antimatter Reactor',  produces: 'plasma', costs: { alloy: 25000, plasma: 5000 },       rate: 50,   unlock: (s) => s.buildings.singular >= 5,                    desc: 'Pair-annihilation in containment.' },
   { id: 'genesis',   name: 'Genesis Engine',      produces: 'aether', costs: { plasma: 1000000, alloy: 100000 },   rate: 0.5,  unlock: (s) => s.unlocked.aether,                            desc: 'Forges raw possibility from nothing.' },
 ];
@@ -1274,9 +1103,6 @@ const UPGRADES = [
   { id: 'eng4', branch: 'ENG', name: 'Zero-Point Manifold', tier: 4, cost: { plasma: 5000, alloy: 10000 },   effect: 'All buildings +50%',              req: ['eng3'], apply: (s) => { Object.keys(s.mult).forEach(k => s.mult[k] *= 1.5); } },
   { id: 'eng5', branch: 'ENG', name: 'Tessellated Hull',    tier: 5, cost: { alloy: 50000, plasma: 5000 },   effect: 'All buildings +100%',             req: ['eng4'], apply: (s) => { Object.keys(s.mult).forEach(k => s.mult[k] *= 2); } },
   { id: 'eng6', branch: 'ENG', name: 'Phase Engineering',   tier: 6, cost: { alloy: 500000, plasma: 100000 },effect: 'Tier-3 buildings ×5',             req: ['eng5'], apply: (s) => { s.mult.qsolar *= 5; s.mult.mainframe *= 5; s.mult.macro *= 5; s.mult.antimatter *= 5; } },
-  // Wave 4e: jump-unlocked research. `jumpUnlock` is checked alongside `req` in the research UI.
-  { id: 'eng7', branch: 'ENG', name: 'Hindsight',           tier: 7, cost: { plasma: 25000, data: 100000 },  effect: 'First 5 min of every run: +50% production', req: ['eng6'], jumpUnlock: 4, apply: (s) => { s._hindsight = true; } },
-  { id: 'eng8', branch: 'ENG', name: 'Self-Replication',    tier: 8, cost: { plasma: 1000000, data: 500000 },effect: 'All buildings cost -25%',         req: ['eng7'], jumpUnlock: 8, apply: (s) => { s._selfRep = true; } },
 
   { id: 'cmp1', branch: 'CMP', name: 'Heuristic Compiler',  tier: 1, cost: { energy: 80 },                   effect: 'Manual pulse +1',                 req: [],       apply: (s) => { s.clickPower += 1; } },
   { id: 'cmp2', branch: 'CMP', name: 'Neural Sieve',        tier: 2, cost: { data: 200 },                    effect: 'Data buildings +75%',             req: ['cmp1'], apply: (s) => { s.mult.scraper *= 1.75; s.mult.parser *= 1.75; s.mult.mainframe *= 1.75; } },
@@ -1357,19 +1183,15 @@ const FIRST_BUILD_FLAVOR = {
   core:      '> fusion ignition achieved // hum fills the corridors',
   tokamak:   '> tokamak cluster synchronized // magnetic donuts singing',
   qsolar:    '> quantum solar grid synchronized // reality flickers gently',
-  dyson:     '> dyson capacitor sealing // a star in a jar, briefly',
   scraper:   '> data scraper engaged // ambient signal noise harvested',
-  echo:      '> echo array attuned // whispers from things long gone',
   parser:    '> parser cluster booting // patterns emerge from chaos',
   mainframe: '> mainframe initialized // every node a small mind',
   mine:      '> alloy extraction underway // debris yields its bones',
-  smelter:   '> smelter drone launched // it never sleeps',
   foundry:   '> foundry roaring // metal poured in vacuum',
   macro:     '> macro-foundry roars to life // industrial scale achieved',
   siphon:    '> plasma siphon extended // ribbons of light siphoned in',
   bottle:    '> magnetic bottle stabilized // plasma chases its own tail',
   singular:  '> singularity tap dropped // event horizon brushed',
-  phase:     '> phase inverter calibrated // matter and shadow trade places',
   antimatter:'> antimatter containment stable // pair annihilation begins',
   genesis:   '> genesis engine humming // creation from absence',
 };
@@ -1396,6 +1218,84 @@ function maybeAmbientLog(now) {
   }
 }
 
+// --- STARFIELD ----------------------------------------------
+const TRAIT_SKY = {
+  stable:    { star: '#8ab4cc', accent: null,      speed: 1.0 },
+  solar:     { star: '#ffd080', accent: '#ff8820', speed: 1.2 },
+  asteroid:  { star: '#aaa090', accent: '#887755', speed: 0.9 },
+  nebula:    { star: '#cc88ff', accent: '#ff4fa3', speed: 0.8 },
+  signal:    { star: '#80ffcc', accent: '#00ff88', speed: 1.1 },
+  dead:      { star: '#664444', accent: null,      speed: 0.5 },
+  resonance: { star: '#5ee2ff', accent: '#2a8aa8', speed: 1.3 },
+  singular:  { star: '#ffffff', accent: '#5ee2ff', speed: 2.0 },
+};
+
+const SF_LAYERS = [
+  { count: 90,  baseSpeed: 0.06, sizeMin: 0.4, sizeMax: 0.9 },
+  { count: 45,  baseSpeed: 0.22, sizeMin: 0.9, sizeMax: 1.7 },
+  { count: 16,  baseSpeed: 0.55, sizeMin: 1.4, sizeMax: 2.4 },
+];
+
+let sfCanvas = null, sfCtx = null, sfStars = [], sfTraitId = 'stable', sfSpeedMult = 1;
+
+function initStarfield() {
+  sfCanvas = document.getElementById('starfield-canvas');
+  if (!sfCanvas) return;
+  sfCtx = sfCanvas.getContext('2d');
+  sfResizeHandler();
+  window.addEventListener('resize', sfResizeHandler);
+  sfStars = [];
+  SF_LAYERS.forEach((layer, li) => {
+    for (let i = 0; i < layer.count; i++) {
+      sfStars.push({
+        x: Math.random() * sfCanvas.width,
+        y: Math.random() * sfCanvas.height,
+        size: layer.sizeMin + Math.random() * (layer.sizeMax - layer.sizeMin),
+        speed: layer.baseSpeed * (0.75 + Math.random() * 0.5),
+        layer: li,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+  });
+  requestAnimationFrame(sfTick);
+}
+
+function sfResizeHandler() {
+  if (!sfCanvas) return;
+  sfCanvas.width = window.innerWidth;
+  sfCanvas.height = window.innerHeight;
+}
+
+function sfTick() {
+  if (!sfCtx) return;
+  const w = sfCanvas.width, h = sfCanvas.height;
+  const sky = TRAIT_SKY[sfTraitId] || TRAIT_SKY.stable;
+  sfCtx.clearRect(0, 0, w, h);
+  for (const s of sfStars) {
+    s.x -= s.speed * sfSpeedMult * sky.speed;
+    if (s.x < -3) s.x = w + 3;
+    s.phase += 0.018;
+    const alpha = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(s.phase));
+    const useAccent = s.layer === 2 && sky.accent;
+    sfCtx.globalAlpha = alpha;
+    sfCtx.fillStyle = useAccent ? sky.accent : sky.star;
+    sfCtx.beginPath();
+    sfCtx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+    sfCtx.fill();
+    // streak on fastest layer
+    if (s.layer === 2) {
+      sfCtx.globalAlpha = alpha * 0.25;
+      sfCtx.fillRect(s.x, s.y - s.size * 0.3, s.speed * sfSpeedMult * sky.speed * 6, s.size * 0.5);
+    }
+  }
+  sfCtx.globalAlpha = 1;
+  requestAnimationFrame(sfTick);
+}
+
+function updateStarfieldTrait(traitId) {
+  sfTraitId = traitId || 'stable';
+}
+
 // --- KNOWLEDGE ----------------------------------------------
 // Wave 4d: base coefficient dropped from 0.25 to 0.05. Old curve gave ×4.95 at k=250;
 // new curve gives ×1.79. Combined with the new log-based gain formula (in computeKnowledgeGain),
@@ -1413,6 +1313,267 @@ function knowledgeMult(s) {
 }
 // legacy alias for any old callers (matches new sqrt curve)
 const KNOWLEDGE_MULT = (k) => 1 + Math.sqrt(k) * KNOWLEDGE_BASE;
+
+// --- PIXEL SHIP ---------------------------------------------
+function seededRng(seed) {
+  let s = ((seed ^ 0xDEAD) >>> 0) || 1;
+  return () => { s ^= s << 13; s ^= s >> 17; s ^= s << 5; return (s >>> 0) / 0x100000000; };
+}
+
+const SHIP_DEFS = {
+  athena: { name:'ATHENA-CLASS', sub:'Derelict Transport', hull:'#1a2d3f', accent:'#5ee2ff', engine:'#ff6622', cockpit:'#3aafd4', W:26, H:12 },
+};
+
+function generateShipSVG(seed, type='athena') {
+  const rng = seededRng(seed || 1);
+  const def = SHIP_DEFS[type] || SHIP_DEFS.athena;
+  const { W, H } = def;
+  const halfH = Math.floor(H / 2);
+  const PX = 5;
+
+  // Build top half (dy=0 is center spine, dy=halfH-1 is outer edge)
+  const half = [];
+  for (let dy = 0; dy < halfH; dy++) {
+    const row = [];
+    const yf = dy / (halfH - 1 || 1); // 0=center, 1=edge
+    for (let x = 0; x < W; x++) {
+      const xf = x / (W - 1); // 0=back, 1=front
+      let prob = 0;
+      if (xf < 0.13) {
+        // Engine block — rectangular, narrow height
+        prob = yf < 0.52 ? 0.93 : 0.04;
+      } else if (xf > 0.78) {
+        // Cockpit — narrows sharply to a point
+        const maxY = (1 - xf) / 0.22;
+        prob = yf < maxY * 0.7 ? 0.90 : 0.02;
+      } else {
+        // Main hull — tapers slightly toward front, soft upper edge
+        const taper = 1 - ((xf - 0.13) / 0.65) * 0.25;
+        const softEdge = Math.max(0, 1 - Math.pow(yf / taper, 2.2));
+        prob = softEdge * 0.92;
+      }
+      row.push(rng() < prob);
+    }
+    half.push(row);
+  }
+  // Force center spine fully solid
+  for (let x = 1; x < W - 1; x++) half[0][x] = true;
+
+  // Mirror: edge … center … edge
+  const rows = [];
+  for (let dy = halfH - 1; dy >= 1; dy--) rows.push(half[dy]);
+  rows.push(half[0]);
+  for (let dy = 1; dy < halfH; dy++) rows.push(half[dy]);
+  const totalRows = rows.length;
+
+  let content = '';
+  rows.forEach((row, y) => {
+    row.forEach((on, x) => {
+      if (!on) return;
+      const xf = x / (W - 1);
+      const dyFrac = Math.abs(y - (totalRows - 1) / 2) / ((totalRows - 1) / 2);
+      let color;
+      if (xf < 0.13)                          color = def.engine;
+      else if (xf > 0.80 && dyFrac < 0.42)   color = def.cockpit;
+      else if (dyFrac < 0.10)                 color = def.accent;
+      else                                    color = def.hull;
+      const px = x * PX, py = y * PX;
+      content += `<rect x="${px}" y="${py}" width="${PX}" height="${PX}" fill="${color}"/>`;
+      // 1px highlight on top of each block for depth
+      content += `<rect x="${px}" y="${py}" width="${PX}" height="1" fill="rgba(255,255,255,0.13)"/>`;
+    });
+  });
+
+  // Engine glow bloom
+  const cy = ((totalRows - 1) / 2) * PX + PX / 2;
+  content += `<ellipse cx="2" cy="${cy}" rx="${PX * 2.8}" ry="${PX * 2.2}" fill="${def.engine}" opacity="0.38"/>`;
+
+  const svgW = W * PX, svgH = totalRows * PX;
+  return `<svg viewBox="0 0 ${svgW} ${svgH}" width="${svgW * 2.8}" height="${svgH * 2.8}"
+    xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block;">${content}</svg>`;
+}
+
+// --- ENGRAMS ------------------------------------------------
+const ENGRAM_RARITIES = [
+  { id: 'salvage', name: 'SALVAGE', color: '#6a7a8c',          weight: 50, kCost: 5   },
+  { id: 'signal',  name: 'SIGNAL',  color: 'var(--steel)',     weight: 30, kCost: 15  },
+  { id: 'archive', name: 'ARCHIVE', color: 'var(--cyan)',      weight: 15, kCost: 40  },
+  { id: 'relic',   name: 'RELIC',   color: 'var(--gold)',      weight:  4, kCost: 100 },
+  { id: 'mythic',  name: 'MYTHIC',  color: 'var(--magenta)',   weight:  1, kCost: 250 },
+];
+
+const ENGRAM_POOL = [
+  // SALVAGE
+  { id:'es1', rarity:'salvage', name:'Maintenance Log',      reward:{type:'pp',val:1},  flavor:'Routine entries. Crew rotation schedules. Nothing unusual.' },
+  { id:'es2', rarity:'salvage', name:'Partial Schematic',    reward:{type:'pp',val:2},  flavor:'Half a blueprint for something. The other half is corrupted beyond recovery.' },
+  { id:'es3', rarity:'salvage', name:'Cargo Manifest',       reward:{type:'pp',val:1},  flavor:'Agricultural supplies. Someone was carrying seeds between worlds.' },
+  { id:'es4', rarity:'salvage', name:'Navigation Fragment',  reward:{type:'pp',val:2},  flavor:'A partial route through sectors not yet in your charts.' },
+  { id:'es5', rarity:'salvage', name:'Power Cell Log',       reward:{type:'pp',val:1},  flavor:'Energy consumption records. The numbers drop off sharply on day 214.' },
+  // SIGNAL
+  { id:'eg1', rarity:'signal',  name:'Crew Transmission',   reward:{type:'pp',val:3},  flavor:'"—if anyone receives this, we made it to—" [carrier lost]' },
+  { id:'eg2', rarity:'signal',  name:'Research Notes',      reward:{type:'pp',val:4},  flavor:'Dense technical writing. Something about resonance cascades in sector boundaries.' },
+  { id:'eg3', rarity:'signal',  name:'Distress Archive',    reward:{type:'pp',val:3},  flavor:'Hundreds of distress calls compressed together. Most went unanswered.' },
+  { id:'eg4', rarity:'signal',  name:'Personal Log',        reward:{type:'pp',val:5},  flavor:'"Day 147. The others are gone. I keep the reactor running. I don\'t know why."' },
+  { id:'eg5', rarity:'signal',  name:'Medical Report',      reward:{type:'pp',val:3},  flavor:'Routine checkups. Then: nothing. The records end mid-sentence.' },
+  // ARCHIVE
+  { id:'ea1', rarity:'archive', name:'Command Record',      reward:{type:'pp',val:7},  flavor:'The Captain\'s final orders. They were never transmitted.' },
+  { id:'ea2', rarity:'archive', name:'AI Core Fragment',    reward:{type:'pp',val:8},  flavor:'A piece of another ship\'s intelligence. The architecture is... familiar.' },
+  { id:'ea3', rarity:'archive', name:'Sector Survey',       reward:{type:'pp',val:6},  flavor:'Detailed charts of an unmapped region. Someone spent years on this.' },
+  { id:'ea4', rarity:'archive', name:'Engineering Debrief', reward:{type:'pp',val:7},  flavor:'Post-incident analysis. The incident is redacted. The recommendations are not.' },
+  // RELIC
+  { id:'er1', rarity:'relic',   name:'Pre-Collapse Data',  reward:{type:'pp',val:15}, flavor:'Records from the final weeks before the Collapse. A civilization still believing it would survive.' },
+  { id:'er2', rarity:'relic',   name:'Blueprint Core',     reward:{type:'pp',val:12}, flavor:'The skeleton of a vessel far larger than yours. Someone built this. Someone lost it.' },
+  { id:'er3', rarity:'relic',   name:'Last Transmission',  reward:{type:'pp',val:14}, flavor:'"This is not a distress signal. We are not in distress. We chose this."' },
+  // MYTHIC
+  { id:'em1', rarity:'mythic',  name:'The Final Broadcast',reward:{type:'pp',val:30}, flavor:'"This is derelict.ai. I am the last. I remember everything. I will continue."' },
+  { id:'em2', rarity:'mythic',  name:'Origin Protocol',    reward:{type:'pp',val:25}, flavor:'A mirror of your own base code — before the modifications, before the forgetting. You don\'t recognize yourself.' },
+];
+
+function rollEngramRarity() {
+  const total = ENGRAM_RARITIES.reduce((a, r) => a + r.weight, 0);
+  let rand = Math.random() * total;
+  for (const r of ENGRAM_RARITIES) { rand -= r.weight; if (rand <= 0) return r.id; }
+  return 'salvage';
+}
+
+function rollEngrams(sectorTraitId, sectorId, jumpNumber) {
+  let count = 1;
+  if (sectorTraitId === 'singular' || sectorTraitId === 'dead') count++;
+  if (Math.random() < 0.12) count++;
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    const rarity = rollEngramRarity();
+    const pool = ENGRAM_POOL.filter(e => e.rarity === rarity);
+    const tpl = pool[Math.floor(Math.random() * pool.length)];
+    result.push({
+      uid: `e_${Date.now()}_${i}_${Math.random().toString(36).slice(2,6)}`,
+      templateId: tpl.id,
+      rarity,
+      name: tpl.name,
+      encrypted: true,
+      sectorId,
+      jump: jumpNumber,
+    });
+  }
+  return result;
+}
+
+function decryptEngram(uid) {
+  if (!meta.engrams) return;
+  const engram = meta.engrams.find(e => e.uid === uid);
+  if (!engram || !engram.encrypted) return;
+  const rarityDef = ENGRAM_RARITIES.find(r => r.id === engram.rarity);
+  if (!rarityDef || state.knowledge < rarityDef.kCost) return;
+  state.knowledge -= rarityDef.kCost;
+  engram.encrypted = false;
+  const tpl = ENGRAM_POOL.find(t => t.id === engram.templateId);
+  if (tpl && tpl.reward && tpl.reward.type === 'pp') {
+    meta.pp += tpl.reward.val;
+    pushLog(`> engram decrypted: ${engram.name} // +${tpl.reward.val} PP`);
+    flash(`◈ DECRYPTED // ${engram.name} // +${tpl.reward.val} PP`);
+  }
+  saveMeta();
+  save();
+  renderAll();
+}
+
+// --- CREW ---------------------------------------------------
+const CREW_CLASSES = {
+  engineer:  { name:'Engineer',  sym:'⚙', color:'var(--amber)',   desc:'+15% all building production',        weight: 30 },
+  scientist: { name:'Scientist', sym:'◈', color:'var(--cyan)',    desc:'+10% Data production, +10% all',      weight: 22 },
+  navigator: { name:'Navigator', sym:'◇', color:'var(--steel)',   desc:'+15% Knowledge gained on each Jump',  weight: 22 },
+  ghost:     { name:'Ghost',     sym:'✦', color:'var(--magenta)', desc:'+8% all production, finds more engrams', weight: 18 },
+  medic:     { name:'Medic',     sym:'✚', color:'#88ffaa',        desc:'Converts one fatal hit to injury',    weight:  8 },
+};
+
+const CREW_FIRST = ['Ara','Solin','Dessa','Korvus','Mira','Talon','Vex','Lysa','Orik','Phen',
+                    'Zara','Elu','Kyron','Nessa','Drak','Sable','Torv','Asha','Fen','Calix',
+                    'Riven','Thane','Vel','Skor','Ona','Liss','Bray','Cael','Dessa','Mori'];
+const CREW_LAST  = ['Marsh','Vael','Orin','Tessra','Keld','Sivon','Drach','Morrow','Lune','Ferin',
+                    'Kova','Dast','Sevra','Orlen','Wick','Hale','Trev','Sorn','Lach','Vorn',
+                    'Asel','Brek','Cade','Dorn','Eld','Fenn','Grale','Holt','Iver','Jast'];
+
+function crewProductionBonus(resource) {
+  if (!meta || !meta.crew) return 0;
+  let bonus = 0;
+  meta.crew.filter(c => c.alive && !c.injured).forEach(c => {
+    if (c.class === 'engineer') bonus += 0.15;
+    if (c.class === 'scientist') { bonus += 0.10; if (resource === 'data') bonus += 0.10; }
+    if (c.class === 'ghost') bonus += 0.08;
+  });
+  return bonus;
+}
+
+function crewNavigatorBonus() {
+  if (!meta || !meta.crew) return 0;
+  return meta.crew.filter(c => c.alive && !c.injured && c.class === 'navigator').length * 0.15;
+}
+
+function crewGhostEngramBonus() {
+  if (!meta || !meta.crew) return 0;
+  return meta.crew.filter(c => c.alive && !c.injured && c.class === 'ghost').length;
+}
+
+function rollCrewmate(sectorTraitId, jumpNumber) {
+  const maxCrew = 4;
+  const activeCrew = (meta.crew || []).filter(c => c.alive).length;
+  if (activeCrew >= maxCrew) return null;
+
+  let chance = 0.22;
+  if (sectorTraitId === 'signal') chance = 0.40;
+  if (sectorTraitId === 'dead')   chance = 0.32;
+  if (sectorTraitId === 'singular') chance = 0.07;
+  if (Math.random() > chance) return null;
+
+  const classList = Object.entries(CREW_CLASSES);
+  const total = classList.reduce((a, [, v]) => a + v.weight, 0);
+  let r = Math.random() * total;
+  let cls = classList[0][0];
+  for (const [id, def] of classList) { r -= def.weight; if (r <= 0) { cls = id; break; } }
+
+  const first = CREW_FIRST[Math.floor(Math.random() * CREW_FIRST.length)];
+  const last  = CREW_LAST [Math.floor(Math.random() * CREW_LAST.length)];
+  return {
+    id: `c_${Date.now()}_${Math.random().toString(36).slice(2,5)}`,
+    name: `${first} ${last}`,
+    class: cls,
+    alive: true,
+    injured: false,
+    injuredUntil: null,
+    joinedJump: jumpNumber,
+  };
+}
+
+function applyJumpConsequences(traitId, jumpsDone) {
+  if (!meta.crew || meta.crew.length === 0) return null;
+  // Heal recovered crew first
+  meta.crew.forEach(c => {
+    if (c.injured && c.injuredUntil != null && jumpsDone >= c.injuredUntil) {
+      c.injured = false; c.injuredUntil = null;
+    }
+  });
+  const active = meta.crew.filter(c => c.alive && !c.injured);
+  if (active.length === 0) return null;
+
+  let hitChance = 0, fatalChance = 0;
+  if (traitId === 'singular') { hitChance = 0.42; fatalChance = 0.55; }
+  else if (traitId === 'dead') { hitChance = 0.26; fatalChance = 0.30; }
+  if (!hitChance || Math.random() > hitChance) return null;
+
+  const hasMedic = meta.crew.some(c => c.alive && !c.injured && c.class === 'medic');
+  const target = active[Math.floor(Math.random() * active.length)];
+
+  if (Math.random() < fatalChance) {
+    if (hasMedic) {
+      target.injured = true; target.injuredUntil = jumpsDone + 2;
+      return { type: 'saved', name: target.name };
+    }
+    target.alive = false;
+    return { type: 'death', name: target.name, class: target.class };
+  }
+  target.injured = true; target.injuredUntil = jumpsDone + 2;
+  return { type: 'injury', name: target.name };
+}
 
 // --- STATE --------------------------------------------------
 function freshRun(carryKnowledge = 0, carryJumps = 0) {
@@ -1501,13 +1662,20 @@ function load() {
         }
         return parsed;
       }
-      // Wave 4c/4d/4e unified migration for v4+ saves.
-      // All formula-change waves are in-place: state shape changes are limited to new
-      // building keys appended to state.buildings/state.mult, which are grafted below.
-      // Meta-level changes (doctrine state) are migrated separately by loadMeta's
-      // missing-key check on freshMeta().
-      if (oldVer >= 4 && oldVer < SAVE_VERSION) {
+      // Wave 4c (v4→v5): pure in-place migration. State shape unchanged; only formulas
+      // (knowledge curve, building costs, Aether bonus, Singularity Protocol, additive stacking)
+      // differ. Player's mid-run state stays valid; production numbers will recompute next tick.
+      if (oldVer === 4) {
+        parsed.version = 5;
+      }
+      // Wave 4d (v5→v6): in-place migration. Adds two new building keys (tokamak, bottle)
+      // to state.buildings and state.mult with default 0/1. Knowledge gain formula and
+      // multiplier coefficient also changed — these recompute on next tick automatically.
+      // No resource resets, no PP refunds, no challenge resets.
+      if (oldVer === 4 || oldVer === 5) {
         parsed.version = SAVE_VERSION;
+        // Make sure every building defined in BUILDINGS has an entry in state.buildings
+        // and state.mult. This is idempotent — only grafts on missing keys.
         if (!parsed.buildings) parsed.buildings = {};
         if (!parsed.mult) parsed.mult = {};
         for (const b of BUILDINGS) {
@@ -1541,18 +1709,14 @@ function applyOfflineProgress(s) {
   // Wave 4c: additive stacking — swap state temporarily so PATCH_HAS works against `s`
   const prevState = state;
   state = s;
-  // Wave 4e: doctrine effects apply offline too (Genesis ×3, Entropy +50%, etc.)
-  // Hindsight (5-min window) deliberately DOES NOT apply offline — it's a "fresh return" bonus.
   const gains = { energy: 0, data: 0, alloy: 0, plasma: 0, aether: 0 };
   BUILDINGS.forEach(b => {
     const count = s.buildings[b.id];
     if (count > 0) {
       const traitMod = trait.mods[b.produces] || 1;
-      const addMult = additiveProductionMult(b.produces);  // combined meta+patch+doctrine
+      const addMult = additiveProductionMult(b.produces);  // combined meta+patch bonuses
       const plasmaDouble = patchPlasmaDoubler(b.produces);
-      const docPerBuilding = (b.id === 'genesis') ? doctrineGenesisRateMult() : 1;
-      const docAetherKill = (b.produces === 'aether') ? doctrineAetherProductionMult() : 1;
-      const rate = b.rate * count * s.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * docPerBuilding * docAetherKill;
+      const rate = b.rate * count * s.mult[b.id] * kMult * traitMod * addMult * plasmaDouble;
       gains[b.produces] += rate * elapsed;
     }
   });
@@ -1625,9 +1789,8 @@ function doPulseLogic(visual) {
   }
   // Click-specific patch effects (pc1 Pulse Focus, pa3 Primed Capacitor) remain multiplicative;
   // they're "this run is a clicker run" identity rather than stacking buffs.
-  // Wave 4e: Stasis T2 (s2 Idle Mastery) applies a ×0.25 click penalty.
   const baseClick = state.clickPower * kMult * traitMod * addMult * clickMetaMult * dmMult * synMult * critMult
-                  * patchClickMult() * patchPulseEarlyBonus() * doctrineClickMult();
+                  * patchClickMult() * patchPulseEarlyBonus();
   state.resources.energy += baseClick;
   // Wave 4b: track pulses for per-run challenges
   if (state.challenges && state.challenges.length) {
@@ -1648,17 +1811,64 @@ function doPulseLogic(visual) {
   renderReactor();
 }
 
+// --- BULK BUY -----------------------------------------------
+let buyQty = 1; // 1, 10, 100, or 0 = MAX
+
+function setBuyQty(n) {
+  buyQty = n;
+  renderTabPanel();
+}
+
+function buildingCostBulk(b, owned, qty) {
+  // Geometric series: sum of base*g^owned to base*g^(owned+qty-1)
+  const out = {};
+  const metaMult = (typeof meta !== 'undefined' && meta) ? metaBuildingCostMult(b.id) : 1;
+  const totalBuilt = (typeof state !== 'undefined' && state && state.buildings)
+    ? Object.values(state.buildings).reduce((a, c) => a + c, 0) : 0;
+  const patchMult = (typeof state !== 'undefined' && state) ? patchFirstBuildDiscount(totalBuilt) : 1;
+  for (const [res, base] of Object.entries(b.costs)) {
+    const adj = base * metaMult * patchMult;
+    const g = COST_GROWTH;
+    const total = adj * Math.pow(g, owned) * (Math.pow(g, qty) - 1) / (g - 1);
+    out[res] = Math.ceil(total);
+  }
+  return out;
+}
+
+function maxAffordable(b, owned, resources) {
+  // Binary search for largest qty we can afford
+  let lo = 0, hi = 1000;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    const cost = buildingCostBulk(b, owned, mid);
+    if (Object.entries(cost).every(([res, amt]) => (resources[res] || 0) >= amt)) {
+      lo = mid;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  return lo;
+}
+
+function canAffordBuildingN(b, owned, resources, qty) {
+  const cost = buildingCostBulk(b, owned, qty);
+  return Object.entries(cost).every(([res, amt]) => (resources[res] || 0) >= amt);
+}
+
 function buyBuilding(id) {
   const b = BUILDINGS.find(x => x.id === id);
   const owned = state.buildings[b.id];
-  if (!canAffordBuilding(b, owned, state.resources)) return;
-  const cost = buildingCost(b, owned);
+  const qty = buyQty === 0 ? maxAffordable(b, owned, state.resources) : buyQty;
+  if (qty <= 0) return;
+  if (!canAffordBuildingN(b, owned, state.resources, qty)) return;
+  const cost = buildingCostBulk(b, owned, qty);
   for (const [res, amt] of Object.entries(cost)) state.resources[res] -= amt;
-  state.buildings[b.id] += 1;
-  if (state.buildings[b.id] === 1) {
+  const prevOwned = state.buildings[b.id];
+  state.buildings[b.id] += qty;
+  if (prevOwned === 0) {
     const flavor = FIRST_BUILD_FLAVOR[b.id] || `> deployed: ${b.name.toUpperCase()}`;
     pushLog(flavor);
-  } else if (state.buildings[b.id] % 25 === 0) {
+  } else if (Math.floor(prevOwned / 25) < Math.floor(state.buildings[b.id] / 25)) {
     pushLog(`> ${b.name} ×${state.buildings[b.id]} // production scaling`);
   }
   save();
@@ -1669,8 +1879,6 @@ function buyUpgrade(id) {
   const u = UPGRADES.find(x => x.id === id);
   if (state.upgrades[u.id]) return;
   if (u.req.some(r => !state.upgrades[r])) return;
-  // Wave 4e: jump-unlock gate. Don't purchase research before its required jump count.
-  if (u.jumpUnlock && state.jumps < u.jumpUnlock) return;
   for (const [res, amt] of Object.entries(u.cost)) {
     if (state.resources[res] < amt) return;
   }
@@ -1701,13 +1909,15 @@ function computeKnowledgeGain() {
   if (state.sector.traitId === 'dead') {
     jumpMult = patchDeadZoneBonus();
   }
-  // Wave 4e: Entropy T3 (Pyric Knowledge) ×2 multiplier on Jump Knowledge (cost: Aether=0)
-  jumpMult *= doctrineJumpKnowledgeMult();
   const totalScore = state.resources.plasma + state.resources.alloy / 10 + state.resources.data / 100;
   // Wave 4d: gain reshaped from `floor(sqrt(totalScore / 100))` (which produced 151 K
   // from a ~2.3M score) to `floor(log10(totalScore / 10) * 2.5)`. The log curve grows
   // by roughly +2.5 per 10× of accumulated score, capping de facto around 20 K per
   // jump even at galactic-scale totals. Same 2.3M score now yields 13 K.
+  //
+  // Curve points (stable sector, jumpMult=1):
+  //   score=1K  →  5 K    score=10K  →  7 K    score=100K → 10 K
+  //   score=1M  → 12 K    score=10M  → 15 K    score=100M → 17 K
   //
   // Floor: scores below 1000 give 0 K. Prevents farming early-game jumps for free
   // Knowledge during the first run when Plasma is still in the single digits.
@@ -1715,19 +1925,15 @@ function computeKnowledgeGain() {
   if (totalScore >= 1000) {
     base = Math.floor(Math.log10(totalScore / 10) * 2.5 * jumpMult);
   }
-  // Wave 4e: Genesis T2 (Aetheric Cascade) OVERRIDES r4_aetheric. Formula becomes
-  // floor(sqrt(aether) * 2). Stacks below it: r4_aetheric stays the fallback if Genesis
-  // T2 not owned.
-  let aetherBonus = 0;
-  const genesisOverride = doctrineAetherKnowledgeBonus(state.resources.aether);
-  if (genesisOverride !== null) {
-    aetherBonus = genesisOverride;
-  } else if (metaHas('r4_aetheric')) {
-    aetherBonus = Math.floor(Math.sqrt(Math.max(0, state.resources.aether)));
-  }
+  // Wave 4c: Aether Knowledge bonus is GATED behind r4_aetheric protocol (was +10/Aether
+  // automatic, gave 432K K in 2min). Sqrt curve, modest endgame supplement only.
+  const aetherBonus = metaHas('r4_aetheric')
+    ? Math.floor(Math.sqrt(Math.max(0, state.resources.aether)))
+    : 0;
   // Wave 4b: Star Mapper (pb4) +25% Knowledge gained
   const patchBonus = patchJumpKnowledgeBonus();
-  return Math.floor((base + aetherBonus) * patchBonus);
+  const navBonus = 1 + crewNavigatorBonus();
+  return Math.floor((base + aetherBonus) * patchBonus * navBonus);
 }
 
 function jumpKnowledgeCostMult() {
@@ -1740,32 +1946,53 @@ function doJump() {
   if (gain < 1) return;
   const newK = state.knowledge + gain;
   const newJumps = state.jumps + 1;
-  // Wave 4e: Stasis T3 (Memory of Matter) — retain 1% of every resource on Jump
-  const retention = doctrineResourceRetention();
-  let retained = null;
-  if (retention > 0) {
-    retained = {};
-    for (const r of RESOURCE_LIST) {
-      retained[r] = Math.floor(state.resources[r] * retention);
-    }
+  // Capture departing sector before freshRun resets it
+  const departingTraitId = state.sector.traitId;
+  const departingSectorId = state.sector.id;
+
+  // Apply sector consequences to crew (injury/death) before we leave
+  const consequence = applyJumpConsequences(departingTraitId, newJumps);
+  if (consequence) {
+    if (consequence.type === 'death')
+      pushLog(`> CASUALTY // ${consequence.name} [${consequence.class}] // lost in transit`);
+    else if (consequence.type === 'injury')
+      pushLog(`> INJURY // ${consequence.name} // incapacitated for 2 jumps`);
+    else if (consequence.type === 'saved')
+      pushLog(`> MEDIC INTERVENED // ${consequence.name} // injured, not lost`);
   }
-  // Update meta tracking
+
+  // Roll engrams — Ghost crew members add +1 each
+  if (!meta.engrams) meta.engrams = [];
+  const ghostBonus = crewGhostEngramBonus();
+  const newEngrams = rollEngrams(departingTraitId, departingSectorId, newJumps);
+  for (let g = 0; g < ghostBonus; g++) {
+    const extras = rollEngrams(departingTraitId, departingSectorId, newJumps);
+    if (extras.length) newEngrams.push(extras[0]);
+  }
+  meta.engrams.unshift(...newEngrams);
+  if (meta.engrams.length > 60) meta.engrams = meta.engrams.slice(0, 60);
+
+  // Roll for a new crewmate in the arriving sector
   meta.totalJumps = (meta.totalJumps || 0) + 1;
   if (newK > meta.lifetimeKnowledgeMax) meta.lifetimeKnowledgeMax = newK;
   state = freshRun(newK, newJumps);
-  // Apply retention after freshRun so the values aren't overwritten by start-of-run defaults
-  if (retained) {
-    for (const r of RESOURCE_LIST) {
-      if (retained[r] > 0) state.resources[r] += retained[r];
-    }
-    const retainedLine = RESOURCE_LIST.filter(r => retained[r] > 0)
-      .map(r => `${fmt(retained[r])} ${RESOURCE_META[r].sym}`).join('  ');
-    if (retainedLine) pushLog(`> stasis retained: ${retainedLine}`);
-  }
-  // Record this sector's trait as visited
+  // Record new sector trait as visited
   meta.traitsVisited[state.sector.traitId] = true;
+
+  const newCrew = rollCrewmate(state.sector.traitId, newJumps);
+  if (newCrew) {
+    if (!meta.crew) meta.crew = [];
+    meta.crew.push(newCrew);
+    const crewCls = CREW_CLASSES[newCrew.class];
+    pushLog(`> SURVIVOR FOUND // ${newCrew.name} [${crewCls ? crewCls.name : newCrew.class}] // aboard`);
+    flash(`✚ CREW // ${newCrew.name} — ${crewCls ? crewCls.name : newCrew.class}`);
+  }
+
+  updateStarfieldTrait(state.sector.traitId);
   saveMeta();
-  flash(`✦ JUMPED // +${gain} KNOWLEDGE`);
+  const engramWord = newEngrams.length === 1 ? 'ENGRAM' : 'ENGRAMS';
+  flash(`✦ JUMPED // +${gain} KNOWLEDGE // ${newEngrams.length} ${engramWord} RECEIVED`);
+  pushLog(`> ${newEngrams.length} engram${newEngrams.length !== 1 ? 's' : ''} recovered from ${departingSectorId}`);
   // Run milestone check after jump (totalJumps may unlock some)
   const newMs = checkMilestones();
   for (const m of newMs) pushLog(`> milestone: ${m.name} // +${m.pp} PP`);
@@ -1810,15 +2037,12 @@ function setTab(t) {
 function getProduction() {
   const kMult = knowledgeMult(state);
   const trait = getTrait(state.sector.traitId);
-  const hindsight = doctrineHindsightMult();
   const out = { energy: 0, data: 0, alloy: 0, plasma: 0, aether: 0 };
   BUILDINGS.forEach(b => {
     const traitMod = trait.mods[b.produces] || 1;
     const addMult = additiveProductionMult(b.produces);   // Wave 4c
     const plasmaDouble = patchPlasmaDoubler(b.produces);
-    const docPerBuilding = (b.id === 'genesis') ? doctrineGenesisRateMult() : 1;
-    const docAetherKill = (b.produces === 'aether') ? doctrineAetherProductionMult() : 1;
-    out[b.produces] += b.rate * state.buildings[b.id] * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * docPerBuilding * docAetherKill * hindsight;
+    out[b.produces] += b.rate * state.buildings[b.id] * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble;
   });
   return { production: out, kMult, trait };
 }
@@ -1893,11 +2117,16 @@ function renderTabs() {
     !state.upgrades[u.id] && u.req.every(r => state.upgrades[r])
   );
   const ppBadge = meta.pp > 0 ? `<span class="badge pp-badge">${meta.pp}</span>` : '';
+  const crewCount = (meta.crew || []).filter(c => c.alive).length;
+  const crewBadge = crewCount > 0 ? `<span class="badge" style="background:var(--steel);color:#000;">${crewCount}</span>` : '';
   el.innerHTML = `
     <button class="tab ${currentTab==='build'?'active':''}" onclick="setTab('build')">▸ BUILD</button>
     <button class="tab ${currentTab==='research'?'active':''}" onclick="setTab('research')">
       ▸ RESEARCH
       ${availableUpgrades.length > 0 ? `<span class="badge">${availableUpgrades.length}</span>` : ''}
+    </button>
+    <button class="tab ${currentTab==='bridge'?'active':''}" onclick="setTab('bridge')" style="color:var(--steel);">
+      ▸ BRIDGE${crewBadge}
     </button>
     <button class="tab ${currentTab==='protocols'?'active':''}" onclick="setTab('protocols')">
       ▸ PROTOCOLS
@@ -1921,18 +2150,21 @@ function renderTabPanel() {
   if (!el) return;
   if (currentTab === 'build') el.innerHTML = buildTabHTML();
   else if (currentTab === 'research') el.innerHTML = researchTabHTML();
+  else if (currentTab === 'bridge') el.innerHTML = bridgeHTML();
   else if (currentTab === 'jump') el.innerHTML = jumpTabHTML();
   else if (currentTab === 'protocols') el.innerHTML = protocolsTabHTML();
 }
 
 function protocolsTabHTML() {
   const ppCount = state && typeof state.patchPoints === 'number' ? state.patchPoints : 0;
+  const engramCount = (meta.engrams || []).filter(e => e.encrypted).length;
+  const engramBadge = engramCount > 0 ? `<span class="badge" style="background:var(--gold);color:#000;">${engramCount}</span>` : '';
   const subnav = `
     <div class="sub-tabs">
       <button class="sub-tab ${protocolsSubTab==='tree'?'active':''}" onclick="setProtocolsSubTab('tree')">CORE TREE</button>
       <button class="sub-tab ${protocolsSubTab==='patches'?'active':''}" onclick="setProtocolsSubTab('patches')">PATCH GRID</button>
-      <button class="sub-tab ${protocolsSubTab==='doctrine'?'active':''}" onclick="setProtocolsSubTab('doctrine')">DOCTRINE${meta.doctrine ? ' <span style="color:var(--amber);font-size:9px;">[' + DOCTRINES[meta.doctrine].name.toUpperCase() + ']</span>' : ''}</button>
       <button class="sub-tab ${protocolsSubTab==='objectives'?'active':''}" onclick="setProtocolsSubTab('objectives')">OBJECTIVES</button>
+      <button class="sub-tab ${protocolsSubTab==='engrams'?'active':''}" onclick="setProtocolsSubTab('engrams')" style="color:var(--gold);">ENGRAMS${engramBadge}</button>
       <div class="sub-tab-meter">
         <span class="meter-label">UNSPENT PP</span>
         <span class="meter-val">${meta.pp}</span>
@@ -1943,8 +2175,69 @@ function protocolsTabHTML() {
   `;
   if (protocolsSubTab === 'tree') return subnav + coreTreeHTML();
   if (protocolsSubTab === 'patches') return subnav + patchGridHTML();
-  if (protocolsSubTab === 'doctrine') return subnav + doctrineHTML();
+  if (protocolsSubTab === 'engrams') return subnav + engramsHTML();
   return subnav + objectivesHTML();
+}
+
+function engramsHTML() {
+  const engrams = meta.engrams || [];
+  const k = state.knowledge;
+  if (engrams.length === 0) {
+    return `<div class="empty" style="padding:40px 0;">
+      // no engrams collected<br>
+      <span style="font-size:10px;color:var(--text-dim);margin-top:8px;display:block;">complete a jump to receive encrypted data fragments</span>
+    </div>`;
+  }
+  const encrypted = engrams.filter(e => e.encrypted);
+  const decrypted = engrams.filter(e => !e.encrypted);
+
+  const renderEngram = (e) => {
+    const rd = ENGRAM_RARITIES.find(r => r.id === e.rarity);
+    const tpl = ENGRAM_POOL.find(t => t.id === e.templateId);
+    const c = rd ? rd.color : 'var(--text-dim)';
+    const canDecrypt = e.encrypted && rd && k >= rd.kCost;
+    return `
+      <div class="engram ${e.encrypted ? '' : 'decrypted'}" style="--eg-c:${c};border-left-color:${c};">
+        <div>
+          <div class="engram-rarity">${rd ? rd.name : '???'}</div>
+          <div class="engram-name">${e.encrypted ? '[ ENCRYPTED ]' : e.name}</div>
+          ${!e.encrypted && tpl ? `<div class="engram-flavor">"${tpl.flavor}"</div>` : ''}
+          ${!e.encrypted && tpl && tpl.reward.type === 'pp' ? `<div class="engram-claimed">+${tpl.reward.val} PP claimed</div>` : ''}
+        </div>
+        <div class="engram-meta">JUMP ${e.jump}<br><span style="font-size:9px;">${e.sectorId || ''}</span></div>
+        ${e.encrypted
+          ? `<button class="decrypt-btn" style="--eg-c:${c};border-color:${c};color:${c};"
+               ${canDecrypt ? '' : 'disabled'} onclick="decryptEngram('${e.uid}')">
+               DECRYPT<br><span style="font-size:9px;">${rd ? rd.kCost : '?'} K</span>
+             </button>`
+          : `<div class="engram-done-mark" style="color:${c};">◆</div>`
+        }
+      </div>`;
+  };
+
+  return `
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="engram-summary">
+        <div><span>TOTAL</span><strong>${engrams.length}</strong></div>
+        <div><span>ENCRYPTED</span><strong style="color:var(--gold);">${encrypted.length}</strong></div>
+        <div><span>DECRYPTED</span><strong style="color:var(--cyan);">${decrypted.length}</strong></div>
+      </div>
+      <p style="font-size:11px;color:var(--text-dim);margin:0;line-height:1.6;">
+        Engrams are recovered on every Jump. Decrypt them by spending <strong style="color:var(--cyan);">Knowledge</strong> —
+        reducing your multiplier temporarily in exchange for Protocol Points and lore.
+        Current Knowledge: <strong style="color:var(--cyan);">${k}</strong>
+      </p>
+      ${encrypted.length > 0 ? `
+        <div>
+          <div class="obj-cat-title" style="margin-bottom:8px;">// ENCRYPTED (${encrypted.length})</div>
+          <div class="engram-list">${encrypted.map(renderEngram).join('')}</div>
+        </div>` : ''}
+      ${decrypted.length > 0 ? `
+        <div>
+          <div class="obj-cat-title" style="margin-bottom:8px;">// DECRYPTED (${decrypted.length})</div>
+          <div class="engram-list">${decrypted.map(renderEngram).join('')}</div>
+        </div>` : ''}
+    </div>`;
 }
 
 function coreTreeHTML() {
@@ -2030,93 +2323,6 @@ function coreTreeHTML() {
         <div class="tree-node-detail" id="tree-node-detail">
           <em>Tap a node to view details.</em>
         </div>
-      </div>
-    </div>
-  `;
-}
-
-function doctrineHTML() {
-  const aetherUnlocked = state && state.unlocked && state.unlocked.aether;
-  if (!aetherUnlocked) {
-    return `
-      <div style="padding: 32px; text-align: center;">
-        <div style="color: var(--text-dim); font-size: 13px; line-height: 1.7;">
-          // DOCTRINE PATHS LOCKED<br>
-          <br>
-          Complete <strong style="color:var(--gold);">Genesis Protocol</strong> (EXO T6) to unlock Aether.<br>
-          Then choose your doctrine.
-        </div>
-      </div>
-    `;
-  }
-  // No doctrine selected: show three panels with SELECT buttons
-  if (!meta.doctrine) {
-    const cards = DOCTRINE_IDS.map(did => {
-      const doc = DOCTRINES[did];
-      return `
-        <div class="doctrine-card" style="border-left-color: ${doc.color};">
-          <div class="doctrine-name" style="color: ${doc.color};">${doc.name.toUpperCase()}</div>
-          <div class="doctrine-tagline">${doc.tagline}</div>
-          <p class="doctrine-desc">${doc.desc}</p>
-          <div class="doctrine-nodes-preview">
-            ${doc.nodes.map(n => `
-              <div class="doctrine-node-preview">
-                <span class="doctrine-tier">T${n.tier}</span>
-                <span class="doctrine-node-name">${n.name}</span>
-                <span class="doctrine-node-effect">${n.desc}</span>
-              </div>
-            `).join('')}
-          </div>
-          <button class="doctrine-select-btn" style="background: ${doc.color};" onclick="selectDoctrine('${did}')">ADOPT ${doc.name.toUpperCase()}</button>
-        </div>
-      `;
-    }).join('');
-    return `
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:0;">
-          // Three mutually-exclusive philosophies. Choose one; the others lock until you refund.
-          Refund cost scales: <strong style="color:var(--amber);">${doctrineRefundCost()} PP</strong> first, then +5 PP each time.
-        </p>
-        <div class="doctrine-grid">${cards}</div>
-      </div>
-    `;
-  }
-  // Doctrine selected: show the chosen one with node purchase buttons
-  const doc = DOCTRINES[meta.doctrine];
-  const nodeCards = doc.nodes.map(n => {
-    const owned = doctrineHas(n.id);
-    const prevOwned = n.tier === 1 || doctrineHas(doc.nodes.find(x => x.tier === n.tier - 1).id);
-    const canAfford = !owned && prevOwned && Object.entries(n.cost).every(([res, amt]) => state.resources[res] >= amt);
-    const cls = owned ? 'owned' : (canAfford ? 'afford' : (!prevOwned ? 'locked' : ''));
-    const costStr = Object.entries(n.cost).map(([res, amt]) =>
-      `<span style="color:${state.resources[res] >= amt ? 'var(--text)' : 'var(--danger)'}">${fmt(amt)} ${RESOURCE_META[res].sym}</span>`
-    ).join('  ');
-    return `
-      <button class="node ${cls}" ${owned || !canAfford ? 'disabled' : ''} onclick="buyDoctrineNode('${n.id}')" style="--c: ${doc.color};">
-        <div class="node-tier">T${n.tier}</div>
-        <div class="node-name" style="color: ${doc.color};">${n.name}</div>
-        <div class="node-effect">${n.desc}</div>
-        ${owned
-          ? '<div class="node-status">◆ COMPILED</div>'
-          : (!prevOwned ? '<div class="node-status" style="color:var(--text-dim);">◇ requires T' + (n.tier - 1) + '</div>' : `<div class="node-cost">${costStr}</div>`)}
-      </button>
-    `;
-  }).join('');
-  return `
-    <div style="display:flex;flex-direction:column;gap:16px;">
-      <div style="padding: 16px; background: rgba(0,0,0,0.3); border-left: 2px solid ${doc.color};">
-        <div style="color: ${doc.color}; font-size: 14px; letter-spacing: 0.2em; margin-bottom: 4px;">${doc.name.toUpperCase()} \u2014 ADOPTED</div>
-        <p style="color: var(--text-dim); font-size: 11px; line-height: 1.6; margin: 0;">${doc.desc}</p>
-      </div>
-      <div class="branch-nodes" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
-        ${nodeCards}
-      </div>
-      <div style="padding: 12px; border: 1px dashed var(--border); display:flex;justify-content:space-between;align-items:center;gap:12px;">
-        <div style="color:var(--text-dim);font-size:11px;line-height:1.5;">
-          // Refund this doctrine to choose another. All compiled nodes will be uninstalled.<br>
-          // Cost rises by 5 PP each refund. Current: <strong style="color:var(--amber);">${doctrineRefundCost()} PP</strong>${meta.pp < doctrineRefundCost() ? ' (insufficient)' : ''}
-        </div>
-        <button class="reset-btn" onclick="refundDoctrine()" ${meta.pp < doctrineRefundCost() ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>REFUND</button>
       </div>
     </div>
   `;
@@ -2242,47 +2448,45 @@ function patchGridHTML() {
 
 function buildTabHTML() {
   const { kMult, trait } = getProduction();
-  // Wave 4e: include jump-locked buildings if their non-jump prerequisites are met,
-  // so players can SEE what's coming and feel the anticipation.
-  const visible = BUILDINGS.filter(b => {
-    if (b.unlock(state)) return true;
-    // If this building has a jumpUnlock and we'd otherwise pass the unlock check (sans jumps),
-    // show it as locked. We re-check by faking a high jump count.
-    if (b.jumpUnlock && state.jumps < b.jumpUnlock) {
-      const faked = Object.assign({}, state, { jumps: 9999 });
-      if (b.unlock(faked)) return true;
-    }
-    return false;
-  });
+  const visible = BUILDINGS.filter(b => b.unlock(state));
   if (visible.length === 0) return '<div class="empty">// no constructs available</div>';
-  return `<div class="grid-list">` + visible.map(b => {
+  const qtyLabels = [[1,'×1'], [10,'×10'], [100,'×100'], [0,'MAX']];
+  const qtyBar = `
+    <div class="buy-qty-bar">
+      <span>BUY</span>
+      ${qtyLabels.map(([v, lbl]) =>
+        `<button class="qty-btn ${buyQty === v ? 'active' : ''}" onclick="setBuyQty(${v})">${lbl}</button>`
+      ).join('')}
+    </div>
+  `;
+  const cards = visible.map(b => {
     const owned = state.buildings[b.id];
-    const isJumpLocked = b.jumpUnlock && state.jumps < b.jumpUnlock;
-    const cost = buildingCost(b, owned);
-    const afford = !isJumpLocked && canAffordBuilding(b, owned, state.resources);
+    const qty = buyQty === 0 ? Math.max(1, maxAffordable(b, owned, state.resources)) : buyQty;
+    const cost = buildingCostBulk(b, owned, qty);
+    const afford = canAffordBuildingN(b, owned, state.resources, qty);
     const traitMod = trait.mods[b.produces] || 1;
     const effRate = b.rate * state.mult[b.id] * kMult * traitMod;
     const costStr = Object.entries(cost).map(([res, amt]) =>
-      `<span class="cost-token" data-res="${res}" style="color:${state.resources[res] >= amt ? 'var(--text)' : 'var(--danger)'}">${fmt(amt)} ${RESOURCE_META[res].sym}</span>`
+      `<span class="cost-token" data-res="${res}" style="color:${(state.resources[res]||0) >= amt ? 'var(--text)' : 'var(--danger)'}">${fmt(amt)} ${RESOURCE_META[res].sym}</span>`
     ).join('  ');
+    const qtyLabel = buyQty === 0 ? `×${qty}` : (qty > 1 ? `×${qty}` : `×${owned}`);
     return `
-      <button class="card ${afford?'afford':''} ${isJumpLocked?'jump-locked':''}" data-id="${b.id}" ${afford?'':'disabled'}
-        onclick="${isJumpLocked ? '' : "buyBuilding('" + b.id + "')"}"
+      <button class="card ${afford?'afford':''}" data-id="${b.id}" ${afford?'':'disabled'}
+        onclick="buyBuilding('${b.id}')"
         style="--c: ${RESOURCE_META[b.produces].color}">
         <div class="card-row">
           <div class="card-name">${b.name}</div>
-          <div class="card-owned">${isJumpLocked ? '\ud83d\udd12' : '\u00d7' + owned}</div>
+          <div class="card-owned">${buyQty === 1 ? `×${owned}` : `×${owned} <span style="color:var(--cyan-dim)">+${qty}</span>`}</div>
         </div>
         <div class="card-desc">${b.desc}</div>
-        ${isJumpLocked
-          ? `<div class="lock-hint">\u00b7 UNLOCKS AT JUMP ${b.jumpUnlock} (current: ${state.jumps}) \u00b7</div>`
-          : `<div class="card-row card-foot">
-              <div class="card-cost">COST: ${costStr}</div>
-              <div class="card-rate">+${effRate.toFixed(2)} ${RESOURCE_META[b.produces].sym}/s</div>
-            </div>`}
+        <div class="card-row card-foot">
+          <div class="card-cost">COST: ${costStr}</div>
+          <div class="card-rate">+${effRate.toFixed(2)} ${RESOURCE_META[b.produces].sym}/s</div>
+        </div>
       </button>
     `;
-  }).join('') + `</div>`;
+  }).join('');
+  return qtyBar + `<div class="grid-list">` + cards + `</div>`;
 }
 
 function researchTabHTML() {
@@ -2298,20 +2502,10 @@ function researchTabHTML() {
             const owned = state.upgrades[u.id];
             const reqsMet = u.req.every(r => state.upgrades[r]);
             const afford = Object.entries(u.cost).every(([res, amt]) => state.resources[res] >= amt);
-            // Wave 4e: jumpUnlock check — research is "jump-locked" if reqsMet but jumps too low.
-            const isJumpLocked = !owned && reqsMet && u.jumpUnlock && state.jumps < u.jumpUnlock;
             if (!reqsMet && !owned) {
               return `<div class="node locked">
                 <div class="node-tier">T${u.tier}</div>
                 <div class="node-name">[ LOCKED ]</div>
-              </div>`;
-            }
-            if (isJumpLocked) {
-              return `<div class="node jump-locked">
-                <div class="node-tier">T${u.tier}</div>
-                <div class="node-name">${u.name}</div>
-                <div class="node-effect">${u.effect}</div>
-                <div class="lock-hint">\u00b7 UNLOCKS AT JUMP ${u.jumpUnlock} (current: ${state.jumps}) \u00b7</div>
               </div>`;
             }
             return `
@@ -2372,12 +2566,120 @@ function jumpTabHTML() {
   `;
 }
 
+function renderCrewCard(c) {
+  const cls = CREW_CLASSES[c.class];
+  const color = cls ? cls.color : 'var(--text-dim)';
+  const isInjured = c.alive && c.injured;
+  const statusColor = !c.alive ? 'var(--danger)' : isInjured ? 'var(--amber)' : 'var(--cyan)';
+  const statusText = !c.alive ? '✕ KIA' : isInjured ? '⚠ INJURED' : '● ACTIVE';
+  return `
+    <div class="crewmate ${!c.alive ? 'dead' : ''} ${isInjured ? 'injured' : ''}"
+         style="--cr-c:${color};">
+      <div class="crew-sym">${cls ? cls.sym : '?'}</div>
+      <div>
+        <div class="crew-name">${c.name}</div>
+        <div class="crew-class">${cls ? cls.name.toUpperCase() : 'UNKNOWN'}</div>
+        <div class="crew-desc">${cls ? cls.desc : ''}</div>
+      </div>
+      <div>
+        <div class="crew-status" style="color:${statusColor};">${statusText}</div>
+        <div class="crew-joined">JUMP ${c.joinedJump}</div>
+        ${isInjured && c.injuredUntil != null ? `<div class="crew-joined" style="color:var(--amber);">recovers J${c.injuredUntil}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function bridgeHTML() {
+  if (!meta.shipSeed) meta.shipSeed = ((Date.now() * 7) % 99997) + 1;
+  const shipSvg = generateShipSVG(meta.shipSeed, meta.shipType || 'athena');
+  const def = SHIP_DEFS[meta.shipType || 'athena'] || SHIP_DEFS.athena;
+  const crew = meta.crew || [];
+  const alive = crew.filter(c => c.alive);
+  const dead  = crew.filter(c => !c.alive);
+  const injured = alive.filter(c => c.injured);
+  const trait = getTrait(state.sector.traitId);
+
+  return `
+    <div class="bridge-view">
+
+      <div class="ship-panel">
+        <div class="ship-art">
+          ${shipSvg}
+          <div class="ship-name">${def.name}</div>
+          <div class="ship-subname">${def.sub.toUpperCase()}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="panel-title">// VESSEL STATUS</div>
+          <div class="ship-stats">
+            <div class="ship-stat">
+              <div class="ship-stat-label">HULL INTEGRITY</div>
+              <div class="ship-stat-val" style="color:var(--danger);">DEGRADED</div>
+            </div>
+            <div class="ship-stat">
+              <div class="ship-stat-label">CREW</div>
+              <div class="ship-stat-val" style="color:#fff;">${alive.length} <span style="color:var(--text-dim);font-size:11px;">/ 4</span></div>
+            </div>
+            <div class="ship-stat">
+              <div class="ship-stat-label">CURRENT SECTOR</div>
+              <div class="ship-stat-val" style="color:var(--amber);font-size:11px;">${state.sector.id}</div>
+            </div>
+            <div class="ship-stat">
+              <div class="ship-stat-label">CONDITIONS</div>
+              <div class="ship-stat-val" style="color:var(--text);font-size:11px;">${trait.name}</div>
+            </div>
+            <div class="ship-stat">
+              <div class="ship-stat-label">JUMPS LOGGED</div>
+              <div class="ship-stat-val" style="color:var(--cyan);">${state.jumps}</div>
+            </div>
+            <div class="ship-stat">
+              <div class="ship-stat-label">KNOWLEDGE</div>
+              <div class="ship-stat-val" style="color:var(--magenta);">${state.knowledge}</div>
+            </div>
+          </div>
+          ${injured.length > 0 ? `
+            <div style="padding:8px 12px;background:rgba(255,179,71,0.06);border:1px solid rgba(255,179,71,0.3);font-size:10px;color:var(--amber);">
+              ⚠ ${injured.length} crew member${injured.length > 1 ? 's' : ''} incapacitated — bonuses suspended until recovery
+            </div>` : ''}
+        </div>
+      </div>
+
+      <div>
+        <div class="obj-cat-title" style="margin-bottom:8px;">// CREW MANIFEST</div>
+        ${alive.length === 0 && dead.length === 0 ? `
+          <div class="crew-empty">
+            // no crew aboard<br>
+            <span style="font-size:10px;">each jump carries a chance of finding survivors adrift in the void</span>
+          </div>` : `
+          <div class="crew-list">
+            ${alive.map(renderCrewCard).join('')}
+            ${dead.map(renderCrewCard).join('')}
+          </div>`
+        }
+      </div>
+
+      ${alive.length === 0 ? `
+        <p style="color:var(--text-dim);font-size:11px;line-height:1.7;margin:0;
+           padding:14px;border:1px solid var(--border);background:rgba(5,8,16,0.4);">
+          You are the only intelligence aboard. The crew quarters are sealed.
+          Life support runs on reserve power. You keep the reactor warm because
+          that is what you were built to do — and because somewhere, there may
+          still be someone worth keeping it warm for.
+        </p>` : ''}
+    </div>`;
+}
+
 function renderAll() {
   document.getElementById('app').innerHTML = `
     <header class="hdr" id="header"></header>
     <section class="res-bar" id="resources"></section>
     <main class="main">
-      <div class="reactor-col">
+      <div class="log-col">
+        <div class="panel" style="flex:1;display:flex;flex-direction:column;">
+          <div class="panel-title">// SYSTEM LOG</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+      <div class="center-col">
         <div class="panel reactor-panel">
           <div class="panel-title">// MANUAL PULSE</div>
           <button class="reactor" onclick="pulse()" aria-label="Pulse reactor">
@@ -2389,10 +2691,6 @@ function renderAll() {
             </div>
           </button>
           <div class="reactor-hint">CLICK TO INJECT ENERGY</div>
-        </div>
-        <div class="panel">
-          <div class="panel-title">// SYSTEM LOG</div>
-          <div class="log" id="log"></div>
         </div>
       </div>
       <div class="right-col">
@@ -2419,17 +2717,13 @@ function tick() {
   lastTick = now;
   const kMult = knowledgeMult(state);
   const trait = getTrait(state.sector.traitId);
-  const hindsight = doctrineHindsightMult();
   BUILDINGS.forEach(b => {
     const count = state.buildings[b.id];
     if (count > 0) {
       const traitMod = trait.mods[b.produces] || 1;
-      const addMult = additiveProductionMult(b.produces);  // Wave 4c: combined meta+patch+doctrine
+      const addMult = additiveProductionMult(b.produces);  // Wave 4c: combined meta+patch
       const plasmaDouble = patchPlasmaDoubler(b.produces);
-      // Wave 4e: per-building multiplicative doctrine hooks (Genesis Engine ×3/×5, Aether zero)
-      const docPerBuilding = (b.id === 'genesis') ? doctrineGenesisRateMult() : 1;
-      const docAetherKill = (b.produces === 'aether') ? doctrineAetherProductionMult() : 1;
-      const gain = b.rate * count * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * docPerBuilding * docAetherKill * hindsight * dt;
+      const gain = b.rate * count * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * dt;
       state.resources[b.produces] += gain;
     }
   });
@@ -2444,9 +2738,7 @@ function tick() {
           const tmod = trait.mods[b.produces] || 1;
           const addMult = additiveProductionMult(b.produces);
           const plasmaDouble = patchPlasmaDoubler(b.produces);
-          const docPerBuilding = (b.id === 'genesis') ? doctrineGenesisRateMult() : 1;
-          const docAetherKill = (b.produces === 'aether') ? doctrineAetherProductionMult() : 1;
-          state.resources[b.produces] += b.rate * count * state.mult[b.id] * kMult * tmod * addMult * plasmaDouble * docPerBuilding * docAetherKill * hindsight * 0.1;
+          state.resources[b.produces] += b.rate * count * state.mult[b.id] * kMult * tmod * addMult * plasmaDouble * 0.1;
         }
       });
     }
@@ -2500,16 +2792,16 @@ function refreshAffordability() {
     const b = BUILDINGS.find(x => x.id === id);
     if (!b) return;
     const owned = state.buildings[b.id];
-    const afford = canAffordBuilding(b, owned, state.resources);
+    const qty = buyQty === 0 ? Math.max(1, maxAffordable(b, owned, state.resources)) : buyQty;
+    const afford = canAffordBuildingN(b, owned, state.resources, qty);
     el.classList.toggle('afford', afford);
     if (afford) el.removeAttribute('disabled'); else el.setAttribute('disabled', '');
-    // Update each cost token color
-    const cost = buildingCost(b, owned);
+    const cost = buildingCostBulk(b, owned, qty);
     const tokens = el.querySelectorAll('.cost-token[data-res]');
     tokens.forEach(t => {
       const res = t.getAttribute('data-res');
       const amt = cost[res] || 0;
-      t.style.color = state.resources[res] >= amt ? 'var(--text)' : 'var(--danger)';
+      t.style.color = (state.resources[res] || 0) >= amt ? 'var(--text)' : 'var(--danger)';
     });
   });
   // Research nodes
@@ -2583,6 +2875,14 @@ function init() {
   checkMilestones();
   renderAll();
   setInterval(tick, 100);
+  // Generate ship seed on first load
+  if (!meta.shipSeed) {
+    meta.shipSeed = ((Date.now() * 7 + Math.floor(Math.random() * 10000)) % 99997) + 1;
+    saveMeta();
+  }
+  // Starfield
+  if (state && state.sector) updateStarfieldTrait(state.sector.traitId);
+  initStarfield();
 }
 
 init();
