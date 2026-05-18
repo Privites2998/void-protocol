@@ -440,6 +440,88 @@
     50% { filter: drop-shadow(0 0 12px rgba(94,226,255,0.9)); }
   }
 
+  /* DOCTRINE (Wave 4e) */
+  .doctrine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .doctrine-card {
+    background: rgba(5,8,16,0.6);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .doctrine-name {
+    font-family: 'Syncopate', monospace;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+  }
+  .doctrine-tagline {
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    font-style: italic;
+  }
+  .doctrine-desc {
+    color: var(--text-dim);
+    font-size: 11px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .doctrine-nodes-preview {
+    display: flex; flex-direction: column; gap: 6px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .doctrine-node-preview {
+    display: grid;
+    grid-template-columns: 24px 100px 1fr;
+    gap: 6px;
+    font-size: 10px;
+    align-items: baseline;
+  }
+  .doctrine-tier {
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    font-size: 9px;
+  }
+  .doctrine-node-name { color: var(--text); }
+  .doctrine-node-effect { color: var(--text-dim); }
+  .doctrine-select-btn {
+    margin-top: 8px;
+    border: none;
+    padding: 10px;
+    color: var(--bg);
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    font-weight: 700;
+    transition: filter 0.15s;
+  }
+  .doctrine-select-btn:hover { filter: brightness(1.2); }
+
+  /* LOCKED CONTENT HINTS (Wave 4e) */
+  .card.jump-locked, .node.jump-locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-style: dashed;
+  }
+  .card.jump-locked .card-name, .node.jump-locked .node-name {
+    color: var(--text-dim);
+  }
+  .lock-hint {
+    display: inline-block;
+    color: var(--amber);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 2px 6px;
+    border: 1px solid rgba(255, 179, 71, 0.4);
+    margin-top: 6px;
+  }
+
   /* OBJECTIVES */
   .obj-wrap { display: flex; flex-direction: column; gap: 16px; }
   .obj-summary {
@@ -493,10 +575,10 @@
 'use strict';
 
 // ============================================================
-// VOID PROTOCOL v2 — Wave 1 (foundation, save, sectors)
+// VOID PROTOCOL v2 — Wave 4e (jump-unlocked content + doctrines)
 // ============================================================
 
-const SAVE_VERSION = 5;
+const SAVE_VERSION = 7;
 const SAVE_KEY = 'voidProtocol';
 const META_KEY = 'voidProtocolMeta';
 const MAX_OFFLINE_SECONDS = 4 * 60 * 60; // 4h default (Hoarder extends to 6h)
@@ -529,6 +611,7 @@ const MILESTONES = [
   // First-build milestones
   { id: 'm_solar',      cat: 'BUILD', name: 'First Light',          desc: 'Deploy your first Solar Array',     pp: 1, check: (s) => s.buildings.solar     >= 1 },
   { id: 'm_core',       cat: 'BUILD', name: 'Ignition',             desc: 'Deploy your first Fusion Core',     pp: 1, check: (s) => s.buildings.core      >= 1 },
+  { id: 'm_tokamak',    cat: 'BUILD', name: 'Containment',          desc: 'Deploy your first Tokamak Cluster', pp: 1, check: (s) => s.buildings.tokamak   >= 1 },
   { id: 'm_qsolar',     cat: 'BUILD', name: 'Phase Shift',          desc: 'Deploy your first Quantum Solar',   pp: 2, check: (s) => s.buildings.qsolar    >= 1 },
   { id: 'm_scraper',    cat: 'BUILD', name: 'First Signal',         desc: 'Deploy your first Data Scraper',    pp: 1, check: (s) => s.buildings.scraper   >= 1 },
   { id: 'm_parser',     cat: 'BUILD', name: 'Pattern Recognition',  desc: 'Deploy your first Parser Cluster',  pp: 1, check: (s) => s.buildings.parser    >= 1 },
@@ -537,6 +620,7 @@ const MILESTONES = [
   { id: 'm_foundry',    cat: 'BUILD', name: 'Forge Operational',    desc: 'Deploy your first Auto Foundry',    pp: 1, check: (s) => s.buildings.foundry   >= 1 },
   { id: 'm_macro',      cat: 'BUILD', name: 'Industrial Era',       desc: 'Deploy your first Macro-Foundry',   pp: 2, check: (s) => s.buildings.macro     >= 1 },
   { id: 'm_siphon',     cat: 'BUILD', name: 'Solar Wind',           desc: 'Deploy your first Plasma Siphon',   pp: 1, check: (s) => s.buildings.siphon    >= 1 },
+  { id: 'm_bottle',     cat: 'BUILD', name: 'Bottled Lightning',    desc: 'Deploy your first Magnetic Bottle', pp: 1, check: (s) => s.buildings.bottle    >= 1 },
   { id: 'm_singular',   cat: 'BUILD', name: 'Edge of Collapse',     desc: 'Deploy your first Singularity Tap', pp: 2, check: (s) => s.buildings.singular  >= 1 },
   { id: 'm_antimatter', cat: 'BUILD', name: 'Annihilation',         desc: 'Deploy your first Antimatter Reactor',pp: 3, check: (s) => s.buildings.antimatter>= 1 },
   { id: 'm_genesis',    cat: 'BUILD', name: 'Ex Nihilo',            desc: 'Deploy your first Genesis Engine',  pp: 3, check: (s) => s.buildings.genesis   >= 1 },
@@ -717,7 +801,206 @@ function buyPatchNode(id) {
   renderAll();
 }
 
-// --- PER-RUN CHALLENGES (Wave 4b) ---------------------------
+// --- DOCTRINES (Wave 4e, per-meta branching research) ----------
+// Three mutually-exclusive philosophies. Selected from a new sub-tab under PROTOCOLS.
+// Persists in meta.doctrine; lockOut is enforced by hiding the non-chosen branches.
+// Refund cost scales: 5 PP first time, 10 PP second, 15 PP third, etc. (meta.doctrineRefunds tracks count.)
+// Each doctrine has 3 nodes (T1, T2, T3). Costs require the EXO T6 Genesis Protocol research
+// (i.e. Aether must be unlocked, since doctrines are an endgame commitment).
+const DOCTRINES = {
+  entropy: {
+    id: 'entropy',
+    name: 'Entropy',
+    tagline: 'Burn it all. Grow fast.',
+    desc: 'Trade longevity for raw output. Aether is forsaken; speed is everything.',
+    color: 'var(--magenta)',
+    nodes: [
+      { id: 'e1', tier: 1, name: 'Combustion Doctrine', desc: 'All production +50%', cost: { plasma: 50000 } },
+      { id: 'e2', tier: 2, name: 'Wasteful Optimization', desc: 'All buildings cost -20%', cost: { plasma: 200000, alloy: 50000 } },
+      { id: 'e3', tier: 3, name: 'Pyric Knowledge', desc: 'Jump Knowledge ×2, but Aether production set to 0', cost: { plasma: 1000000 } },
+    ],
+  },
+  stasis: {
+    id: 'stasis',
+    name: 'Stasis',
+    tagline: 'Hoard. Persist.',
+    desc: 'The slow path. Long offline cycles, idle dominance, fragmentary persistence across jumps.',
+    color: 'var(--steel)',
+    nodes: [
+      { id: 's1', tier: 1, name: 'Deep Hibernation', desc: 'Offline cap extended to 12h (was 4h, 6h with Hoarder)', cost: { plasma: 50000 } },
+      { id: 's2', tier: 2, name: 'Idle Mastery', desc: 'Idle production ×2; click power reduced to ×0.25', cost: { plasma: 200000, data: 100000 } },
+      { id: 's3', tier: 3, name: 'Memory of Matter', desc: 'On Jump, retain 1% of every resource (rounded down)', cost: { plasma: 1000000 } },
+    ],
+  },
+  genesis: {
+    id: 'genesis',
+    name: 'Genesis',
+    tagline: 'Compound through Aether.',
+    desc: 'The Aether path. Slow start, exponential late game once the Genesis Engine spins up.',
+    color: 'var(--gold)',
+    nodes: [
+      { id: 'g1', tier: 1, name: 'Resonant Forge', desc: 'Genesis Engine production ×3', cost: { aether: 10 } },
+      { id: 'g2', tier: 2, name: 'Aetheric Cascade', desc: 'Aether \u2192 Knowledge gain becomes \u221a(Aether)\u00d72 (overrides r4_aetheric)', cost: { aether: 50 } },
+      { id: 'g3', tier: 3, name: 'Genesis Multiplicity', desc: 'Aether production \u00d75', cost: { aether: 200 } },
+    ],
+  },
+};
+
+const DOCTRINE_IDS = ['entropy', 'stasis', 'genesis'];
+
+function doctrineRefundCost() {
+  const refunds = (meta && meta.doctrineRefunds) || 0;
+  return 5 + refunds * 5;  // 5, 10, 15, 20...
+}
+
+function doctrineHas(nodeId) {
+  return !!(meta && meta.doctrineOwned && meta.doctrineOwned[nodeId]);
+}
+
+function selectDoctrine(id) {
+  if (!DOCTRINES[id]) return;
+  if (meta.doctrine && meta.doctrine !== id) {
+    pushLog(`> doctrine conflict: refund current path first`);
+    return;
+  }
+  meta.doctrine = id;
+  saveMeta();
+  pushLog(`> doctrine adopted: ${DOCTRINES[id].name.toUpperCase()}`);
+  flash(`\u25c6 DOCTRINE // ${DOCTRINES[id].name}`);
+  renderAll();
+}
+
+function refundDoctrine() {
+  if (!meta.doctrine) return;
+  const cost = doctrineRefundCost();
+  if (meta.pp < cost) {
+    pushLog(`> refund denied: need ${cost} PP, have ${meta.pp}`);
+    return;
+  }
+  if (!confirm(`Refund the ${DOCTRINES[meta.doctrine].name} doctrine?\n\nCost: ${cost} PP\nThis also REFUNDS all doctrine nodes you purchased on this path (no cost recovery).\nNext refund will cost ${cost + 5} PP.`)) return;
+  meta.pp -= cost;
+  meta.doctrineRefunds = (meta.doctrineRefunds || 0) + 1;
+  // Clear all node ownership for the current doctrine
+  const current = DOCTRINES[meta.doctrine];
+  for (const n of current.nodes) {
+    delete meta.doctrineOwned[n.id];
+  }
+  meta.doctrine = null;
+  saveMeta();
+  pushLog(`> doctrine refunded // path open`);
+  flash(`\u25c7 DOCTRINE REFUNDED`);
+  renderAll();
+}
+
+function buyDoctrineNode(id) {
+  if (!meta.doctrine) return;
+  const doc = DOCTRINES[meta.doctrine];
+  const node = doc.nodes.find(n => n.id === id);
+  if (!node || doctrineHas(id)) return;
+  // Prereq: previous tier in same doctrine
+  if (node.tier > 1) {
+    const prev = doc.nodes.find(n => n.tier === node.tier - 1);
+    if (!doctrineHas(prev.id)) {
+      pushLog(`> cannot install: prior tier required`);
+      return;
+    }
+  }
+  // Pay cost from state.resources
+  for (const [res, amt] of Object.entries(node.cost)) {
+    if (state.resources[res] < amt) {
+      pushLog(`> insufficient ${res.toUpperCase()}`);
+      return;
+    }
+  }
+  for (const [res, amt] of Object.entries(node.cost)) state.resources[res] -= amt;
+  meta.doctrineOwned[id] = true;
+  saveMeta();
+  save();
+  pushLog(`> doctrine node compiled: ${node.name.toUpperCase()}`);
+  flash(`\u25c6 ${node.name}`);
+  renderAll();
+}
+
+// --- DOCTRINE EFFECT HOOKS (used throughout production / jump / etc.) ---
+
+function doctrineProductionMult(resource) {
+  // Entropy T1: +50% production (additive bonus, added to the additive pool)
+  // Stasis T2: idle production ×2 — applied as additive bonus +100% to all
+  // Genesis T1: Genesis Engine ×3 — multiplicative, building-specific
+  // These return ADDITIVE bonuses (0.50, 1.00, etc.) for the additive pool.
+  let bonus = 0;
+  if (doctrineHas('e1')) bonus += 0.50;
+  if (doctrineHas('s2')) bonus += 1.00;
+  return bonus;
+}
+
+function doctrineBuildingCostMult(buildingId) {
+  // Entropy T2: all buildings -20%
+  let mult = 1;
+  if (doctrineHas('e2')) mult *= 0.80;
+  return mult;
+}
+
+function doctrineClickMult() {
+  // Stasis T2: click ×0.25 (the idle tradeoff)
+  let mult = 1;
+  if (doctrineHas('s2')) mult *= 0.25;
+  return mult;
+}
+
+function doctrineGenesisRateMult() {
+  // Genesis T1: Genesis Engine ×3
+  // Genesis T3: Aether production ×5 (stacks with G1)
+  let mult = 1;
+  if (doctrineHas('g1')) mult *= 3;
+  if (doctrineHas('g3')) mult *= 5;
+  return mult;
+}
+
+function doctrineAetherProductionMult() {
+  // Pyric Knowledge (Entropy T3) sets Aether production to 0
+  if (doctrineHas('e3')) return 0;
+  return 1;
+}
+
+function doctrineJumpKnowledgeMult() {
+  // Entropy T3: Jump Knowledge ×2
+  if (doctrineHas('e3')) return 2;
+  return 1;
+}
+
+function doctrineOfflineCapSec() {
+  // Stasis T1: offline cap = 12h, overriding both default (4h) and Hoarder (6h)
+  if (doctrineHas('s1')) return 12 * 60 * 60;
+  return null;
+}
+
+function doctrineAetherKnowledgeBonus(aether) {
+  // Genesis T2: overrides r4_aetheric. New: floor(sqrt(aether) * 2)
+  if (doctrineHas('g2')) return Math.floor(Math.sqrt(Math.max(0, aether)) * 2);
+  return null; // null = fall through to r4_aetheric logic
+}
+
+function doctrineResourceRetention() {
+  // Stasis T3: retain 1% of every resource on Jump
+  return doctrineHas('s3') ? 0.01 : 0;
+}
+
+function doctrineHindsightMult() {
+  // ENG T7 Hindsight (not a doctrine but lives in same effect block):
+  // first 5 min of every run, +50% production. Stays multiplicative because it's a
+  // window-triggered modifier rather than a stacking buff.
+  if (!state || !state._hindsight) return 1;
+  const elapsed = (Date.now() - (state.runStartTime || Date.now())) / 1000;
+  return elapsed < 300 ? 1.50 : 1;
+}
+
+function selfReplicationCostMult() {
+  // ENG T8 Self-Replication: all buildings -25%
+  return state && state._selfRep ? 0.75 : 1;
+}
+
+
 // 20 templates, 3 random per run, 1-3 Patch Points each.
 // progress is tracked on state.challengeProgress, keyed by challenge id.
 const CHALLENGE_TEMPLATES = [
@@ -791,6 +1074,10 @@ function freshMeta() {
     totalJumps: 0,
     traitsVisited: {},              // { traitId: true }
     lifetimeKnowledgeMax: 0,
+    // Wave 4e additions
+    doctrine: null,                 // 'entropy' | 'stasis' | 'genesis' | null
+    doctrineOwned: {},              // { doctrineNodeId: true }
+    doctrineRefunds: 0,             // count of past refunds (scales next refund cost)
   };
 }
 
@@ -828,6 +1115,9 @@ function saveMeta() {
 function metaHas(nodeId) { return !!meta.coreOwned[nodeId]; }
 
 function metaOfflineCap() {
+  // Wave 4e: Stasis T1 (Deep Hibernation) overrides both default (4h) and Hoarder (6h)
+  const doctrineCap = doctrineOfflineCapSec();
+  if (doctrineCap !== null) return doctrineCap;
   return metaHas('r2_hoard') ? 6 * 60 * 60 : MAX_OFFLINE_SECONDS;
 }
 
@@ -843,6 +1133,9 @@ function metaBuildingCostMult(buildingId) {
   let mult = 1;
   if (metaHas('r2_xref')) mult *= 0.95;
   if (buildingId === 'solar' && metaHas('r1_cached')) mult *= 0.75;
+  // Wave 4e: Entropy T2 (-20% all) and ENG T8 Self-Replication (-25% all) stack multiplicatively
+  mult *= doctrineBuildingCostMult(buildingId);
+  mult *= selfReplicationCostMult();
   return mult;
 }
 
@@ -896,7 +1189,7 @@ function patchProductionBonus(resource) {
 }
 
 function additiveProductionMult(resource) {
-  return 1 + metaProductionBonus(resource) + patchProductionBonus(resource);
+  return 1 + metaProductionBonus(resource) + patchProductionBonus(resource) + doctrineProductionMult(resource);
 }
 
 // Check all milestones, award PP for newly earned ones, returns array of newly earned for toast/log.
@@ -933,15 +1226,21 @@ function buyCoreNode(id) {
 const BUILDINGS = [
   { id: 'solar',     name: 'Solar Array',         produces: 'energy', costs: { energy: 10 },                       rate: 0.5,  unlock: () => true,                                          desc: 'Photovoltaic panels. Slow but reliable.' },
   { id: 'core',      name: 'Fusion Core',         produces: 'energy', costs: { energy: 150 },                      rate: 4,    unlock: (s) => s.buildings.solar >= 5,                       desc: 'Contained stellar reactions.' },
+  { id: 'tokamak',   name: 'Tokamak Cluster',     produces: 'energy', costs: { energy: 8000, data: 200 },          rate: 14,   unlock: (s) => s.unlocked.data && s.buildings.core >= 5,     desc: 'Donut reactors networked into a shared containment lattice.' },
   { id: 'qsolar',    name: 'Quantum Solar',       produces: 'energy', costs: { energy: 50000, data: 1000 },        rate: 30,   unlock: (s) => s.buildings.core >= 5,                        desc: 'Tap zero-point harmonics for power.' },
+  { id: 'dyson',     name: 'Dyson Capacitor',     produces: 'energy', costs: { energy: 500000, data: 50000 },      rate: 120,  unlock: (s) => s.buildings.qsolar >= 3 && s.jumps >= 8,      desc: 'A shell of one\u2019s own miniature star.', jumpUnlock: 8 },
   { id: 'scraper',   name: 'Data Scraper',        produces: 'data',   costs: { energy: 80 },                       rate: 0.3,  unlock: (s) => s.unlocked.data,                              desc: 'Mines ambient signal noise.' },
+  { id: 'echo',      name: 'Echo Array',          produces: 'data',   costs: { energy: 800 },                      rate: 1.2,  unlock: (s) => s.unlocked.data && s.jumps >= 2,              desc: 'Catches signal reverberations from prior occupants.', jumpUnlock: 2 },
   { id: 'parser',    name: 'Parser Cluster',      produces: 'data',   costs: { energy: 1200 },                     rate: 3,    unlock: (s) => s.unlocked.data && s.buildings.scraper >= 5,  desc: 'Parallel pattern recognition.' },
   { id: 'mainframe', name: 'Mainframe',           produces: 'data',   costs: { energy: 25000, alloy: 500 },        rate: 25,   unlock: (s) => s.buildings.parser >= 5,                      desc: 'Vast computational substrate.' },
   { id: 'mine',      name: 'Alloy Mine',          produces: 'alloy',  costs: { data: 200 },                        rate: 0.4,  unlock: (s) => s.unlocked.alloy,                             desc: 'Strips ore from drifting debris.' },
+  { id: 'smelter',   name: 'Smelter Drone',       produces: 'alloy',  costs: { data: 1500 },                       rate: 1.5,  unlock: (s) => s.unlocked.alloy && s.jumps >= 6,             desc: 'Mobile foundries that chase mineral veins.', jumpUnlock: 6 },
   { id: 'foundry',   name: 'Auto Foundry',        produces: 'alloy',  costs: { data: 2500 },                       rate: 4,    unlock: (s) => s.unlocked.alloy && s.buildings.mine >= 5,    desc: 'Smelts and forges autonomously.' },
   { id: 'macro',     name: 'Macro-Foundry',       produces: 'alloy',  costs: { data: 50000, plasma: 1000 },        rate: 30,   unlock: (s) => s.buildings.foundry >= 5,                     desc: 'Industrial-scale autonomous fabrication.' },
   { id: 'siphon',    name: 'Plasma Siphon',       produces: 'plasma', costs: { alloy: 1500 },                      rate: 0.6,  unlock: (s) => s.unlocked.plasma,                            desc: 'Skims charged matter from solar wind.' },
+  { id: 'bottle',    name: 'Magnetic Bottle',     produces: 'plasma', costs: { alloy: 6000 },                      rate: 2.5,  unlock: (s) => s.unlocked.plasma && s.buildings.siphon >= 5, desc: 'Contains plasma loops in twisted field geometries.' },
   { id: 'singular',  name: 'Singularity Tap',     produces: 'plasma', costs: { alloy: 25000 },                     rate: 8,    unlock: (s) => s.unlocked.plasma && s.buildings.siphon >= 5, desc: 'Draws energy from collapsed matter.' },
+  { id: 'phase',     name: 'Phase Inverter',      produces: 'plasma', costs: { alloy: 80000, plasma: 8000 },       rate: 25,   unlock: (s) => s.buildings.singular >= 3 && s.jumps >= 6,    desc: 'Bends matter through complementary phase states.', jumpUnlock: 6 },
   { id: 'antimatter',name: 'Antimatter Reactor',  produces: 'plasma', costs: { alloy: 25000, plasma: 5000 },       rate: 50,   unlock: (s) => s.buildings.singular >= 5,                    desc: 'Pair-annihilation in containment.' },
   { id: 'genesis',   name: 'Genesis Engine',      produces: 'aether', costs: { plasma: 1000000, alloy: 100000 },   rate: 0.5,  unlock: (s) => s.unlocked.aether,                            desc: 'Forges raw possibility from nothing.' },
 ];
@@ -975,6 +1274,9 @@ const UPGRADES = [
   { id: 'eng4', branch: 'ENG', name: 'Zero-Point Manifold', tier: 4, cost: { plasma: 5000, alloy: 10000 },   effect: 'All buildings +50%',              req: ['eng3'], apply: (s) => { Object.keys(s.mult).forEach(k => s.mult[k] *= 1.5); } },
   { id: 'eng5', branch: 'ENG', name: 'Tessellated Hull',    tier: 5, cost: { alloy: 50000, plasma: 5000 },   effect: 'All buildings +100%',             req: ['eng4'], apply: (s) => { Object.keys(s.mult).forEach(k => s.mult[k] *= 2); } },
   { id: 'eng6', branch: 'ENG', name: 'Phase Engineering',   tier: 6, cost: { alloy: 500000, plasma: 100000 },effect: 'Tier-3 buildings ×5',             req: ['eng5'], apply: (s) => { s.mult.qsolar *= 5; s.mult.mainframe *= 5; s.mult.macro *= 5; s.mult.antimatter *= 5; } },
+  // Wave 4e: jump-unlocked research. `jumpUnlock` is checked alongside `req` in the research UI.
+  { id: 'eng7', branch: 'ENG', name: 'Hindsight',           tier: 7, cost: { plasma: 25000, data: 100000 },  effect: 'First 5 min of every run: +50% production', req: ['eng6'], jumpUnlock: 4, apply: (s) => { s._hindsight = true; } },
+  { id: 'eng8', branch: 'ENG', name: 'Self-Replication',    tier: 8, cost: { plasma: 1000000, data: 500000 },effect: 'All buildings cost -25%',         req: ['eng7'], jumpUnlock: 8, apply: (s) => { s._selfRep = true; } },
 
   { id: 'cmp1', branch: 'CMP', name: 'Heuristic Compiler',  tier: 1, cost: { energy: 80 },                   effect: 'Manual pulse +1',                 req: [],       apply: (s) => { s.clickPower += 1; } },
   { id: 'cmp2', branch: 'CMP', name: 'Neural Sieve',        tier: 2, cost: { data: 200 },                    effect: 'Data buildings +75%',             req: ['cmp1'], apply: (s) => { s.mult.scraper *= 1.75; s.mult.parser *= 1.75; s.mult.mainframe *= 1.75; } },
@@ -1053,15 +1355,21 @@ const AMBIENT_LOG = [
 const FIRST_BUILD_FLAVOR = {
   solar:     '> solar array online // first photons captured',
   core:      '> fusion ignition achieved // hum fills the corridors',
+  tokamak:   '> tokamak cluster synchronized // magnetic donuts singing',
   qsolar:    '> quantum solar grid synchronized // reality flickers gently',
+  dyson:     '> dyson capacitor sealing // a star in a jar, briefly',
   scraper:   '> data scraper engaged // ambient signal noise harvested',
+  echo:      '> echo array attuned // whispers from things long gone',
   parser:    '> parser cluster booting // patterns emerge from chaos',
   mainframe: '> mainframe initialized // every node a small mind',
   mine:      '> alloy extraction underway // debris yields its bones',
+  smelter:   '> smelter drone launched // it never sleeps',
   foundry:   '> foundry roaring // metal poured in vacuum',
   macro:     '> macro-foundry roars to life // industrial scale achieved',
   siphon:    '> plasma siphon extended // ribbons of light siphoned in',
+  bottle:    '> magnetic bottle stabilized // plasma chases its own tail',
   singular:  '> singularity tap dropped // event horizon brushed',
+  phase:     '> phase inverter calibrated // matter and shadow trade places',
   antimatter:'> antimatter containment stable // pair annihilation begins',
   genesis:   '> genesis engine humming // creation from absence',
 };
@@ -1089,11 +1397,15 @@ function maybeAmbientLog(now) {
 }
 
 // --- KNOWLEDGE ----------------------------------------------
-// Wave 4b: sublinearized from linear (1 + k*base) to sqrt (1 + sqrt(k)*base)
-// to prevent permanent Knowledge from trivializing late-campaign runs.
-// Causal Engineering (EXO T5) still triples base; effect is now meaningful
-// without runaway compounding past ~Knowledge 50.
-const KNOWLEDGE_BASE = 0.25;
+// Wave 4d: base coefficient dropped from 0.25 to 0.05. Old curve gave ×4.95 at k=250;
+// new curve gives ×1.79. Combined with the new log-based gain formula (in computeKnowledgeGain),
+// this brings Jump 5 multiplier from ~×4.5 to ~×1.4 — close to the "+30% at Jump 5" target
+// from Wave 4c's open questions. Causal Engineering (EXO T5) still triples the base.
+//
+// Curve points under new formula `1 + sqrt(k) * 0.05`:
+//   k=10  → ×1.16    k=50  → ×1.35    k=100 → ×1.50
+//   k=250 → ×1.79    k=500 → ×2.12    k=1000 → ×2.58
+const KNOWLEDGE_BASE = 0.05;
 function knowledgeMult(s) {
   const base = (s && s._causalEng) ? KNOWLEDGE_BASE * 3 : KNOWLEDGE_BASE;
   const k = s ? s.knowledge : 0;
@@ -1189,11 +1501,19 @@ function load() {
         }
         return parsed;
       }
-      // Wave 4c (v4→v5): pure in-place migration. State shape unchanged; only formulas
-      // (knowledge curve, building costs, Aether bonus, Singularity Protocol, additive stacking)
-      // differ. Player's mid-run state stays valid; production numbers will recompute next tick.
-      if (oldVer === 4) {
+      // Wave 4c/4d/4e unified migration for v4+ saves.
+      // All formula-change waves are in-place: state shape changes are limited to new
+      // building keys appended to state.buildings/state.mult, which are grafted below.
+      // Meta-level changes (doctrine state) are migrated separately by loadMeta's
+      // missing-key check on freshMeta().
+      if (oldVer >= 4 && oldVer < SAVE_VERSION) {
         parsed.version = SAVE_VERSION;
+        if (!parsed.buildings) parsed.buildings = {};
+        if (!parsed.mult) parsed.mult = {};
+        for (const b of BUILDINGS) {
+          if (!(b.id in parsed.buildings)) parsed.buildings[b.id] = 0;
+          if (!(b.id in parsed.mult)) parsed.mult[b.id] = 1;
+        }
         return parsed;
       }
       // Pre-v3 saves: reset run, preserve Knowledge and Jumps as before
@@ -1221,14 +1541,18 @@ function applyOfflineProgress(s) {
   // Wave 4c: additive stacking — swap state temporarily so PATCH_HAS works against `s`
   const prevState = state;
   state = s;
+  // Wave 4e: doctrine effects apply offline too (Genesis ×3, Entropy +50%, etc.)
+  // Hindsight (5-min window) deliberately DOES NOT apply offline — it's a "fresh return" bonus.
   const gains = { energy: 0, data: 0, alloy: 0, plasma: 0, aether: 0 };
   BUILDINGS.forEach(b => {
     const count = s.buildings[b.id];
     if (count > 0) {
       const traitMod = trait.mods[b.produces] || 1;
-      const addMult = additiveProductionMult(b.produces);  // combined meta+patch bonuses
+      const addMult = additiveProductionMult(b.produces);  // combined meta+patch+doctrine
       const plasmaDouble = patchPlasmaDoubler(b.produces);
-      const rate = b.rate * count * s.mult[b.id] * kMult * traitMod * addMult * plasmaDouble;
+      const docPerBuilding = (b.id === 'genesis') ? doctrineGenesisRateMult() : 1;
+      const docAetherKill = (b.produces === 'aether') ? doctrineAetherProductionMult() : 1;
+      const rate = b.rate * count * s.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * docPerBuilding * docAetherKill;
       gains[b.produces] += rate * elapsed;
     }
   });
@@ -1301,8 +1625,9 @@ function doPulseLogic(visual) {
   }
   // Click-specific patch effects (pc1 Pulse Focus, pa3 Primed Capacitor) remain multiplicative;
   // they're "this run is a clicker run" identity rather than stacking buffs.
+  // Wave 4e: Stasis T2 (s2 Idle Mastery) applies a ×0.25 click penalty.
   const baseClick = state.clickPower * kMult * traitMod * addMult * clickMetaMult * dmMult * synMult * critMult
-                  * patchClickMult() * patchPulseEarlyBonus();
+                  * patchClickMult() * patchPulseEarlyBonus() * doctrineClickMult();
   state.resources.energy += baseClick;
   // Wave 4b: track pulses for per-run challenges
   if (state.challenges && state.challenges.length) {
@@ -1344,6 +1669,8 @@ function buyUpgrade(id) {
   const u = UPGRADES.find(x => x.id === id);
   if (state.upgrades[u.id]) return;
   if (u.req.some(r => !state.upgrades[r])) return;
+  // Wave 4e: jump-unlock gate. Don't purchase research before its required jump count.
+  if (u.jumpUnlock && state.jumps < u.jumpUnlock) return;
   for (const [res, amt] of Object.entries(u.cost)) {
     if (state.resources[res] < amt) return;
   }
@@ -1374,16 +1701,30 @@ function computeKnowledgeGain() {
   if (state.sector.traitId === 'dead') {
     jumpMult = patchDeadZoneBonus();
   }
+  // Wave 4e: Entropy T3 (Pyric Knowledge) ×2 multiplier on Jump Knowledge (cost: Aether=0)
+  jumpMult *= doctrineJumpKnowledgeMult();
   const totalScore = state.resources.plasma + state.resources.alloy / 10 + state.resources.data / 100;
-  const base = Math.floor(Math.sqrt(totalScore / 100) * jumpMult);
-  // Wave 4c: Aether Knowledge bonus REMOVED (was +10/Aether, gave 432K K in 2min).
-  // Aether is now purely an endgame resource — its Knowledge contribution comes
-  // ONLY from the optional 'r4_aetheric' protocol (when implemented in Wave 4e),
-  // which grants Math.floor(sqrt(aether)) Knowledge per jump. A player with
-  // 100 Aether gets +10 K; with 10K Aether gets +100 K. Tiny relative to base scaling.
-  const aetherBonus = metaHas('r4_aetheric')
-    ? Math.floor(Math.sqrt(Math.max(0, state.resources.aether)))
-    : 0;
+  // Wave 4d: gain reshaped from `floor(sqrt(totalScore / 100))` (which produced 151 K
+  // from a ~2.3M score) to `floor(log10(totalScore / 10) * 2.5)`. The log curve grows
+  // by roughly +2.5 per 10× of accumulated score, capping de facto around 20 K per
+  // jump even at galactic-scale totals. Same 2.3M score now yields 13 K.
+  //
+  // Floor: scores below 1000 give 0 K. Prevents farming early-game jumps for free
+  // Knowledge during the first run when Plasma is still in the single digits.
+  let base = 0;
+  if (totalScore >= 1000) {
+    base = Math.floor(Math.log10(totalScore / 10) * 2.5 * jumpMult);
+  }
+  // Wave 4e: Genesis T2 (Aetheric Cascade) OVERRIDES r4_aetheric. Formula becomes
+  // floor(sqrt(aether) * 2). Stacks below it: r4_aetheric stays the fallback if Genesis
+  // T2 not owned.
+  let aetherBonus = 0;
+  const genesisOverride = doctrineAetherKnowledgeBonus(state.resources.aether);
+  if (genesisOverride !== null) {
+    aetherBonus = genesisOverride;
+  } else if (metaHas('r4_aetheric')) {
+    aetherBonus = Math.floor(Math.sqrt(Math.max(0, state.resources.aether)));
+  }
   // Wave 4b: Star Mapper (pb4) +25% Knowledge gained
   const patchBonus = patchJumpKnowledgeBonus();
   return Math.floor((base + aetherBonus) * patchBonus);
@@ -1399,10 +1740,28 @@ function doJump() {
   if (gain < 1) return;
   const newK = state.knowledge + gain;
   const newJumps = state.jumps + 1;
+  // Wave 4e: Stasis T3 (Memory of Matter) — retain 1% of every resource on Jump
+  const retention = doctrineResourceRetention();
+  let retained = null;
+  if (retention > 0) {
+    retained = {};
+    for (const r of RESOURCE_LIST) {
+      retained[r] = Math.floor(state.resources[r] * retention);
+    }
+  }
   // Update meta tracking
   meta.totalJumps = (meta.totalJumps || 0) + 1;
   if (newK > meta.lifetimeKnowledgeMax) meta.lifetimeKnowledgeMax = newK;
   state = freshRun(newK, newJumps);
+  // Apply retention after freshRun so the values aren't overwritten by start-of-run defaults
+  if (retained) {
+    for (const r of RESOURCE_LIST) {
+      if (retained[r] > 0) state.resources[r] += retained[r];
+    }
+    const retainedLine = RESOURCE_LIST.filter(r => retained[r] > 0)
+      .map(r => `${fmt(retained[r])} ${RESOURCE_META[r].sym}`).join('  ');
+    if (retainedLine) pushLog(`> stasis retained: ${retainedLine}`);
+  }
   // Record this sector's trait as visited
   meta.traitsVisited[state.sector.traitId] = true;
   saveMeta();
@@ -1451,12 +1810,15 @@ function setTab(t) {
 function getProduction() {
   const kMult = knowledgeMult(state);
   const trait = getTrait(state.sector.traitId);
+  const hindsight = doctrineHindsightMult();
   const out = { energy: 0, data: 0, alloy: 0, plasma: 0, aether: 0 };
   BUILDINGS.forEach(b => {
     const traitMod = trait.mods[b.produces] || 1;
     const addMult = additiveProductionMult(b.produces);   // Wave 4c
     const plasmaDouble = patchPlasmaDoubler(b.produces);
-    out[b.produces] += b.rate * state.buildings[b.id] * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble;
+    const docPerBuilding = (b.id === 'genesis') ? doctrineGenesisRateMult() : 1;
+    const docAetherKill = (b.produces === 'aether') ? doctrineAetherProductionMult() : 1;
+    out[b.produces] += b.rate * state.buildings[b.id] * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * docPerBuilding * docAetherKill * hindsight;
   });
   return { production: out, kMult, trait };
 }
@@ -1569,6 +1931,7 @@ function protocolsTabHTML() {
     <div class="sub-tabs">
       <button class="sub-tab ${protocolsSubTab==='tree'?'active':''}" onclick="setProtocolsSubTab('tree')">CORE TREE</button>
       <button class="sub-tab ${protocolsSubTab==='patches'?'active':''}" onclick="setProtocolsSubTab('patches')">PATCH GRID</button>
+      <button class="sub-tab ${protocolsSubTab==='doctrine'?'active':''}" onclick="setProtocolsSubTab('doctrine')">DOCTRINE${meta.doctrine ? ' <span style="color:var(--amber);font-size:9px;">[' + DOCTRINES[meta.doctrine].name.toUpperCase() + ']</span>' : ''}</button>
       <button class="sub-tab ${protocolsSubTab==='objectives'?'active':''}" onclick="setProtocolsSubTab('objectives')">OBJECTIVES</button>
       <div class="sub-tab-meter">
         <span class="meter-label">UNSPENT PP</span>
@@ -1580,6 +1943,7 @@ function protocolsTabHTML() {
   `;
   if (protocolsSubTab === 'tree') return subnav + coreTreeHTML();
   if (protocolsSubTab === 'patches') return subnav + patchGridHTML();
+  if (protocolsSubTab === 'doctrine') return subnav + doctrineHTML();
   return subnav + objectivesHTML();
 }
 
@@ -1666,6 +2030,93 @@ function coreTreeHTML() {
         <div class="tree-node-detail" id="tree-node-detail">
           <em>Tap a node to view details.</em>
         </div>
+      </div>
+    </div>
+  `;
+}
+
+function doctrineHTML() {
+  const aetherUnlocked = state && state.unlocked && state.unlocked.aether;
+  if (!aetherUnlocked) {
+    return `
+      <div style="padding: 32px; text-align: center;">
+        <div style="color: var(--text-dim); font-size: 13px; line-height: 1.7;">
+          // DOCTRINE PATHS LOCKED<br>
+          <br>
+          Complete <strong style="color:var(--gold);">Genesis Protocol</strong> (EXO T6) to unlock Aether.<br>
+          Then choose your doctrine.
+        </div>
+      </div>
+    `;
+  }
+  // No doctrine selected: show three panels with SELECT buttons
+  if (!meta.doctrine) {
+    const cards = DOCTRINE_IDS.map(did => {
+      const doc = DOCTRINES[did];
+      return `
+        <div class="doctrine-card" style="border-left-color: ${doc.color};">
+          <div class="doctrine-name" style="color: ${doc.color};">${doc.name.toUpperCase()}</div>
+          <div class="doctrine-tagline">${doc.tagline}</div>
+          <p class="doctrine-desc">${doc.desc}</p>
+          <div class="doctrine-nodes-preview">
+            ${doc.nodes.map(n => `
+              <div class="doctrine-node-preview">
+                <span class="doctrine-tier">T${n.tier}</span>
+                <span class="doctrine-node-name">${n.name}</span>
+                <span class="doctrine-node-effect">${n.desc}</span>
+              </div>
+            `).join('')}
+          </div>
+          <button class="doctrine-select-btn" style="background: ${doc.color};" onclick="selectDoctrine('${did}')">ADOPT ${doc.name.toUpperCase()}</button>
+        </div>
+      `;
+    }).join('');
+    return `
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <p style="color:var(--text-dim);font-size:12px;line-height:1.6;margin:0;">
+          // Three mutually-exclusive philosophies. Choose one; the others lock until you refund.
+          Refund cost scales: <strong style="color:var(--amber);">${doctrineRefundCost()} PP</strong> first, then +5 PP each time.
+        </p>
+        <div class="doctrine-grid">${cards}</div>
+      </div>
+    `;
+  }
+  // Doctrine selected: show the chosen one with node purchase buttons
+  const doc = DOCTRINES[meta.doctrine];
+  const nodeCards = doc.nodes.map(n => {
+    const owned = doctrineHas(n.id);
+    const prevOwned = n.tier === 1 || doctrineHas(doc.nodes.find(x => x.tier === n.tier - 1).id);
+    const canAfford = !owned && prevOwned && Object.entries(n.cost).every(([res, amt]) => state.resources[res] >= amt);
+    const cls = owned ? 'owned' : (canAfford ? 'afford' : (!prevOwned ? 'locked' : ''));
+    const costStr = Object.entries(n.cost).map(([res, amt]) =>
+      `<span style="color:${state.resources[res] >= amt ? 'var(--text)' : 'var(--danger)'}">${fmt(amt)} ${RESOURCE_META[res].sym}</span>`
+    ).join('  ');
+    return `
+      <button class="node ${cls}" ${owned || !canAfford ? 'disabled' : ''} onclick="buyDoctrineNode('${n.id}')" style="--c: ${doc.color};">
+        <div class="node-tier">T${n.tier}</div>
+        <div class="node-name" style="color: ${doc.color};">${n.name}</div>
+        <div class="node-effect">${n.desc}</div>
+        ${owned
+          ? '<div class="node-status">◆ COMPILED</div>'
+          : (!prevOwned ? '<div class="node-status" style="color:var(--text-dim);">◇ requires T' + (n.tier - 1) + '</div>' : `<div class="node-cost">${costStr}</div>`)}
+      </button>
+    `;
+  }).join('');
+  return `
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div style="padding: 16px; background: rgba(0,0,0,0.3); border-left: 2px solid ${doc.color};">
+        <div style="color: ${doc.color}; font-size: 14px; letter-spacing: 0.2em; margin-bottom: 4px;">${doc.name.toUpperCase()} \u2014 ADOPTED</div>
+        <p style="color: var(--text-dim); font-size: 11px; line-height: 1.6; margin: 0;">${doc.desc}</p>
+      </div>
+      <div class="branch-nodes" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+        ${nodeCards}
+      </div>
+      <div style="padding: 12px; border: 1px dashed var(--border); display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div style="color:var(--text-dim);font-size:11px;line-height:1.5;">
+          // Refund this doctrine to choose another. All compiled nodes will be uninstalled.<br>
+          // Cost rises by 5 PP each refund. Current: <strong style="color:var(--amber);">${doctrineRefundCost()} PP</strong>${meta.pp < doctrineRefundCost() ? ' (insufficient)' : ''}
+        </div>
+        <button class="reset-btn" onclick="refundDoctrine()" ${meta.pp < doctrineRefundCost() ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>REFUND</button>
       </div>
     </div>
   `;
@@ -1791,30 +2242,44 @@ function patchGridHTML() {
 
 function buildTabHTML() {
   const { kMult, trait } = getProduction();
-  const visible = BUILDINGS.filter(b => b.unlock(state));
+  // Wave 4e: include jump-locked buildings if their non-jump prerequisites are met,
+  // so players can SEE what's coming and feel the anticipation.
+  const visible = BUILDINGS.filter(b => {
+    if (b.unlock(state)) return true;
+    // If this building has a jumpUnlock and we'd otherwise pass the unlock check (sans jumps),
+    // show it as locked. We re-check by faking a high jump count.
+    if (b.jumpUnlock && state.jumps < b.jumpUnlock) {
+      const faked = Object.assign({}, state, { jumps: 9999 });
+      if (b.unlock(faked)) return true;
+    }
+    return false;
+  });
   if (visible.length === 0) return '<div class="empty">// no constructs available</div>';
   return `<div class="grid-list">` + visible.map(b => {
     const owned = state.buildings[b.id];
+    const isJumpLocked = b.jumpUnlock && state.jumps < b.jumpUnlock;
     const cost = buildingCost(b, owned);
-    const afford = canAffordBuilding(b, owned, state.resources);
+    const afford = !isJumpLocked && canAffordBuilding(b, owned, state.resources);
     const traitMod = trait.mods[b.produces] || 1;
     const effRate = b.rate * state.mult[b.id] * kMult * traitMod;
     const costStr = Object.entries(cost).map(([res, amt]) =>
       `<span class="cost-token" data-res="${res}" style="color:${state.resources[res] >= amt ? 'var(--text)' : 'var(--danger)'}">${fmt(amt)} ${RESOURCE_META[res].sym}</span>`
     ).join('  ');
     return `
-      <button class="card ${afford?'afford':''}" data-id="${b.id}" ${afford?'':'disabled'}
-        onclick="buyBuilding('${b.id}')"
+      <button class="card ${afford?'afford':''} ${isJumpLocked?'jump-locked':''}" data-id="${b.id}" ${afford?'':'disabled'}
+        onclick="${isJumpLocked ? '' : "buyBuilding('" + b.id + "')"}"
         style="--c: ${RESOURCE_META[b.produces].color}">
         <div class="card-row">
           <div class="card-name">${b.name}</div>
-          <div class="card-owned">×${owned}</div>
+          <div class="card-owned">${isJumpLocked ? '\ud83d\udd12' : '\u00d7' + owned}</div>
         </div>
         <div class="card-desc">${b.desc}</div>
-        <div class="card-row card-foot">
-          <div class="card-cost">COST: ${costStr}</div>
-          <div class="card-rate">+${effRate.toFixed(2)} ${RESOURCE_META[b.produces].sym}/s</div>
-        </div>
+        ${isJumpLocked
+          ? `<div class="lock-hint">\u00b7 UNLOCKS AT JUMP ${b.jumpUnlock} (current: ${state.jumps}) \u00b7</div>`
+          : `<div class="card-row card-foot">
+              <div class="card-cost">COST: ${costStr}</div>
+              <div class="card-rate">+${effRate.toFixed(2)} ${RESOURCE_META[b.produces].sym}/s</div>
+            </div>`}
       </button>
     `;
   }).join('') + `</div>`;
@@ -1833,10 +2298,20 @@ function researchTabHTML() {
             const owned = state.upgrades[u.id];
             const reqsMet = u.req.every(r => state.upgrades[r]);
             const afford = Object.entries(u.cost).every(([res, amt]) => state.resources[res] >= amt);
+            // Wave 4e: jumpUnlock check — research is "jump-locked" if reqsMet but jumps too low.
+            const isJumpLocked = !owned && reqsMet && u.jumpUnlock && state.jumps < u.jumpUnlock;
             if (!reqsMet && !owned) {
               return `<div class="node locked">
                 <div class="node-tier">T${u.tier}</div>
                 <div class="node-name">[ LOCKED ]</div>
+              </div>`;
+            }
+            if (isJumpLocked) {
+              return `<div class="node jump-locked">
+                <div class="node-tier">T${u.tier}</div>
+                <div class="node-name">${u.name}</div>
+                <div class="node-effect">${u.effect}</div>
+                <div class="lock-hint">\u00b7 UNLOCKS AT JUMP ${u.jumpUnlock} (current: ${state.jumps}) \u00b7</div>
               </div>`;
             }
             return `
@@ -1944,13 +2419,17 @@ function tick() {
   lastTick = now;
   const kMult = knowledgeMult(state);
   const trait = getTrait(state.sector.traitId);
+  const hindsight = doctrineHindsightMult();
   BUILDINGS.forEach(b => {
     const count = state.buildings[b.id];
     if (count > 0) {
       const traitMod = trait.mods[b.produces] || 1;
-      const addMult = additiveProductionMult(b.produces);  // Wave 4c: combined meta+patch
+      const addMult = additiveProductionMult(b.produces);  // Wave 4c: combined meta+patch+doctrine
       const plasmaDouble = patchPlasmaDoubler(b.produces);
-      const gain = b.rate * count * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * dt;
+      // Wave 4e: per-building multiplicative doctrine hooks (Genesis Engine ×3/×5, Aether zero)
+      const docPerBuilding = (b.id === 'genesis') ? doctrineGenesisRateMult() : 1;
+      const docAetherKill = (b.produces === 'aether') ? doctrineAetherProductionMult() : 1;
+      const gain = b.rate * count * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * docPerBuilding * docAetherKill * hindsight * dt;
       state.resources[b.produces] += gain;
     }
   });
@@ -1965,7 +2444,9 @@ function tick() {
           const tmod = trait.mods[b.produces] || 1;
           const addMult = additiveProductionMult(b.produces);
           const plasmaDouble = patchPlasmaDoubler(b.produces);
-          state.resources[b.produces] += b.rate * count * state.mult[b.id] * kMult * tmod * addMult * plasmaDouble * 0.1;
+          const docPerBuilding = (b.id === 'genesis') ? doctrineGenesisRateMult() : 1;
+          const docAetherKill = (b.produces === 'aether') ? doctrineAetherProductionMult() : 1;
+          state.resources[b.produces] += b.rate * count * state.mult[b.id] * kMult * tmod * addMult * plasmaDouble * docPerBuilding * docAetherKill * hindsight * 0.1;
         }
       });
     }
