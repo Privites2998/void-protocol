@@ -1775,7 +1775,7 @@ const ANOMALIES = [
     triggers: () => true,
     choices: [
       { label:'RESPOND', desc:'Plot intercept. Accept whatever you find.',
-        outcome:(meta.crew && meta.crew.filter(c => c.alive).length < webMaxCrew())
+        outcome: (s, m) => (m && m.crew && m.crew.filter(c => c.alive).length < webMaxCrew())
           ? 'A survivor in a damaged escape pod. They join the crew.'
           : 'You arrive too late. The pod is sealed and silent. +10 Knowledge from the recovered logs.',
         apply:(s, m) => {
