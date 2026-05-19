@@ -926,7 +926,7 @@
 // VOID PROTOCOL v2 — Wave 4d (Knowledge rebalance + bridge buildings)
 // ============================================================
 
-const SAVE_VERSION = 16;
+const SAVE_VERSION = 18;
 const SAVE_KEY = 'voidProtocol';
 const META_KEY = 'voidProtocolMeta';
 const MAX_OFFLINE_SECONDS = 4 * 60 * 60; // 4h default (Hoarder extends to 6h)
@@ -3556,72 +3556,198 @@ function shipJumpDamageMult()  { return shipDef().jumpHullDamageMult || 1.0; }
 function shipMaxHull()         { return 100 + shipHullMaxBonus(); }
 function shipCrewBonusBoost()  { return meta && meta.shipType === 'halcyon' ? 1.25 : 1.0; }
 
+// ============================================================
+// WAVE 18 — HAND-DESIGNED PIXEL SHIPS
+// ============================================================
+// Each ship is a fixed silhouette per class. The seed varies *details*:
+//   - which 'W' (windows) are lit (gold) vs dark
+//   - which 'D' (detail/lights) render
+//   - which 'T' (antenna) render
+//   - subtle paint scuffs ('s') and trim recolors
+// Pixel legend:
+//   . / space = empty           H = hull (base)
+//   S = shaded hull (-20%)      L = highlight hull (+20%)
+//   A = accent stripe color     C = cockpit color
+//   E = engine block            G = engine highlight (lighter engine)
+//   W = window (procedural: lit or dark)
+//   T = antenna (procedural: shows or not)
+//   D = detail panel/light (procedural: shows or not, sometimes tinted)
+//   s = scuff (procedural: dark spot, rare)
+const SHIP_TEMPLATES = {
+  athena: [
+    "..............T.................",
+    "..............T.................",
+    "GG..HHHHHHHHHHHHHHHHHHHHHHHC....",
+    "GGEEHHAAAAAAAAAAAAAAAAAAHHHCC...",
+    "GGEEHWHHHHHWHHHHHWHHHHWHHHCCC...",
+    "..EEHHHHHHHHHHHHHHHHHHHHHHHCC...",
+    "EEEEHHHHHHHHHHHHHHHHHHHHHHHCCC..",
+    "EEEEHHHHHHHHHHHHHHHHHHHHHHHCCC..",
+    "..EEHHHHHHHHHHHHHHHHHHHHHHHCC...",
+    "GGEEHWHHHHHWHHHHHWHHHHWHHHCCC...",
+    "GGEEHHAAAAAAAAAAAAAAAAAAHHHCC...",
+    "GG..HHHHHHHHHHHHHHHHHHHHHHHC....",
+    "..............T.................",
+    "................................",
+  ],
+  cetus: [
+    "..............................",
+    "GG..AAHHHHHHHHHHHHHHHHHHHCC...",
+    "GG.AAHHHHHHHHHHHHHHHHHHHHCCC..",
+    "GGEEAAHHHHHHHHHHHHHHHHHHHHCCC.",
+    "EEEEAAHHHHHHHWHHHHHWHHHHHHCCC.",
+    "EEEEAAHHHHHHHHHHHHHHHHHHHHCCC.",
+    "EEEEAAHHHHHHHHHHHHHHHHHHHHCCCC",
+    "EEEEAAHHHHHHHHHHHHHHHHHHHHCCCC",
+    "EEEEAAHHHHHHHHHHHHHHHHHHHHCCC.",
+    "EEEEAAHHHHHHHWHHHHHWHHHHHHCCC.",
+    "GGEEAAHHHHHHHHHHHHHHHHHHHHCCC.",
+    "GG.AAHHHHHHHHHHHHHHHHHHHHCCC..",
+    "GG..AAHHHHHHHHHHHHHHHHHHHCC...",
+    "..............................",
+  ],
+  vessel: [
+    "........................",
+    "..........T.............",
+    "G.EEHHHHHHHHHHHHCC......",
+    "GGEEHHHHHHWHHHHHHCCC....",
+    "GGEEHHHHHHHHHHHHHHCCCC..",
+    "GGEEHHHHHHHHHHHHHHCCCC..",
+    "GGEEHHHHHHWHHHHHHCCC....",
+    "G.EEHHHHHHHHHHHHCC......",
+    "..........T.............",
+    "........................",
+  ],
+  halcyon: [
+    "....................................",
+    ".....HHHHHHHHHHHHHHHHHHHHHHHC.......",
+    "GG.HHHHHHHHHHHHHHHHHHHHHHHHHCC......",
+    "GGHHWHWHWHWHWHWHWHWHWHWHWHWHHCC.....",
+    "GGHHHHHHHHHHHHHHHHHHHHHHHHHHHCCC....",
+    "GGEEHHHHHHHHHHHHHHHHHHHHHHHHHHCCC...",
+    "GGEEHHHHHHHHHHHHHHHHHHHHHHHHHHCCC...",
+    "GGEEHHHHHHHHHHHHHHHHHHHHHHHHHHCCC...",
+    "GGEEHHHHHHHHHHHHHHHHHHHHHHHHHHCCC...",
+    "GGHHHHHHHHHHHHHHHHHHHHHHHHHHHCCC....",
+    "GGHHWHWHWHWHWHWHWHWHWHWHWHWHHCC.....",
+    "GG.HHHHHHHHHHHHHHHHHHHHHHHHHCC......",
+    ".....HHHHHHHHHHHHHHHHHHHHHHHC.......",
+    "....................................",
+  ],
+  prometheus: [
+    "..........T.....................",
+    ".........TTT.D..................",
+    "........TTTTTT..................",
+    "........DTTTTT..................",
+    "...HHHHHHHHHHHHHHHHHHHHCC.......",
+    "GGEEHHHHHHHHHWHHHHWHHHHHCCC.....",
+    "GGEEHHHHHHHHHHHHHHHHHHHHHCCCC...",
+    "GGEEHHHHHHHHHHHHHHHHHHHHHCCCC...",
+    "GGEEHHHHHHHHHWHHHHWHHHHHCCC.....",
+    "...HHHHHHHHHHHHHHHHHHHHCC.......",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+  ],
+};
+
+// Helper: shift a hex color brightness by amt (-1..1)
+function shadeHex(hex, amt) {
+  if (!hex || hex[0] !== '#') return hex;
+  let h = hex.slice(1);
+  if (h.length === 3) h = h.split('').map(c => c+c).join('');
+  let r = parseInt(h.substr(0,2), 16);
+  let g = parseInt(h.substr(2,2), 16);
+  let b = parseInt(h.substr(4,2), 16);
+  r = Math.max(0, Math.min(255, Math.round(r + r * amt)));
+  g = Math.max(0, Math.min(255, Math.round(g + g * amt)));
+  b = Math.max(0, Math.min(255, Math.round(b + b * amt)));
+  return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
+}
+
 function generateShipSVG(seed, type='athena') {
   const rng = seededRng(seed || 1);
   const def = SHIP_DEFS[type] || SHIP_DEFS.athena;
-  const { W, H } = def;
-  const halfH = Math.floor(H / 2);
+  const template = SHIP_TEMPLATES[type] || SHIP_TEMPLATES.athena;
   const PX = 5;
 
-  // Build top half (dy=0 is center spine, dy=halfH-1 is outer edge)
-  const half = [];
-  for (let dy = 0; dy < halfH; dy++) {
-    const row = [];
-    const yf = dy / (halfH - 1 || 1); // 0=center, 1=edge
-    for (let x = 0; x < W; x++) {
-      const xf = x / (W - 1); // 0=back, 1=front
-      let prob = 0;
-      if (xf < 0.13) {
-        // Engine block — rectangular, narrow height
-        prob = yf < 0.52 ? 0.93 : 0.04;
-      } else if (xf > 0.78) {
-        // Cockpit — narrows sharply to a point
-        const maxY = (1 - xf) / 0.22;
-        prob = yf < maxY * 0.7 ? 0.90 : 0.02;
-      } else {
-        // Main hull — tapers slightly toward front, soft upper edge
-        const taper = 1 - ((xf - 0.13) / 0.65) * 0.25;
-        const softEdge = Math.max(0, 1 - Math.pow(yf / taper, 2.2));
-        prob = softEdge * 0.92;
-      }
-      row.push(rng() < prob);
-    }
-    half.push(row);
-  }
-  // Force center spine fully solid
-  for (let x = 1; x < W - 1; x++) half[0][x] = true;
+  // Seeded palette tweaks — keep them subtle so the class identity stays clear
+  const hullShade  = (rng() - 0.5) * 0.10;       // ±5% hull brightness
+  const accentTint = (rng() - 0.5) * 0.20;       // ±10% accent brightness
+  const cockpitTint= (rng() - 0.5) * 0.15;
+  const colors = {
+    H: shadeHex(def.hull,    hullShade),
+    S: shadeHex(def.hull,    hullShade - 0.25),  // shading (darker hull)
+    L: shadeHex(def.hull,    hullShade + 0.25),  // highlight hull
+    A: shadeHex(def.accent,  accentTint),
+    C: shadeHex(def.cockpit, cockpitTint),
+    E: def.engine,
+    G: shadeHex(def.engine,  0.35),               // engine highlight
+    T: shadeHex(def.hull,    -0.45),              // antenna (dark hull-ish)
+    s: shadeHex(def.hull,    -0.35),              // scuff (dark hull)
+  };
+  const windowLitColor  = '#ffe88a';
+  const windowDarkColor = shadeHex(def.hull, -0.55);
 
-  // Mirror: edge … center … edge
-  const rows = [];
-  for (let dy = halfH - 1; dy >= 1; dy--) rows.push(half[dy]);
-  rows.push(half[0]);
-  for (let dy = 1; dy < halfH; dy++) rows.push(half[dy]);
-  const totalRows = rows.length;
-
+  const H = template.length;
+  const W = template.reduce((max, row) => Math.max(max, row.length), 0);
   let content = '';
-  rows.forEach((row, y) => {
-    row.forEach((on, x) => {
-      if (!on) return;
-      const xf = x / (W - 1);
-      const dyFrac = Math.abs(y - (totalRows - 1) / 2) / ((totalRows - 1) / 2);
-      let color;
-      if (xf < 0.13)                          color = def.engine;
-      else if (xf > 0.80 && dyFrac < 0.42)   color = def.cockpit;
-      else if (dyFrac < 0.10)                 color = def.accent;
-      else                                    color = def.hull;
-      const px = x * PX, py = y * PX;
-      content += `<rect x="${px}" y="${py}" width="${PX}" height="${PX}" fill="${color}"/>`;
-      // 1px highlight on top of each block for depth
-      content += `<rect x="${px}" y="${py}" width="${PX}" height="1" fill="rgba(255,255,255,0.13)"/>`;
-    });
+
+  // Pre-roll detail decisions so the same seed always produces the same ship
+  const detailRoll = (key) => {
+    // Use a stable per-position randomness via repeated rng() calls
+    return rng();
+  };
+
+  // First pass: collect every coordinate for stable rolling
+  const coords = [];
+  template.forEach((row, y) => {
+    for (let x = 0; x < row.length; x++) coords.push({ x, y, ch: row[x] });
   });
 
-  // Engine glow bloom
-  const cy = ((totalRows - 1) / 2) * PX + PX / 2;
-  content += `<ellipse cx="2" cy="${cy}" rx="${PX * 2.8}" ry="${PX * 2.2}" fill="${def.engine}" opacity="0.38"/>`;
+  coords.forEach(({ x, y, ch }) => {
+    if (ch === '.' || ch === ' ') return;
+    let color;
+    if (ch === 'W') {
+      color = (rng() < 0.45) ? windowLitColor : windowDarkColor;
+    } else if (ch === 'T') {
+      if (rng() < 0.35) return; // skip 35% of antennas
+      color = colors.T;
+    } else if (ch === 'D') {
+      if (rng() < 0.45) return;
+      // detail spot — 40% chance to be a lit panel
+      color = (rng() < 0.40) ? shadeHex(def.accent, 0.30) : colors.L;
+    } else if (ch === 's') {
+      if (rng() < 0.6) return;
+      color = colors.s;
+    } else {
+      color = colors[ch] || def.hull;
+    }
+    // Small chance of a paint scuff on a regular hull pixel
+    if (ch === 'H' && rng() < 0.03) color = shadeHex(def.hull, -0.4);
 
-  const svgW = W * PX, svgH = totalRows * PX;
-  return `<svg viewBox="0 0 ${svgW} ${svgH}" width="${svgW * 2.8}" height="${svgH * 2.8}"
+    const px = x * PX, py = y * PX;
+    content += `<rect x="${px}" y="${py}" width="${PX}" height="${PX}" fill="${color}"/>`;
+    // Tiny top-edge highlight for depth (skip for T/D/W to keep them cleaner)
+    if (ch === 'H' || ch === 'A' || ch === 'C' || ch === 'E' || ch === 'G') {
+      content += `<rect x="${px}" y="${py}" width="${PX}" height="1" fill="rgba(255,255,255,0.13)"/>`;
+    }
+    // Tiny bottom-edge shadow for further depth on hull
+    if (ch === 'H') {
+      content += `<rect x="${px}" y="${py + PX - 1}" width="${PX}" height="1" fill="rgba(0,0,0,0.18)"/>`;
+    }
+  });
+
+  // Engine glow at the back (left side of ship)
+  const cy = (H / 2) * PX;
+  content += `<ellipse cx="0" cy="${cy}" rx="${PX * 3.2}" ry="${PX * 2.6}" fill="${def.engine}" opacity="0.42"/>`;
+  content += `<ellipse cx="0" cy="${cy}" rx="${PX * 1.6}" ry="${PX * 1.3}" fill="${shadeHex(def.engine, 0.4)}" opacity="0.55"/>`;
+
+  const svgW = W * PX, svgH = H * PX;
+  // Display scale — bigger ships render at a slightly smaller scale so they fit
+  const scale = W > 32 ? 2.2 : (W > 26 ? 2.5 : 2.8);
+  return `<svg viewBox="0 0 ${svgW} ${svgH}" width="${svgW * scale}" height="${svgH * scale}"
     xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block;">${content}</svg>`;
 }
 
@@ -3938,7 +4064,7 @@ function load() {
         return parsed;
       }
       // Wave 7-15: in-place migration.
-      if (oldVer >= 6 && oldVer <= 15) {
+      if (oldVer >= 6 && oldVer <= 17) {
         parsed.version = SAVE_VERSION;
         if (typeof parsed.hull !== 'number') parsed.hull = 100;
         // Wave 15: auto-buy data is no longer used; remove it
