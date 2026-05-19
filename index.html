@@ -746,11 +746,11 @@
   .res-cat-pts {
     color: #fff; font-size: 13px; font-variant-numeric: tabular-nums;
   }
-  .res-bar {
+  .reso-bar {
     position: relative; height: 5px; background: rgba(5,8,16,0.6);
     border: 1px solid var(--border); overflow: hidden;
   }
-  .res-fill { height: 100%; transition: width 0.4s, background 0.4s; }
+  .reso-fill { height: 100%; transition: width 0.4s, background 0.4s; }
   .res-cat-effect {
     color: var(--text-dim); font-size: 11px; margin-top: 6px;
   }
@@ -1805,7 +1805,7 @@ function resonanceHTML() {
           </div>
           <span class="res-cat-pts">${pts} / 100</span>
         </div>
-        <div class="res-bar"><div class="res-fill" style="background:${cat.color};box-shadow:0 0 8px ${cat.color};width:${pct}%;"></div></div>
+        <div class="reso-bar"><div class="reso-fill" style="background:${cat.color};box-shadow:0 0 8px ${cat.color};width:${pct}%;"></div></div>
         <div class="res-cat-effect">${bonusText}</div>
         ${maxed ? `<div class="res-cat-mastery">★ Mastery: ${RES_MASTERY[cat.id]}</div>` : ''}
         <div class="res-cat-actions">
@@ -1833,7 +1833,7 @@ function resonanceHTML() {
           <strong>${totalPoints} / 500 · ${pctComplete}%</strong>
           ${meta.resonanceCompleted ? '<span style="color:var(--gold);letter-spacing:0.2em;">◆ TROPHY</span>' : ''}
         </div>
-        <div class="res-bar"><div class="res-fill" style="background:linear-gradient(90deg, #5ee2ff, #ffb347, #ffe88a, #a8b8cc, #ff4fa3);width:${pctComplete}%;"></div></div>
+        <div class="reso-bar"><div class="reso-fill" style="background:linear-gradient(90deg, #5ee2ff, #ffb347, #ffe88a, #a8b8cc, #ff4fa3);width:${pctComplete}%;"></div></div>
       </div>
       <div class="res-cats">${rows}</div>
       <p style="color:var(--text-dim);font-size:10px;line-height:1.6;margin:8px 0 0;">
