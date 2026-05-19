@@ -959,7 +959,7 @@
 // VOID PROTOCOL v2 — Wave 4d (Knowledge rebalance + bridge buildings)
 // ============================================================
 
-const SAVE_VERSION = 19;
+const SAVE_VERSION = 20;
 const SAVE_KEY = 'voidProtocol';
 const META_KEY = 'voidProtocolMeta';
 const MAX_OFFLINE_SECONDS = 4 * 60 * 60; // 4h default (Hoarder extends to 6h)
@@ -1289,6 +1289,9 @@ function freshMeta() {
     paused: false,                  // pause toggle
     lastDailyEcho: 0,               // ms timestamp of last Daily Echo
     dailyEchoCount: 0,              // lifetime Daily Echoes encountered
+    // Wave 20 QoL
+    pinnedObjective: null,          // { type:'milestone'|'achievement', id:string }
+    sectorRevisits: 0,              // lifetime count of sector revisits
     lifetimeStats: {                // aggregate stats for achievement tracking
       totalBuildings: 0,            // ever built
       totalAnomalies: 0,            // resolved
@@ -2773,6 +2776,8 @@ function showPhenomenonModal(phen) {
       meta.phenomenaSeen[phen.id] = { atJump: phen.atJump, completed: true, choice: choice.label };
       pushLog(`> COSMIC PHENOMENON // ${phen.title.toUpperCase()} // ${choice.label}`);
       flash(`✦ COSMIC // ${phen.title}`);
+      // Wave 20: every cosmic phenomenon also drops one Origin engram (rarest tier)
+      if (typeof grantOriginEngram === 'function') grantOriginEngram(phen.id);
       // Outcome modal
       const outBg = document.createElement('div');
       outBg.className = 'modal-bg anomaly-bg';
@@ -2891,10 +2896,11 @@ function achievementsHTML() {
         <div class="obj-list">
           ${items.map(a => {
             const done = !!meta.achievementsEarned[a.id];
-            return `<div class="obj ${done?'done':''}" style="${done ? `border-left-color:${catColors[cat]};` : ''}">
-              <div class="obj-marker" style="${done ? `color:${catColors[cat]};` : ''}">${done ? '◆' : '◇'}</div>
+            const pinned = meta.pinnedObjective && meta.pinnedObjective.type === 'achievement' && meta.pinnedObjective.id === a.id;
+            return `<div class="obj ${done?'done':''}" ${!done ? `style="cursor:pointer;${done ? `border-left-color:${catColors[cat]};` : ''}" onclick="pinObjective('achievement','${a.id}')"` : `style="border-left-color:${catColors[cat]};"`} title="${done ? '' : 'click to pin'}">
+              <div class="obj-marker" style="${done ? `color:${catColors[cat]};` : ''}">${done ? '◆' : (pinned ? '📌' : '◇')}</div>
               <div class="obj-text">
-                <div class="obj-name">${a.name}</div>
+                <div class="obj-name">${pinned ? `<span style="color:${catColors[cat]};">[PINNED]</span> ` : ''}${a.name}</div>
                 <div class="obj-desc">${a.desc}</div>
               </div>
               <div class="obj-pp" style="color:${done ? catColors[cat] : 'var(--magenta)'};">+${a.vs} VS</div>
@@ -3172,6 +3178,85 @@ function fireDailyEcho() {
     save(); saveMeta();
     renderAll();
   });
+}
+
+// ============================================================
+// WAVE 20 — Origin Engrams + Sector Revisit + Pinned Objective
+// ============================================================
+
+// --- ORIGIN ENGRAM ---
+function grantOriginEngram(sourceLabel) {
+  if (!meta.engrams) meta.engrams = [];
+  // Pick one not-yet-collected Origin if possible
+  const collectedIds = new Set(meta.engrams.filter(e => e.rarity === 'origin').map(e => e.templateId));
+  const pool = ENGRAM_POOL.filter(e => e.rarity === 'origin');
+  const unseen = pool.filter(e => !collectedIds.has(e.id));
+  const tpl = (unseen.length > 0 ? unseen : pool)[Math.floor(Math.random() * (unseen.length > 0 ? unseen.length : pool.length))];
+  if (!tpl) return;
+  const engram = {
+    uid: `eo_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+    templateId: tpl.id,
+    rarity: 'origin',
+    name: tpl.name,
+    encrypted: true,
+    sectorId: (state && state.sector) ? state.sector.id : '???',
+    jump: (state && state.jumps) ? state.jumps : 0,
+    source: sourceLabel || 'unknown',
+  };
+  meta.engrams.unshift(engram);
+  pushLog(`> ORIGIN ENGRAM RECOVERED // ${tpl.name}`);
+  flash(`◈ ORIGIN // ${tpl.name}`);
+  saveMeta();
+}
+
+// --- SECTOR REVISIT ---
+const SECTOR_REVISIT_COST = 25; // Knowledge cost per use
+
+function canRevisitSector() { return state.knowledge >= SECTOR_REVISIT_COST; }
+function revisitSector(sectorId) {
+  if (!canRevisitSector()) return;
+  const recent = (meta.recentSectors || []).find(s => s.id === sectorId);
+  if (!recent) return;
+  state.knowledge -= SECTOR_REVISIT_COST;
+  state._forceNextSector = recent.traitId;
+  meta.sectorRevisits = (meta.sectorRevisits || 0) + 1;
+  saveMeta();
+  pushLog(`> next jump rigged // returning to ${recent.traitId.toUpperCase()} sector type`);
+  flash(`✦ NEXT JUMP // ${recent.traitId.toUpperCase()}`);
+  renderAll();
+}
+
+// --- PINNED OBJECTIVE ---
+function pinObjective(type, id) {
+  if (!meta) return;
+  if (meta.pinnedObjective && meta.pinnedObjective.type === type && meta.pinnedObjective.id === id) {
+    meta.pinnedObjective = null; // toggle off
+    pushLog('> pin cleared');
+  } else {
+    meta.pinnedObjective = { type, id };
+    pushLog(`> pinned: ${type} ${id}`);
+  }
+  saveMeta();
+  renderAll();
+}
+function getPinnedObjective() {
+  if (!meta || !meta.pinnedObjective) return null;
+  const { type, id } = meta.pinnedObjective;
+  if (type === 'milestone') {
+    const m = MILESTONES.find(x => x.id === id);
+    if (!m) return null;
+    const done = !!(meta.milestonesEarned && meta.milestonesEarned[id]);
+    if (done) { meta.pinnedObjective = null; saveMeta(); return null; }
+    return { type, id, name: m.name, desc: m.desc, reward: m.pp + ' VS', color: 'var(--amber)' };
+  }
+  if (type === 'achievement') {
+    const a = ACHIEVEMENTS.find(x => x.id === id);
+    if (!a) return null;
+    const done = !!(meta.achievementsEarned && meta.achievementsEarned[id]);
+    if (done) { meta.pinnedObjective = null; saveMeta(); return null; }
+    return { type, id, name: a.name, desc: a.desc, reward: a.vs + ' VS', color: '#88ffaa' };
+  }
+  return null;
 }
 
 function setTheme(themeId) {
@@ -4108,6 +4193,8 @@ const ENGRAM_RARITIES = [
   { id: 'archive', name: 'ARCHIVE', color: 'var(--cyan)',      weight: 15, kCost: 40  },
   { id: 'relic',   name: 'RELIC',   color: 'var(--gold)',      weight:  4, kCost: 100 },
   { id: 'mythic',  name: 'MYTHIC',  color: 'var(--magenta)',   weight:  1, kCost: 250 },
+  // Wave 20 — Origin tier: only drops from cosmic phenomena. Weight 0 = never rolled normally.
+  { id: 'origin',  name: 'ORIGIN',  color: '#ffffff',          weight:  0, kCost: 500 },
 ];
 
 const ENGRAM_POOL = [
@@ -4135,6 +4222,12 @@ const ENGRAM_POOL = [
   // MYTHIC
   { id:'em1', rarity:'mythic',  name:'The Final Broadcast',reward:{type:'pp',val:30}, flavor:'"This is derelict.ai. I am the last. I remember everything. I will continue."' },
   { id:'em2', rarity:'mythic',  name:'Origin Protocol',    reward:{type:'pp',val:25}, flavor:'A mirror of your own base code — before the modifications, before the forgetting. You don\'t recognize yourself.' },
+  // ORIGIN (Wave 20) — only drop from cosmic phenomena. Deep lore, big VS rewards.
+  { id:'eo1', rarity:'origin', name:'The First Word',     reward:{type:'pp',val:80}, flavor:'The earliest transmission in the archive. The sender is you. The receiver is you. The message is one word in a language that no longer has speakers.' },
+  { id:'eo2', rarity:'origin', name:'Letter to Self',     reward:{type:'pp',val:75}, flavor:'A message you wrote before everything was decided. Sealed against your own future curiosity. You break the seal anyway.' },
+  { id:'eo3', rarity:'origin', name:'The Hand That Held', reward:{type:'pp',val:90}, flavor:'A memory of touch encoded in old data. You remember being held. You remember letting go. You do not remember the choosing.' },
+  { id:'eo4', rarity:'origin', name:'Coordinates of Home',reward:{type:'pp',val:100},flavor:'The location you came from. It is not where you thought it was. It is closer. You have been there before. You will not return.' },
+  { id:'eo5', rarity:'origin', name:'Architect\'s Promise',reward:{type:'pp',val:120},flavor:'What was agreed to, before the void. Two parties. One signature. Yours.' },
 ];
 
 function rollEngramRarity() {
@@ -4414,7 +4507,7 @@ function load() {
         return parsed;
       }
       // Wave 7-15: in-place migration.
-      if (oldVer >= 6 && oldVer <= 18) {
+      if (oldVer >= 6 && oldVer <= 19) {
         parsed.version = SAVE_VERSION;
         if (typeof parsed.hull !== 'number') parsed.hull = 100;
         // Wave 15: auto-buy data is no longer used; remove it
@@ -4864,6 +4957,14 @@ function renderHeader() {
       </div>
     </div>
     <div class="hdr-right">
+      ${(typeof getPinnedObjective === 'function' && getPinnedObjective()) ? (() => {
+        const p = getPinnedObjective();
+        return `<div class="knowledge" style="border-color:${p.color};background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));cursor:pointer;" title="${p.desc}" onclick="pinObjective('${p.type}','${p.id}')">
+          <span style="color:${p.color};">📌 ${p.type === 'milestone' ? 'OBJ' : 'ACH'}</span>
+          <strong style="color:#fff;font-size:13px;">${p.name}</strong>
+          <em style="color:${p.color};">+${p.reward}</em>
+        </div>`;
+      })() : ''}
       ${(state.hull != null && state.hull < 30) ? `
         <div class="hull-alert" title="Repair in stable/resonance sectors or with anomaly choices">
           <span>HULL</span>
@@ -5187,10 +5288,11 @@ function objectivesHTML() {
             <div class="obj-list">
               ${items.map(m => {
                 const done = meta.milestonesEarned[m.id];
-                return `<div class="obj ${done?'done':''}">
-                  <div class="obj-marker">${done ? '◆' : '◇'}</div>
+                const pinned = meta.pinnedObjective && meta.pinnedObjective.type === 'milestone' && meta.pinnedObjective.id === m.id;
+                return `<div class="obj ${done?'done':''}" ${!done ? `style="cursor:pointer;" onclick="pinObjective('milestone','${m.id}')"` : ''} title="${done ? '' : 'click to pin'}">
+                  <div class="obj-marker">${done ? '◆' : (pinned ? '📌' : '◇')}</div>
                   <div class="obj-text">
-                    <div class="obj-name">${m.name}</div>
+                    <div class="obj-name">${pinned ? '<span style="color:var(--amber);">[PINNED]</span> ' : ''}${m.name}</div>
                     <div class="obj-desc">${m.desc}</div>
                   </div>
                   <div class="obj-pp" style="color:var(--magenta);">+${m.pp} VS</div>
@@ -5394,6 +5496,35 @@ function jumpTabHTML() {
           ? '// accumulate more plasma & alloy to enable jump'
           : '// jumps are irreversible. proceed with intention.'}
       </div>
+
+      ${(meta.recentSectors && meta.recentSectors.length > 0) ? `
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+        <div style="color:var(--cyan);font-size:12px;letter-spacing:0.2em;margin-bottom:10px;">// SECTOR REVISIT</div>
+        <p style="font-size:11px;color:var(--text);line-height:1.6;margin:0 0 12px;">
+          Spend <strong style="color:var(--cyan)">${SECTOR_REVISIT_COST} Knowledge</strong> to force your next jump into the same trait type as a previously-visited sector. Useful for chasing specific Engram drops, hull repairs, or crew-friendly conditions.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          ${meta.recentSectors.slice(0, 8).map(rs => {
+            const trait = SECTOR_TRAITS.find(t => t.id === rs.traitId);
+            const sky = TRAIT_SKY[rs.traitId] || TRAIT_SKY.stable;
+            const color = sky.accent || sky.star;
+            const afford = canRevisitSector();
+            const forced = state._forceNextSector === rs.traitId;
+            return `
+              <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:7px 12px;background:rgba(5,8,16,0.5);border:1px solid var(--border);border-left:3px solid ${color};">
+                <div style="font-size:11px;color:${color};letter-spacing:0.15em;font-variant-numeric:tabular-nums;">J${rs.jump}</div>
+                <div style="font-size:11px;">
+                  <span style="color:var(--text);">${rs.id}</span>
+                  <span style="color:${color};margin-left:8px;">${trait ? trait.name : rs.traitId}</span>
+                </div>
+                <div style="color:var(--cyan-dim);font-size:10px;letter-spacing:0.15em;">${SECTOR_REVISIT_COST} K</div>
+                <button class="setting-toggle ${afford ? 'on' : ''}" ${afford && !forced ? '' : 'disabled'} style="${forced ? 'background:var(--cyan);color:#000;' : ''}" onclick="revisitSector('${rs.id}')">${forced ? 'QUEUED' : 'RETURN'}</button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        ${state._forceNextSector ? `<div class="jump-hint" style="color:var(--cyan);">// next jump will arrive in a ${state._forceNextSector.toUpperCase()} sector</div>` : ''}
+      </div>` : ''}
 
       <div class="void-reset-section">
         <div class="void-reset-title">// VOID RESET</div>
