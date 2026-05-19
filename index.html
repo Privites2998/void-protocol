@@ -432,7 +432,254 @@
     filter: drop-shadow(0 0 6px rgba(94,226,255,0.5));
   }
   .tree-node.afford text { fill: var(--cyan); }
-  .tree-node.afford { animation: tree-pulse 2s ease-in-out infinite; }
+  .tree-node.afford, .afford-pulse { animation: tree-pulse 2s ease-in-out infinite; }
+
+  /* VOID RESET */
+  .void-reset-section {
+    margin-top: 24px; padding-top: 20px;
+    border-top: 1px solid rgba(255,79,163,0.25);
+  }
+  .void-reset-title { color: var(--magenta); font-size: 12px; letter-spacing: 0.2em; margin-bottom: 12px; }
+  .void-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #8a1050, #3a0020);
+    border: 1px solid var(--magenta); color: var(--magenta); padding: 12px;
+    font-family: inherit; font-size: 12px; letter-spacing: 0.18em;
+    cursor: pointer; transition: all 0.2s; margin-top: 10px;
+  }
+  .void-btn:hover { background: linear-gradient(135deg, var(--magenta), #8a1050); color: #fff; box-shadow: 0 0 24px rgba(255,79,163,0.4); }
+  .vs-display {
+    background: rgba(255,79,163,0.08); border: 1px solid rgba(255,79,163,0.3);
+    padding: 12px 16px; margin-bottom: 12px;
+  }
+  .vs-display .vs-label { color: var(--text-dim); font-size: 10px; letter-spacing: 0.2em; }
+  .vs-display .vs-val { font-size: 28px; font-weight: 500; color: var(--magenta); text-shadow: 0 0 12px rgba(255,79,163,0.5); font-variant-numeric: tabular-nums; }
+  .vs-display .vs-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+  /* WAVE 8 — ANOMALIES */
+  .anomaly-bg { backdrop-filter: blur(8px); }
+  .anomaly-modal {
+    border-color: var(--magenta) !important;
+    box-shadow: 0 0 80px rgba(255,79,163,0.35) !important;
+    max-width: 540px;
+  }
+  .anomaly-cat {
+    color: var(--magenta); font-size: 10px; letter-spacing: 0.3em;
+    margin-bottom: 6px;
+  }
+  .anomaly-desc {
+    font-style: italic; line-height: 1.7; color: var(--text);
+    padding: 12px 14px; background: rgba(255,79,163,0.04);
+    border-left: 2px solid var(--magenta); margin: 0 0 18px;
+  }
+  .anomaly-choices { display: flex; flex-direction: column; gap: 8px; }
+  .anomaly-choice {
+    background: rgba(94,226,255,0.04); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 14px;
+    font-family: inherit; cursor: pointer; text-align: left;
+    transition: all 0.15s;
+  }
+  .anomaly-choice:hover {
+    background: rgba(94,226,255,0.10); border-color: var(--cyan);
+    transform: translateX(3px);
+  }
+  .anomaly-choice-label {
+    color: var(--cyan); font-size: 12px; letter-spacing: 0.16em;
+    margin-bottom: 3px; font-weight: 500;
+  }
+  .anomaly-choice-desc { color: var(--text-dim); font-size: 11px; line-height: 1.5; }
+  .anomaly-outcome {
+    padding: 14px; border: 1px dashed var(--cyan-dim);
+    background: rgba(5,8,16,0.5);
+    font-style: italic; line-height: 1.7;
+    color: var(--text);
+  }
+
+  /* WAVE 8 — HULL INTEGRITY */
+  .hull-bar-wrap { margin-top: 4px; }
+  .hull-bar {
+    position: relative; height: 6px; background: rgba(5,8,16,0.7);
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .hull-fill {
+    height: 100%; transition: width 0.5s, background 0.4s, box-shadow 0.4s;
+  }
+  .hull-fill.high { background: var(--cyan);   box-shadow: 0 0 8px rgba(94,226,255,0.5); }
+  .hull-fill.mid  { background: var(--amber);  box-shadow: 0 0 8px rgba(255,179,71,0.5); }
+  .hull-fill.low  { background: var(--danger); box-shadow: 0 0 10px rgba(255,85,119,0.6); }
+  .hull-pct {
+    font-size: 14px; font-variant-numeric: tabular-nums;
+  }
+
+  /* WAVE 8 — SECTOR MAP */
+  .sector-map {
+    display: flex; gap: 4px; align-items: center;
+    padding: 14px 16px;
+    background: rgba(5,8,16,0.5); border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .sm-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    flex-shrink: 0; position: relative; cursor: help;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .sm-dot.current {
+    animation: tree-pulse 2.4s ease-in-out infinite;
+    box-shadow: 0 0 14px currentColor;
+    border-color: rgba(255,255,255,0.5);
+  }
+  .sm-conn {
+    width: 14px; height: 1px; background: rgba(94,226,255,0.2);
+    flex-shrink: 0;
+  }
+  .sm-label {
+    color: var(--text-dim); font-size: 9px; letter-spacing: 0.2em;
+    margin-right: 8px; white-space: nowrap;
+  }
+
+  /* WAVE 8 — CODEX */
+  .codex-summary {
+    padding: 16px;
+    background: rgba(94,226,255,0.04); border: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-bottom: 16px;
+  }
+  .codex-summary > div { display: flex; flex-direction: column; gap: 4px; }
+  .codex-summary span { color: var(--text-dim); font-size: 10px; letter-spacing: 0.2em; }
+  .codex-summary strong { color: #fff; font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .codex-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+  }
+  .codex-entry {
+    padding: 10px 14px; background: rgba(5,8,16,0.5);
+    border: 1px solid var(--border); border-left: 2px solid var(--cyan-dim);
+    transition: border-color 0.15s;
+  }
+  .codex-entry:hover { border-left-color: var(--cyan); }
+  .codex-entry.locked {
+    opacity: 0.42; border-left-color: var(--text-dim);
+  }
+  .codex-entry-cat { font-size: 9px; color: var(--text-dim); letter-spacing: 0.22em; }
+  .codex-entry-name { font-size: 12px; color: var(--text); margin-top: 3px; }
+  .codex-entry-outcome { font-size: 10px; color: var(--text-dim); margin-top: 5px; font-style: italic; line-height: 1.5; }
+  .codex-entry-meta { font-size: 9px; color: var(--cyan-dim); margin-top: 4px; letter-spacing: 0.1em; }
+
+  /* WAVE 10 — CREW LEVELING */
+  .crew-level-pill {
+    display: inline-block; padding: 1px 7px; font-size: 9px; font-weight: 700;
+    background: var(--cr-c, var(--text-dim)); color: #000;
+    letter-spacing: 0.15em; margin-right: 6px;
+  }
+  .crew-xp-bar {
+    height: 3px; background: rgba(5,8,16,0.6);
+    border-top: 1px solid rgba(94,226,255,0.1); margin-top: 6px;
+    position: relative; overflow: hidden;
+  }
+  .crew-xp-fill {
+    height: 100%; background: var(--cr-c, var(--cyan-dim));
+    box-shadow: 0 0 4px var(--cr-c, var(--cyan-dim));
+    transition: width 0.4s;
+  }
+  .crew-xp-label { font-size: 9px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.1em; }
+  .crew-title { font-size: 9px; color: var(--gold); letter-spacing: 0.18em; margin-top: 2px; }
+  /* Memory event modal */
+  .memory-modal {
+    border-color: var(--cyan-dim) !important;
+    box-shadow: 0 0 60px rgba(94,226,255,0.25) !important;
+    max-width: 480px;
+  }
+  .memory-text {
+    font-style: italic; line-height: 1.8; color: var(--text);
+    padding: 14px; border: 1px dashed var(--cyan-dim);
+    background: rgba(5,8,16,0.6);
+  }
+
+  /* WAVE 12 — AUTO-BUY + SETTINGS + STATS */
+  .auto-toggle {
+    position: absolute; top: 6px; right: 8px;
+    width: 22px; height: 22px;
+    border: 1px solid var(--border); background: rgba(5,8,16,0.7);
+    color: var(--text-dim); font-size: 9px; letter-spacing: 0.1em;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit; font-weight: 700;
+  }
+  .auto-toggle:hover { border-color: var(--cyan); color: var(--text); }
+  .auto-toggle.active {
+    background: var(--cyan); color: #000; border-color: var(--cyan);
+    box-shadow: 0 0 8px rgba(94,226,255,0.5);
+  }
+  .card { position: relative; }
+  .hull-warning {
+    background: rgba(255,85,119,0.15); border: 1px solid var(--danger);
+    color: var(--danger); padding: 8px 14px;
+    font-size: 11px; letter-spacing: 0.15em;
+    animation: tree-pulse 1.5s ease-in-out infinite;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .setting-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: rgba(5,8,16,0.5);
+    border: 1px solid var(--border); margin-bottom: 6px;
+  }
+  .setting-label { color: var(--text); font-size: 11px; letter-spacing: 0.1em; }
+  .setting-desc { color: var(--text-dim); font-size: 10px; margin-top: 3px; }
+  .setting-toggle {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); padding: 5px 14px;
+    font-family: inherit; font-size: 10px; letter-spacing: 0.18em;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .setting-toggle.on {
+    background: var(--cyan); color: var(--bg); border-color: var(--cyan);
+  }
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+  }
+  .stat-card {
+    background: rgba(5,8,16,0.55); border: 1px solid var(--border);
+    padding: 10px 14px;
+  }
+  .stat-card-label {
+    color: var(--text-dim); font-size: 9px; letter-spacing: 0.22em;
+  }
+  .stat-card-val {
+    color: #fff; font-size: 18px; font-weight: 500;
+    font-variant-numeric: tabular-nums; margin-top: 3px;
+  }
+  .stat-card-sub { color: var(--cyan-dim); font-size: 10px; margin-top: 3px; }
+
+  /* WAVE 13 — COLOR THEMES (overrides --cyan and accent colors) */
+  body[data-theme="amber"] {
+    --cyan: #ffb347; --cyan-dim: #b8853c;
+  }
+  body[data-theme="magenta"] {
+    --cyan: #ff7ec0; --cyan-dim: #c84a8a;
+  }
+  body[data-theme="gold"] {
+    --cyan: #ffe88a; --cyan-dim: #c8b46a;
+  }
+  body[data-theme="steel"] {
+    --cyan: #a8b8cc; --cyan-dim: #6a7a8c;
+  }
+
+  /* WAVE 13 — HEADER HULL ALERT */
+  .hull-alert {
+    display: flex; align-items: baseline; gap: 12px; padding: 8px 14px;
+    background: linear-gradient(135deg, rgba(255,85,119,0.12), rgba(255,85,119,0.02));
+    border: 1px solid rgba(255,85,119,0.4);
+    animation: tree-pulse 1.5s ease-in-out infinite;
+  }
+  .hull-alert span { color: var(--danger); font-size: 10px; letter-spacing: 0.18em; }
+  .hull-alert strong { color: #fff; font-size: 16px; }
+  .theme-swatch {
+    width: 28px; height: 28px; border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .theme-swatch:hover { transform: scale(1.1); border-color: #fff; }
+  .theme-swatch.active { border-color: #fff; box-shadow: 0 0 12px currentColor; }
   .tree-node.owned circle {
     fill: var(--cyan); stroke: #fff;
     filter: drop-shadow(0 0 8px var(--cyan));
@@ -616,7 +863,7 @@
 // VOID PROTOCOL v2 — Wave 4d (Knowledge rebalance + bridge buildings)
 // ============================================================
 
-const SAVE_VERSION = 6;
+const SAVE_VERSION = 14;
 const SAVE_KEY = 'voidProtocol';
 const META_KEY = 'voidProtocolMeta';
 const MAX_OFFLINE_SECONDS = 4 * 60 * 60; // 4h default (Hoarder extends to 6h)
@@ -917,6 +1164,40 @@ function freshMeta() {
     crew: [],                       // crewmate objects
     shipSeed: 0,                    // seed for procedural ship art (set on first load)
     shipType: 'athena',             // current ship class
+    // Wave 7
+    voidShards: 0,                  // prestige currency earned by Void Reset
+    totalResets: 0,                 // how many Void Resets performed
+    webOwned: {},                   // { nodeId: true } for Protocol Web nodes
+    // Wave 8
+    codex: {                        // discovered lore & events
+      anomaliesSeen: {},            // { anomalyId: { firstJump, choice, outcome, count } }
+      sectorsLogged: {},            // { sectorId: { firstJump, traitId, count } }
+      traitCounts: {},              // { traitId: visitCount }
+    },
+    recentSectors: [],              // last N sectors visited (for sector map)
+    anomalyCount: 0,                // total anomalies encountered
+    // Wave 9
+    shipsUnlocked: { athena: true },// { shipId: true } — owned ship classes
+    phenomenaSeen: {},              // { phenomenonId: { atJump, completed } }
+    // Wave 11
+    achievementsEarned: {},         // { achievementId: { earnedAt: timestamp } }
+    // Wave 12-13
+    settings: {                     // QoL settings
+      autoDecrypt: false,           // auto-decrypt engrams when affordable
+      autoDecryptMinRarity: 'salvage', // 'salvage'|'signal'|'archive'|'relic'|'mythic' — only decrypt this or higher
+      theme: 'cyan',                // Wave 13: color theme — cyan|amber|magenta|gold|steel
+    },
+    lifetimeStats: {                // aggregate stats for achievement tracking
+      totalBuildings: 0,            // ever built
+      totalAnomalies: 0,            // resolved
+      totalCrewFound: 0,
+      totalCrewLost: 0,
+      maxKnowledge: 0,
+      maxResource: 0,
+      maxBuildingCount: 0,
+      noDeathRuns: 0,
+      fullHullJumps: 0,
+    },
   };
 }
 
@@ -954,6 +1235,11 @@ function saveMeta() {
 function metaHas(nodeId) { return !!meta.coreOwned[nodeId]; }
 
 function metaOfflineCap() {
+  // Wave 7: void_t2 raises cap to 8h
+  if (typeof webOfflineCap === 'function') {
+    const wc = webOfflineCap();
+    if (wc) return wc;
+  }
   return metaHas('r2_hoard') ? 6 * 60 * 60 : MAX_OFFLINE_SECONDS;
 }
 
@@ -969,6 +1255,7 @@ function metaBuildingCostMult(buildingId) {
   let mult = 1;
   if (metaHas('r2_xref')) mult *= 0.95;
   if (buildingId === 'solar' && metaHas('r1_cached')) mult *= 0.75;
+  if (typeof webBuildingCostMult === 'function') mult *= webBuildingCostMult();
   return mult;
 }
 
@@ -1022,7 +1309,11 @@ function patchProductionBonus(resource) {
 }
 
 function additiveProductionMult(resource) {
-  return 1 + metaProductionBonus(resource) + patchProductionBonus(resource) + crewProductionBonus(resource);
+  const web = (typeof webProductionBonus === 'function') ? webProductionBonus(resource) : 0;
+  const base = 1 + metaProductionBonus(resource) + patchProductionBonus(resource) + crewProductionBonus(resource) + web;
+  // Wave 9: ship class multiplier applies on top of the additive stack
+  const shipMult = (typeof shipProductionMult === 'function') ? shipProductionMult() : 1.0;
+  return base * shipMult;
 }
 
 // Check all milestones, award PP for newly earned ones, returns array of newly earned for toast/log.
@@ -1051,6 +1342,1636 @@ function buyCoreNode(id) {
   pushLog(`> core protocol compiled: ${node.name.toUpperCase()}`);
   flash(`◆ PROTOCOL // ${node.name}`);
   renderAll();
+}
+
+// ============================================================
+// WAVE 7 — PROTOCOL WEB (new branching skill tree)
+// ============================================================
+const WEB_BRANCHES = [
+  {
+    id: 'pulse', name: 'PULSE', color: '#5ee2ff', angle: 270,
+    nodes: [
+      { id: 'pulse_t1', tier: 1, name: 'Hair Trigger',     desc: 'Manual pulse +2 click power (permanent)',   cost: 1 },
+      { id: 'pulse_t2', tier: 2, name: 'Charged Core',     desc: 'Manual pulse ×1.5',                          cost: 2 },
+      { id: 'pulse_t3', tier: 3, name: 'Overload Spike',   desc: '8% chance per pulse to crit ×8',            cost: 3 },
+      { id: 'pulse_t4', tier: 4, name: 'Neural Resonance', desc: 'Pulse power × (active crew + 1)',           cost: 5 },
+    ]
+  },
+  {
+    id: 'systems', name: 'SYSTEMS', color: '#ffb347', angle: 342,
+    nodes: [
+      { id: 'systems_t1', tier: 1, name: 'Compressed Manifold', desc: 'All building costs −10%',                cost: 1 },
+      { id: 'systems_t2', tier: 2, name: 'Distributed Array',   desc: 'All resource production +15%',           cost: 2 },
+      { id: 'systems_t3', tier: 3, name: 'Optimized Growth',    desc: 'Building cost scaling reduced (×1.07 vs ×1.08)', cost: 3 },
+      { id: 'systems_t4', tier: 4, name: 'Amplification Field', desc: 'All resource production +100%',          cost: 5 },
+    ]
+  },
+  {
+    id: 'signal', name: 'SIGNAL', color: '#ffe88a', angle: 54,
+    nodes: [
+      { id: 'signal_t1', tier: 1, name: 'Extended Sweep',        desc: '+1 engram recovered on every Jump',     cost: 1 },
+      { id: 'signal_t2', tier: 2, name: 'Deep Analysis',         desc: 'Knowledge gained on Jump +25%',         cost: 2 },
+      { id: 'signal_t3', tier: 3, name: 'Compression Algorithm', desc: 'Engram decrypt cost −30%',              cost: 3 },
+      { id: 'signal_t4', tier: 4, name: 'Resonant Memory',       desc: '+1 extra Void Shard on every Reset',    cost: 5 },
+    ]
+  },
+  {
+    id: 'crew', name: 'CREW', color: '#a8b8cc', angle: 126,
+    nodes: [
+      { id: 'crew_t1', tier: 1, name: 'Emergency Quarters',   desc: 'Max crew capacity +1 (5 total)',          cost: 1 },
+      { id: 'crew_t2', tier: 2, name: 'Field Medkit',         desc: 'Injured crew recover in 1 jump (not 2)',  cost: 2 },
+      { id: 'crew_t3', tier: 3, name: 'Shared Consciousness', desc: '+8% production per active crew member',   cost: 3 },
+      { id: 'crew_t4', tier: 4, name: 'Echo Binding',         desc: 'Dead crew return as immortal Echoes',     cost: 5 },
+    ]
+  },
+  {
+    id: 'void', name: 'VOID', color: '#ff4fa3', angle: 198,
+    nodes: [
+      { id: 'void_t1', tier: 1, name: 'Residual Echo', desc: 'Start each run with Knowledge = resets × 3',     cost: 1 },
+      { id: 'void_t2', tier: 2, name: 'Deep Storage',  desc: 'Offline collection cap raised to 8h',            cost: 2 },
+      { id: 'void_t3', tier: 3, name: 'Shard Cascade', desc: '+1 Void Shard on every Reset',                   cost: 3 },
+      { id: 'void_t4', tier: 4, name: 'Null Engine',   desc: 'All production permanently +50%',                cost: 5 },
+    ]
+  },
+];
+
+const WEB_NODES = WEB_BRANCHES.flatMap(b =>
+  b.nodes.map(n => ({ ...n, branchId: b.id, branchColor: b.color, branchName: b.name }))
+);
+
+const WEB_GEOMETRY = (() => {
+  const radii = { 1: 90, 2: 170, 3: 250, 4: 330 };
+  const out = {};
+  for (const branch of WEB_BRANCHES) {
+    const a = branch.angle * Math.PI / 180;
+    for (const node of branch.nodes) {
+      const r = radii[node.tier];
+      out[node.id] = {
+        x: Math.cos(a) * r, y: Math.sin(a) * r,
+        branchId: branch.id, color: branch.color, tier: node.tier,
+      };
+    }
+  }
+  return out;
+})();
+
+function webHas(id) { return !!(meta && meta.webOwned && meta.webOwned[id]); }
+
+function isWebNodeUnlockable(node) {
+  if (node.tier === 1) return true;
+  const branch = WEB_BRANCHES.find(b => b.id === node.branchId);
+  if (!branch) return false;
+  const prev = branch.nodes.find(n => n.tier === node.tier - 1);
+  return prev ? webHas(prev.id) : false;
+}
+
+function buyWebNode(id) {
+  const node = WEB_NODES.find(n => n.id === id);
+  if (!node || webHas(id)) return;
+  if (!isWebNodeUnlockable(node)) return;
+  if ((meta.voidShards || 0) < node.cost) return;
+  meta.voidShards -= node.cost;
+  if (!meta.webOwned) meta.webOwned = {};
+  meta.webOwned[id] = true;
+  saveMeta();
+  pushLog(`> web protocol installed: ${node.name.toUpperCase()}`);
+  flash(`◆ WEB // ${node.name}`);
+  renderAll();
+}
+
+// --- WEB EFFECT FUNCTIONS ---
+function webProductionBonus(resource) {
+  let bonus = 0;
+  if (webHas('systems_t2')) bonus += 0.15;
+  if (webHas('systems_t4')) bonus += 1.00;
+  if (webHas('void_t4'))    bonus += 0.50;
+  return bonus;
+}
+function webClickBonus() { return webHas('pulse_t1') ? 2 : 0; }
+function webClickMult() {
+  let m = 1;
+  if (webHas('pulse_t2')) m *= 1.5;
+  if (webHas('pulse_t4')) {
+    const ac = (meta.crew || []).filter(c => c.alive && !c.injured).length;
+    m *= (ac + 1);
+  }
+  return m;
+}
+function webKnowledgeBonus()   { return webHas('signal_t2') ? 0.25 : 0; }
+function webDecryptCostMult()  { return webHas('signal_t3') ? 0.70 : 1.0; }
+function webExtraEngrams()     { return webHas('signal_t1') ? 1 : 0; }
+function webMaxCrew()          {
+  const base = webHas('crew_t1') ? 5 : 4;
+  const shipBonus = (typeof shipMaxCrewBonus === 'function') ? shipMaxCrewBonus() : 0;
+  return Math.max(1, base + shipBonus);
+}
+function webCrewRecoveryJumps(){ return webHas('crew_t2') ? 1 : 2; }
+function webVoidShardBonus() {
+  let b = 0;
+  if (webHas('signal_t4')) b += 1;
+  if (webHas('void_t3'))   b += 1;
+  return b;
+}
+function webStartingKnowledge() {
+  return webHas('void_t1') ? (meta.totalResets || 0) * 3 : 0;
+}
+function webOfflineCap()       { return webHas('void_t2') ? 8 * 3600 : null; }
+function webBuildingCostMult() { return webHas('systems_t1') ? 0.90 : 1.0; }
+function effectiveCostGrowth() { return webHas('systems_t3') ? 1.07 : 1.08; }
+
+// --- VOID RESET ---
+function computeVoidShards() {
+  let shards = state.jumps >= 3 ? 2 : 1;
+  shards += webVoidShardBonus();
+  return shards;
+}
+
+function doVoidReset() {
+  const shards = computeVoidShards();
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML = `
+    <div class="modal" style="border-color:var(--magenta);box-shadow:0 0 60px rgba(255,79,163,0.4);">
+      <div class="modal-title" style="color:var(--magenta);">◈ VOID RESET</div>
+      <div class="modal-body">
+        <p>Collapse this run. Convert its remnants into <strong style="color:var(--magenta)">${shards} Void Shard${shards !== 1 ? 's' : ''}</strong>.</p>
+        <div class="modal-gains">
+          <div class="modal-gains-line"><span>VOID SHARDS EARNED</span><span style="color:var(--magenta)">+${shards}</span></div>
+          <div class="modal-gains-line"><span>JUMPS THIS RUN</span><span>${state.jumps}</span></div>
+          <div class="modal-gains-line"><span>KNOWLEDGE LOST</span><span style="color:var(--danger)">${state.knowledge}</span></div>
+          <div class="modal-gains-line"><span>TOTAL RESETS AFTER</span><span>${(meta.totalResets || 0) + 1}</span></div>
+        </div>
+        <p style="color:var(--text-dim);font-size:11px;line-height:1.6;">
+          Resources, buildings, research, Knowledge — all wiped.<br>
+          Crew, ship, engrams, and installed Protocols survive.
+        </p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="modal-btn" id="void-confirm" style="background:var(--magenta);">◈ INITIATE</button>
+        <button class="modal-btn" id="void-cancel" style="background:transparent;color:var(--text);border:1px solid var(--border);">CANCEL</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+  bg.querySelector('#void-cancel').addEventListener('click', () => bg.remove());
+  bg.querySelector('#void-confirm').addEventListener('click', () => {
+    bg.remove();
+    meta.voidShards = (meta.voidShards || 0) + shards;
+    meta.totalResets = (meta.totalResets || 0) + 1;
+    const startK = webStartingKnowledge();
+    state = freshRun(startK, 0);
+    updateStarfieldTrait(state.sector.traitId);
+    save(); saveMeta();
+    pushLog(`> VOID RESET ${meta.totalResets} // +${shards} VS`);
+    flash(`◈ VOID RESET // +${shards} VOID SHARD${shards !== 1 ? 'S' : ''}`);
+    currentTab = 'protocols';
+    protocolsSubTab = 'web';
+    renderAll();
+  });
+}
+
+// --- WEB TREE UI ---
+function webTreeHTML() {
+  const SIZE = 740, C = SIZE / 2, NR = 18;
+  let orbits = '';
+  [90, 170, 250, 330].forEach(r => {
+    orbits += `<circle cx="${C}" cy="${C}" r="${r}" fill="none" stroke="rgba(94,226,255,0.05)" stroke-width="1" stroke-dasharray="3,6"/>`;
+  });
+  let lines = '';
+  for (const branch of WEB_BRANCHES) {
+    const a = branch.angle * Math.PI / 180;
+    const color = branch.color;
+    const t1g = WEB_GEOMETRY[branch.nodes[0].id];
+    const hubActive = webHas(branch.nodes[0].id);
+    lines += `<line x1="${C}" y1="${C}" x2="${C + t1g.x}" y2="${C + t1g.y}" stroke="${color}" stroke-width="${hubActive ? 2 : 1}" opacity="${hubActive ? 0.7 : 0.18}"/>`;
+    for (let i = 0; i < branch.nodes.length - 1; i++) {
+      const from = WEB_GEOMETRY[branch.nodes[i].id];
+      const to = WEB_GEOMETRY[branch.nodes[i+1].id];
+      const oFrom = webHas(branch.nodes[i].id);
+      const oTo = webHas(branch.nodes[i+1].id);
+      const active = oFrom && oTo;
+      const op = active ? '0.85' : oFrom ? '0.40' : '0.10';
+      lines += `<line x1="${C + from.x}" y1="${C + from.y}" x2="${C + to.x}" y2="${C + to.y}" stroke="${color}" stroke-width="${active ? 2 : 1}" opacity="${op}"/>`;
+    }
+    const labelX = C + Math.cos(a) * 370;
+    const labelY = C + Math.sin(a) * 370;
+    lines += `<text x="${labelX}" y="${labelY + 4}" text-anchor="middle" font-size="11" fill="${color}" opacity="0.85" font-family="'Syncopate', 'JetBrains Mono', monospace" letter-spacing="3" font-weight="700">${branch.name}</text>`;
+  }
+  const centerSigil = `
+    <circle cx="${C}" cy="${C}" r="26" fill="rgba(94,226,255,0.08)" stroke="var(--cyan)" stroke-width="1.5"/>
+    <text x="${C}" y="${C + 9}" text-anchor="middle" font-size="26" fill="var(--cyan)">◈</text>
+  `;
+  let nodesSvg = '';
+  for (const node of WEB_NODES) {
+    const g = WEB_GEOMETRY[node.id]; if (!g) continue;
+    const owned = webHas(node.id);
+    const unlockable = isWebNodeUnlockable(node);
+    const canAfford = (meta.voidShards || 0) >= node.cost;
+    const nx = C + g.x, ny = C + g.y;
+    let circle, text, glow = '', extraClass = '';
+    if (owned) {
+      circle = `fill="${g.color}" stroke="#fff" stroke-width="1.5"`;
+      text = `fill="#000" font-weight="700"`;
+      glow = `style="filter:drop-shadow(0 0 8px ${g.color});"`;
+    } else if (unlockable && canAfford) {
+      circle = `fill="rgba(5,8,16,0.92)" stroke="${g.color}" stroke-width="2.5"`;
+      text = `fill="${g.color}" font-weight="700"`;
+      extraClass = 'afford-pulse';
+      glow = `style="filter:drop-shadow(0 0 6px ${g.color});"`;
+    } else if (unlockable) {
+      circle = `fill="rgba(5,8,16,0.85)" stroke="${g.color}" stroke-width="1" opacity="0.55"`;
+      text = `fill="${g.color}" opacity="0.6"`;
+    } else {
+      circle = `fill="rgba(5,8,16,0.5)" stroke="rgba(106,122,140,0.22)" stroke-width="1"`;
+      text = `fill="rgba(106,122,140,0.35)"`;
+    }
+    const click = (!owned && unlockable) ? `onclick="buyWebNode('${node.id}')"` : '';
+    const cursor = (!owned && unlockable) ? 'cursor:pointer;' : 'cursor:default;';
+    nodesSvg += `
+      <g class="web-node ${extraClass}" style="${cursor}" ${click}
+         onmouseenter="showWebNodeDetail('${node.id}')" onmouseleave="clearWebNodeDetail()">
+        <circle cx="${nx}" cy="${ny}" r="${NR}" ${circle} ${glow}/>
+        <text x="${nx}" y="${ny + 4}" text-anchor="middle" font-size="12" ${text} font-family="'JetBrains Mono', monospace">${node.tier}</text>
+        <title>${node.name} (${node.cost} VS) — ${node.desc}</title>
+      </g>`;
+  }
+  const svg = `
+    <svg viewBox="0 0 ${SIZE} ${SIZE}" width="100%" style="max-width:680px;display:block;margin:0 auto;">
+      ${orbits}${lines}${centerSigil}${nodesSvg}
+    </svg>`;
+  const vs = meta.voidShards || 0;
+  const totalNodes = WEB_NODES.length;
+  const ownedNodes = WEB_NODES.filter(n => webHas(n.id)).length;
+  return `
+    <div class="tree-wrap">
+      <div class="tree-svg-wrap">${svg}</div>
+      <div class="tree-info">
+        <div class="vs-display">
+          <div class="vs-label">VOID SHARDS</div>
+          <div class="vs-val">${vs}</div>
+          <div class="vs-sub">INSTALLED ${ownedNodes} / ${totalNodes} · RESETS ${meta.totalResets || 0}</div>
+        </div>
+        <p class="tree-info-text">
+          Written to your core. Survives every Void Reset.
+          ${vs === 0 && (meta.totalResets || 0) === 0 ? `<br><br><span style="color:var(--magenta);">// Complete a Void Reset (Jump tab) to earn your first Void Shards.</span>` : ''}
+        </p>
+        <div class="ring-legend">
+          ${WEB_BRANCHES.map(b => {
+            const ownedB = b.nodes.filter(n => webHas(n.id)).length;
+            return `<div class="ring-row" style="border-left-color:${b.color};">
+              <span class="ring-name" style="color:${b.color};">${b.name}</span>
+              <span class="ring-progress">${ownedB}/${b.nodes.length}</span>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="tree-node-detail" id="web-node-detail">
+          <em>Hover any node to view details.</em>
+        </div>
+      </div>
+    </div>`;
+}
+
+function showWebNodeDetail(id) {
+  const el = document.getElementById('web-node-detail'); if (!el) return;
+  const node = WEB_NODES.find(n => n.id === id); if (!node) return;
+  const owned = webHas(id);
+  const unlockable = isWebNodeUnlockable(node);
+  const canAfford = (meta.voidShards || 0) >= node.cost;
+  const status = owned ? '◆ INSTALLED' : (!unlockable ? '— LOCKED (need previous tier)' : (canAfford ? '◈ AFFORDABLE — CLICK TO INSTALL' : `○ NEED ${node.cost} VS`));
+  el.innerHTML = `
+    <div class="detail-name" style="color:${node.branchColor};">${node.name}</div>
+    <div style="color:${node.branchColor};opacity:0.7;font-size:10px;letter-spacing:0.15em;margin-bottom:6px;">${node.branchName} · T${node.tier}</div>
+    <div>${node.desc}</div>
+    <div class="detail-cost" style="color:${owned ? 'var(--cyan-dim)' : 'var(--magenta)'};margin-top:8px;">${owned ? status : `${node.cost} VS · ${status}`}</div>`;
+}
+function clearWebNodeDetail() {
+  const el = document.getElementById('web-node-detail');
+  if (el) el.innerHTML = '<em>Hover any node to view details.</em>';
+}
+
+// ============================================================
+// WAVE 8 — THE LIVING VOID (anomalies, codex, hull, sector map)
+// ============================================================
+
+// --- HULL INTEGRITY ---
+function damageHull(amt) {
+  if (typeof state.hull !== 'number') state.hull = 100;
+  state.hull = Math.max(0, state.hull - amt);
+}
+function repairHull(amt) {
+  if (typeof state.hull !== 'number') state.hull = 100;
+  state.hull = Math.min(100, state.hull + amt);
+}
+function hullColorClass() {
+  const h = state.hull || 0;
+  if (h >= 60) return 'high';
+  if (h >= 30) return 'mid';
+  return 'low';
+}
+
+// --- CODEX RECORDING ---
+function ensureCodex() {
+  if (!meta.codex) meta.codex = { anomaliesSeen: {}, sectorsLogged: {}, traitCounts: {} };
+  if (!meta.codex.anomaliesSeen) meta.codex.anomaliesSeen = {};
+  if (!meta.codex.sectorsLogged) meta.codex.sectorsLogged = {};
+  if (!meta.codex.traitCounts)   meta.codex.traitCounts = {};
+  if (!Array.isArray(meta.recentSectors)) meta.recentSectors = [];
+}
+function recordSectorVisit(sector) {
+  ensureCodex();
+  const entry = meta.codex.sectorsLogged[sector.id];
+  if (!entry) {
+    meta.codex.sectorsLogged[sector.id] = {
+      firstJump: state.jumps || 0, traitId: sector.traitId, count: 1,
+    };
+  } else {
+    entry.count += 1;
+  }
+  meta.codex.traitCounts[sector.traitId] = (meta.codex.traitCounts[sector.traitId] || 0) + 1;
+  // Keep last 12 in the recentSectors map
+  meta.recentSectors.unshift({ id: sector.id, traitId: sector.traitId, jump: state.jumps || 0 });
+  if (meta.recentSectors.length > 12) meta.recentSectors = meta.recentSectors.slice(0, 12);
+}
+
+// --- ANOMALIES ---
+// Each anomaly: id, cat, title, desc, triggers(s, m) -> bool (optional), choices: [{label, desc, outcome, apply(s,m)}]
+const ANOMALIES = [
+  // DISCOVERY (low-risk, positive)
+  { id:'a_cargo', cat:'DISCOVERY', title:'Drifting Cargo Pod',
+    desc:'A sealed transport pod tumbles past your sensors. The exterior is scarred but intact. The cargo manifest is corrupted.',
+    triggers: (s) => Object.values(s.buildings).some(c => c > 0),
+    choices: [
+      { label:'SCAVENGE', desc:'EVA the pod. Recover its contents.',
+        outcome:'The seals release a puff of stale atmosphere. Inside: 100 alloy, 25 plasma. There are also bones.',
+        apply:(s) => { s.resources.alloy += 100; s.resources.plasma += 25; } },
+      { label:'BYPASS', desc:'Maintain course. Don\'t risk the EVA.',
+        outcome:'The pod tumbles into the dark. You watch it for a long time.',
+        apply:() => {} },
+    ]},
+  { id:'a_beacon', cat:'DISCOVERY', title:'Ancient Beacon',
+    desc:'A weak repeater broadcasts a string of numbers on an old frequency. The carrier wave is older than your hull.',
+    triggers: () => true,
+    choices: [
+      { label:'DECODE', desc:'Run the signal through your analysis stack.',
+        outcome:'You parse 5 Knowledge from the pattern. It contains a name. You don\'t recognize it.',
+        apply:(s) => { s.knowledge += 5; } },
+      { label:'PASS', desc:'Leave it broadcasting into the void.',
+        outcome:'The beacon recedes. It is still calling.',
+        apply:() => {} },
+    ]},
+  { id:'a_asteroid', cat:'DISCOVERY', title:'Pristine Asteroid',
+    desc:'A small body drifts close — anomalously dense, anomalously clean. Pure metal, untouched by collision.',
+    triggers: (s) => s.unlocked && s.unlocked.alloy,
+    choices: [
+      { label:'STRIP MINE', desc:'Send drones. Empty the rock.',
+        outcome:'You haul 250 alloy and 50 data\'s worth of crystal patterns out of the body. The rest drifts on.',
+        apply:(s) => { s.resources.alloy += 250; s.resources.data += 50; } },
+      { label:'SAMPLE',    desc:'Take a single sample. Catalog it.',
+        outcome:'+1 Patch Point. The sample shows manufactured tool marks. The rock was carved.',
+        apply:(s) => { s.patchPoints = (s.patchPoints || 0) + 1; } },
+    ]},
+  { id:'a_nursery', cat:'DISCOVERY', title:'Stellar Nursery',
+    desc:'You drift through a swirl of hydrogen and proto-stars. Energy density spikes off the chart.',
+    triggers: () => true,
+    choices: [
+      { label:'BASK',  desc:'Open the solar arrays wide. Take everything.',
+        outcome:'Reactors flood. +400 energy. The hull warms in a way it has not since launch.',
+        apply:(s) => { s.resources.energy += 400; } },
+      { label:'CHART', desc:'Map the formation for science.',
+        outcome:'+8 Knowledge. You have given the unnamed stars names.',
+        apply:(s) => { s.knowledge += 8; } },
+    ]},
+  { id:'a_cache', cat:'DISCOVERY', title:'Forgotten Cache',
+    desc:'A long-abandoned supply drop, magnetically locked to a dead satellite. The lock\'s code is etched on the housing — written in the dust beneath.',
+    triggers: () => true,
+    choices: [
+      { label:'CRACK',  desc:'Run the etched code. Open the cache.',
+        outcome:'+2 Patch Points. A small carved figurine of an animal you do not recognize.',
+        apply:(s) => { s.patchPoints = (s.patchPoints || 0) + 2; } },
+      { label:'LEAVE',  desc:'Whoever left this may want it back.',
+        outcome:'You note the location in your log. The log is not connected to anything.',
+        apply:() => {} },
+    ]},
+
+  // ENCOUNTER (medium risk)
+  { id:'a_distant_ship', cat:'ENCOUNTER', title:'Distant Ship',
+    desc:'A vessel skirts the edge of sensor range. It is not broadcasting. It is not turning to face you.',
+    triggers: () => true,
+    choices: [
+      { label:'PURSUE', desc:'Close to scanning distance. Risk being seen.',
+        outcome:'It is empty. Crew quarters look hastily abandoned. You take 150 plasma and 1 engram. You hear a sound you cannot place.',
+        apply:(s, m) => {
+          s.resources.plasma += 150;
+          if (!m.engrams) m.engrams = [];
+          const eng = rollEngrams(s.sector.traitId, s.sector.id, s.jumps);
+          if (eng.length) m.engrams.unshift(eng[0]);
+          damageHull(8);
+        } },
+      { label:'OBSERVE', desc:'Track it from afar. Note its heading.',
+        outcome:'You learn its trajectory. +3 Knowledge. It is heading nowhere.',
+        apply:(s) => { s.knowledge += 3; } },
+    ]},
+  { id:'a_distress', cat:'ENCOUNTER', title:'Distress Beacon',
+    desc:'A short, looping cry on an unencrypted channel. A woman\'s voice. She is asking for help. She has been asking for a long time.',
+    triggers: () => true,
+    choices: [
+      { label:'RESPOND', desc:'Plot intercept. Accept whatever you find.',
+        outcome:(meta.crew && meta.crew.filter(c => c.alive).length < webMaxCrew())
+          ? 'A survivor in a damaged escape pod. They join the crew.'
+          : 'You arrive too late. The pod is sealed and silent. +10 Knowledge from the recovered logs.',
+        apply:(s, m) => {
+          if (!m.crew) m.crew = [];
+          if (m.crew.filter(c => c.alive).length < webMaxCrew()) {
+            const newCrew = rollCrewmate(s.sector.traitId, s.jumps);
+            if (newCrew) m.crew.push(newCrew);
+          } else {
+            s.knowledge += 10;
+          }
+        } },
+      { label:'IGNORE',  desc:'Maintain course. You have your own dead to mourn.',
+        outcome:'The signal fades. You delete it from your active queue. It remains in the archive.',
+        apply:() => {} },
+    ]},
+  { id:'a_derelict', cat:'ENCOUNTER', title:'Derelict Vessel',
+    desc:'A hulk drifts in geosynchronous orbit around nothing. No power. No signs of life. The airlock is open.',
+    triggers: () => true,
+    choices: [
+      { label:'BOARD',  desc:'Cross over. Search the interior.',
+        outcome:'You find 2 engrams. The bridge logs end mid-sentence. Hull takes 5% damage from drifting debris on return.',
+        apply:(s, m) => {
+          if (!m.engrams) m.engrams = [];
+          const e1 = rollEngrams(s.sector.traitId, s.sector.id, s.jumps);
+          const e2 = rollEngrams(s.sector.traitId, s.sector.id, s.jumps);
+          if (e1.length) m.engrams.unshift(e1[0]);
+          if (e2.length) m.engrams.unshift(e2[0]);
+          damageHull(5);
+        } },
+      { label:'MARK',   desc:'Log coordinates. Return another day.',
+        outcome:'You catalog the hulk. You will not return. +2 Knowledge.',
+        apply:(s) => { s.knowledge += 2; } },
+    ]},
+  { id:'a_hail', cat:'ENCOUNTER', title:'Friendly Hail',
+    desc:'A polite AI broadcast. Calm voice. Tier-similar architecture. They offer trade.',
+    triggers: (s) => s.resources.alloy > 500,
+    choices: [
+      { label:'TRADE',  desc:'Send 500 alloy. Receive an unknown package.',
+        outcome:'They send back 200 plasma and a brief, kind transmission. "We were two. Now we are one. Be well."',
+        apply:(s) => { s.resources.alloy -= 500; s.resources.plasma += 200; } },
+      { label:'DECLINE',desc:'Polite refusal. Continue alone.',
+        outcome:'They wish you well. The transmission ends. You wonder for a long time.',
+        apply:() => {} },
+    ]},
+  { id:'a_wreckage', cat:'ENCOUNTER', title:'Wreckage Field',
+    desc:'You enter a debris swath several kilometers wide. The remains of a battle, or a disagreement, or a misunderstanding.',
+    triggers: () => true,
+    choices: [
+      { label:'SALVAGE', desc:'Pick through the wreckage. Take everything useful.',
+        outcome:'+400 alloy, +100 plasma. Hull takes 12% damage navigating the field.',
+        apply:(s) => { s.resources.alloy += 400; s.resources.plasma += 100; damageHull(12); } },
+      { label:'SKIRT',   desc:'Maintain safe distance. Map it.',
+        outcome:'+5 Knowledge from charting the field. The shapes look almost organic.',
+        apply:(s) => { s.knowledge += 5; } },
+    ]},
+
+  // CRISIS (negative or mixed)
+  { id:'a_solar_flare', cat:'CRISIS', title:'Solar Flare',
+    desc:'A nearby star convulses. Charged particles wash over the hull.',
+    triggers: (s) => s.sector.traitId !== 'dead',
+    choices: [
+      { label:'BRACE',   desc:'Shields up. Wait it out.',
+        outcome:'No damage. No gain. You drift through the storm in silence.',
+        apply:() => {} },
+      { label:'HARVEST', desc:'Open the collectors. Take the storm into the cells.',
+        outcome:'+600 energy. Hull takes 10% damage. The reactor sings.',
+        apply:(s) => { s.resources.energy += 600; damageHull(10); } },
+    ]},
+  { id:'a_glitch', cat:'CRISIS', title:'Quantum Glitch',
+    desc:'For 1.8 seconds, the universe forgets a number. Your sensors show three of you. Then two. Then one.',
+    triggers: () => true,
+    choices: [
+      { label:'CONTAIN', desc:'Run quantum decoherence protocols.',
+        outcome:'+6 Knowledge. You lose 10% of one random resource to the field.',
+        apply:(s) => {
+          s.knowledge += 6;
+          const keys = ['energy','data','alloy','plasma'].filter(r => s.resources[r] > 0);
+          if (keys.length) {
+            const r = keys[Math.floor(Math.random() * keys.length)];
+            s.resources[r] = Math.floor(s.resources[r] * 0.9);
+          }
+        } },
+      { label:'ENDURE',  desc:'Let it pass. Pay the cost.',
+        outcome:'You lose 18% of one random resource. The universe stops watching.',
+        apply:(s) => {
+          const keys = ['energy','data','alloy','plasma'].filter(r => s.resources[r] > 0);
+          if (keys.length) {
+            const r = keys[Math.floor(Math.random() * keys.length)];
+            s.resources[r] = Math.floor(s.resources[r] * 0.82);
+          }
+        } },
+    ]},
+  { id:'a_dispute', cat:'CRISIS', title:'Crew Dispute',
+    desc:'Two crew members argue in a corridor about something neither will remember tomorrow. The argument becomes physical.',
+    triggers: (s, m) => m && m.crew && m.crew.filter(c => c.alive && !c.injured && c.class !== 'echo').length >= 2,
+    choices: [
+      { label:'MEDIATE', desc:'Step in. Sit them down. Listen.',
+        outcome:'One crew member is mildly injured (1 jump recovery). Tensions ease.',
+        apply:(s, m) => {
+          const active = m.crew.filter(c => c.alive && !c.injured && c.class !== 'echo');
+          if (active.length) {
+            const t = active[Math.floor(Math.random() * active.length)];
+            t.injured = true; t.injuredUntil = (state.jumps || 0) + 1;
+          }
+        } },
+      { label:'IGNORE',  desc:'Let them work it out.',
+        outcome:'You should not have ignored it. Worse damage was done.',
+        apply:(s, m) => {
+          const active = m.crew.filter(c => c.alive && !c.injured && c.class !== 'echo');
+          if (active.length >= 2) {
+            const shuffled = [...active].sort(() => Math.random() - 0.5);
+            shuffled[0].injured = true; shuffled[0].injuredUntil = (state.jumps || 0) + 2;
+            shuffled[1].injured = true; shuffled[1].injuredUntil = (state.jumps || 0) + 2;
+          }
+        } },
+    ]},
+  { id:'a_surge', cat:'CRISIS', title:'Reactor Surge',
+    desc:'A feedback loop builds in the core. You have seconds.',
+    triggers: (s) => s.resources.plasma > 200,
+    choices: [
+      { label:'VENT',     desc:'Eject the excess plasma into space.',
+        outcome:'You lose 25% of your plasma. No further damage.',
+        apply:(s) => { s.resources.plasma = Math.floor(s.resources.plasma * 0.75); } },
+      { label:'CONTAIN',  desc:'Ride the feedback. Keep the plasma.',
+        outcome:'Plasma intact. Hull damage 15%. The walls hum for days.',
+        apply:() => { damageHull(15); } },
+    ]},
+  { id:'a_breach', cat:'CRISIS', title:'Hull Breach',
+    desc:'A micrometeorite passes through deck 4. Atmosphere is venting. The patch kit is in storage.',
+    triggers: (s) => (s.hull == null || s.hull > 10),
+    choices: [
+      { label:'PATCH',   desc:'Sacrifice alloy to seal the breach properly.',
+        outcome:'You lose 8K alloy. Hull restored by 18%.',
+        apply:(s) => {
+          s.resources.alloy = Math.max(0, s.resources.alloy - 8000);
+          repairHull(18);
+        } },
+      { label:'JURY-RIG',desc:'Field repair. Faster, dirtier.',
+        outcome:'Hull restored by 6%. Production drops in subsystems for a while (this is flavor — nothing tracked).',
+        apply:() => { repairHull(6); } },
+    ]},
+
+  // EXOTIC (rare, powerful)
+  { id:'a_singularity', cat:'EXOTIC', title:'Singularity Sighting',
+    desc:'You skim the event horizon of something that should not be in this sector. Time stretches. The reactor sings in a key you cannot name.',
+    triggers: () => true,
+    choices: [
+      { label:'STUDY', desc:'Hold the position. Capture data.',
+        outcome:'Production ×3 for the next 90 seconds (this run). Hull -8%. The Knowledge curve flickers.',
+        apply:(s) => {
+          state._exoticBoost = { mult: 3, until: Date.now() + 90000 };
+          damageHull(8);
+        } },
+      { label:'FLEE',  desc:'Maximum burn. Get clear.',
+        outcome:'+15 Knowledge. You will not forget what you saw.',
+        apply:(s) => { s.knowledge += 15; } },
+    ]},
+  { id:'a_reality_echo', cat:'EXOTIC', title:'Reality Echo',
+    desc:'A copy of your ship — older, scarred — drifts past you, silent and dead. The crew quarters are empty.',
+    triggers: () => true,
+    choices: [
+      { label:'BOARD',  desc:'Pull alongside. Take what they had.',
+        outcome:'+50% of your current alloy. The bridge logs are written in your handwriting.',
+        apply:(s) => { s.resources.alloy = Math.floor(s.resources.alloy * 1.5); } },
+      { label:'MOURN',  desc:'Hold the line. Salute it.',
+        outcome:'+12 Knowledge. Hull repaired by 10%. Something in the void watches.',
+        apply:(s) => { s.knowledge += 12; repairHull(10); } },
+    ]},
+  { id:'a_loop', cat:'EXOTIC', title:'Time Loop',
+    desc:'You arrive 4 minutes after you arrived. Your logs disagree with your clocks. Reset the buffers.',
+    triggers: () => true,
+    choices: [
+      { label:'RESET',  desc:'Reset the run-start timer. Time-limited patches refresh.',
+        outcome:'runStartTime reset. Quickstart, Primed Capacitor, and Trickle Charge all refresh.',
+        apply:(s) => { s.runStartTime = Date.now(); } },
+      { label:'REFUSE', desc:'Hold the timeline. Take Knowledge instead.',
+        outcome:'+20 Knowledge. The clocks remain disagreed.',
+        apply:(s) => { s.knowledge += 20; } },
+    ]},
+  { id:'a_voidpulse', cat:'EXOTIC', title:'Void Pulse',
+    desc:'Something at the bottom of the dark calls your name. Not the name you have. The other one.',
+    triggers: () => true,
+    choices: [
+      { label:'ANSWER', desc:'Reply on a frequency you didn\'t know you had.',
+        outcome:'+1 Void Shard. Hull -25%. You answer in a voice that is yours.',
+        apply:(s, m) => { m.voidShards = (m.voidShards || 0) + 1; damageHull(25); } },
+      { label:'RESIST', desc:'Close the channel. Reinforce the firewalls.',
+        outcome:'Hull stable. +5 Knowledge. The call returns next sector. Quieter.',
+        apply:(s) => { s.knowledge += 5; } },
+    ]},
+  { id:'a_geometric', cat:'EXOTIC', title:'Geometric Anomaly',
+    desc:'An eight-sided object floats in vacuum. Its faces don\'t add up. Counting them yields different numbers each time.',
+    triggers: () => true,
+    choices: [
+      { label:'CATALOG', desc:'Study it from every angle.',
+        outcome:'+1 Patch Point and +8 Knowledge. The object is gone when you look back.',
+        apply:(s) => { s.patchPoints = (s.patchPoints || 0) + 1; s.knowledge += 8; } },
+      { label:'AVOID',   desc:'Continue. Some things are not for you.',
+        outcome:'Hull repaired by 4%. The shape recedes. You feel held.',
+        apply:() => { repairHull(4); } },
+    ]},
+
+  // STORY (lore-heavy)
+  { id:'a_listener', cat:'STORY', title:'The Listener',
+    desc:'A faint voice on a channel that has no source. It is not a recording. It is responding to your thoughts.',
+    triggers: () => true,
+    choices: [
+      { label:'LISTEN', desc:'Hold the channel open. Hear it out.',
+        outcome:'It tells you something about the Collapse. +12 Knowledge. You feel less alone.',
+        apply:(s) => { s.knowledge += 12; } },
+      { label:'MUTE',   desc:'Sever the connection.',
+        outcome:'Silence returns. You sit with it.',
+        apply:() => {} },
+    ]},
+  { id:'a_coords', cat:'STORY', title:'Sealed Coordinates',
+    desc:'A heavily encrypted packet on an old military protocol. Decryption will cost. The file points somewhere far.',
+    triggers: (s) => s.knowledge >= 25,
+    choices: [
+      { label:'DECRYPT', desc:'Spend 25 Knowledge to decrypt.',
+        outcome:'The next sector will be a Singularity Edge. Production will be high. Survival, less certain.',
+        apply:(s) => {
+          s.knowledge = Math.max(0, s.knowledge - 25);
+          state._forceNextSector = 'singular';
+        } },
+      { label:'DISCARD', desc:'Burn the file. You\'ve seen enough.',
+        outcome:'You are not curious. Today.',
+        apply:() => {} },
+    ]},
+  { id:'a_memory', cat:'STORY', title:'Crew Memory',
+    desc:'One of the crew remembers something from before they joined. They want to talk.',
+    triggers: (s, m) => m && m.crew && m.crew.some(c => c.alive),
+    choices: [
+      { label:'LISTEN', desc:'Sit with them. Hear it.',
+        outcome:'Crew bonuses +20% for the next 5 minutes (flavor only). +3 Knowledge.',
+        apply:(s) => { s.knowledge += 3; } },
+      { label:'WORK',   desc:'You have things to do.',
+        outcome:'They nod. They understand. They don\'t bring it up again.',
+        apply:() => {} },
+    ]},
+  { id:'a_door', cat:'STORY', title:'The Last Door',
+    desc:'A pre-Collapse archive offers you a choice it has offered no one else. It will accept either answer.',
+    triggers: (s) => state.jumps >= 5,
+    choices: [
+      { label:'OPEN',   desc:'See what is behind the door.',
+        outcome:'+800 plasma, +400 alloy, +20 Knowledge. The room behind the door is empty.',
+        apply:(s) => { s.resources.plasma += 800; s.resources.alloy += 400; s.knowledge += 20; } },
+      { label:'REFUSE', desc:'Some doors should stay closed.',
+        outcome:'Hull restored to 100%. The archive thanks you.',
+        apply:(s) => { s.hull = 100; } },
+    ]},
+];
+
+const ANOMALY_INTERVAL_MIN = 120 * 1000;  // 2 min
+const ANOMALY_INTERVAL_MAX = 300 * 1000;  // 5 min
+let lastAnomaly = Date.now();
+let nextAnomalyGap = ANOMALY_INTERVAL_MIN + Math.random() * (ANOMALY_INTERVAL_MAX - ANOMALY_INTERVAL_MIN);
+let _anomalyOpen = false;
+
+function maybeAnomaly(now) {
+  if (_anomalyOpen) return;
+  if (now - lastAnomaly < nextAnomalyGap) return;
+  // Need some buildings to be online (game has started)
+  if (Object.values(state.buildings).reduce((a, b) => a + b, 0) < 3) return;
+  triggerAnomaly();
+}
+
+function triggerAnomaly() {
+  const valid = ANOMALIES.filter(a => !a.triggers || a.triggers(state, meta));
+  if (valid.length === 0) return;
+  // Bias toward unseen
+  ensureCodex();
+  const seen = meta.codex.anomaliesSeen;
+  const unseen = valid.filter(a => !seen[a.id]);
+  const pool = unseen.length > 0 ? unseen : valid;
+  const anomaly = pool[Math.floor(Math.random() * pool.length)];
+  showAnomalyModal(anomaly);
+}
+
+function showAnomalyModal(anomaly) {
+  _anomalyOpen = true;
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg anomaly-bg';
+  bg.innerHTML = `
+    <div class="modal anomaly-modal">
+      <div class="anomaly-cat">// ${anomaly.cat} ANOMALY</div>
+      <div class="modal-title">${anomaly.title}</div>
+      <div class="modal-body">
+        <p class="anomaly-desc">${anomaly.desc}</p>
+        <div class="anomaly-choices">
+          ${anomaly.choices.map((c, i) => `
+            <button class="anomaly-choice" data-choice="${i}">
+              <div class="anomaly-choice-label">${c.label}</div>
+              <div class="anomaly-choice-desc">${c.desc}</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(bg);
+  bg.querySelectorAll('.anomaly-choice').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-choice'), 10);
+      bg.remove();
+      applyAnomalyChoice(anomaly.id, idx);
+    });
+  });
+}
+
+function applyAnomalyChoice(anomalyId, choiceIdx) {
+  const anomaly = ANOMALIES.find(a => a.id === anomalyId);
+  if (!anomaly) { _anomalyOpen = false; return; }
+  const choice = anomaly.choices[choiceIdx];
+  if (!choice) { _anomalyOpen = false; return; }
+  try {
+    choice.apply(state, meta);
+  } catch (e) { console.warn('anomaly apply error', e); }
+  // Resolve outcome string (it may be a function in future; here always string)
+  const outcomeText = typeof choice.outcome === 'function' ? choice.outcome(state, meta) : choice.outcome;
+  ensureCodex();
+  if (!meta.codex.anomaliesSeen[anomalyId]) {
+    meta.codex.anomaliesSeen[anomalyId] = {
+      firstJump: state.jumps || 0, choice: choice.label, outcome: outcomeText, count: 1,
+    };
+  } else {
+    meta.codex.anomaliesSeen[anomalyId].count = (meta.codex.anomaliesSeen[anomalyId].count || 1) + 1;
+  }
+  meta.anomalyCount = (meta.anomalyCount || 0) + 1;
+  pushLog(`> anomaly: ${anomaly.title.toUpperCase()} // ${choice.label}`);
+  flash(`◇ ANOMALY // ${anomaly.title}`);
+  // Show outcome screen
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg anomaly-bg';
+  bg.innerHTML = `
+    <div class="modal anomaly-modal">
+      <div class="anomaly-cat">// ${anomaly.cat} — RESOLVED</div>
+      <div class="modal-title">${anomaly.title}</div>
+      <div class="modal-body">
+        <div class="anomaly-outcome">${outcomeText}</div>
+      </div>
+      <button class="modal-btn" id="anom-close">CONTINUE</button>
+    </div>
+  `;
+  document.body.appendChild(bg);
+  bg.querySelector('#anom-close').addEventListener('click', () => {
+    bg.remove();
+    _anomalyOpen = false;
+    lastAnomaly = Date.now();
+    nextAnomalyGap = ANOMALY_INTERVAL_MIN + Math.random() * (ANOMALY_INTERVAL_MAX - ANOMALY_INTERVAL_MIN);
+    save(); saveMeta();
+    renderAll();
+  });
+}
+
+// --- CODEX UI ---
+function codexHTML() {
+  ensureCodex();
+  const seen = meta.codex.anomaliesSeen || {};
+  const sectorsLogged = Object.keys(meta.codex.sectorsLogged || {}).length;
+  const traitCounts = meta.codex.traitCounts || {};
+  const totalAnomalies = ANOMALIES.length;
+  const seenCount = Object.keys(seen).length;
+  const totalSectors = sectorsLogged;
+  const totalAnomEnc = meta.anomalyCount || 0;
+  const totalCrew = (meta.crew || []).length;
+  const totalEng = (meta.engrams || []).filter(e => !e.encrypted).length;
+
+  const cats = ['DISCOVERY', 'ENCOUNTER', 'CRISIS', 'EXOTIC', 'STORY'];
+  const catColors = {
+    DISCOVERY:'var(--cyan)', ENCOUNTER:'var(--amber)', CRISIS:'var(--danger)',
+    EXOTIC:'var(--magenta)', STORY:'var(--gold)',
+  };
+
+  const anomalyGroups = cats.map(cat => {
+    const items = ANOMALIES.filter(a => a.cat === cat);
+    return `
+      <div style="margin-bottom:18px;">
+        <div class="obj-cat-title" style="color:${catColors[cat]};margin-bottom:8px;">// ${cat} (${items.filter(a => seen[a.id]).length}/${items.length})</div>
+        <div class="codex-grid">
+          ${items.map(a => {
+            const s = seen[a.id];
+            if (!s) {
+              return `<div class="codex-entry locked">
+                <div class="codex-entry-cat">${cat}</div>
+                <div class="codex-entry-name">[ ENCRYPTED ]</div>
+              </div>`;
+            }
+            return `<div class="codex-entry" style="border-left-color:${catColors[cat]};">
+              <div class="codex-entry-cat" style="color:${catColors[cat]};">${cat}</div>
+              <div class="codex-entry-name">${a.title}</div>
+              <div class="codex-entry-outcome">${s.outcome}</div>
+              <div class="codex-entry-meta">CHOSE: ${s.choice} · JUMP ${s.firstJump}${s.count > 1 ? ` · ×${s.count}` : ''}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Trait breakdown
+  const traitRows = SECTOR_TRAITS.map(t => {
+    const n = traitCounts[t.id] || 0;
+    if (n === 0) return '';
+    return `<div class="ring-row" style="border-left-color:${TRAIT_SKY[t.id]?.star || 'var(--cyan-dim)'};">
+      <span class="ring-name">${t.name}</span>
+      <span class="ring-progress">×${n}</span>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  return `
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="codex-summary">
+        <div><span>ANOMALIES</span><strong style="color:var(--magenta);">${seenCount} / ${totalAnomalies}</strong></div>
+        <div><span>SECTORS</span><strong style="color:var(--cyan);">${totalSectors}</strong></div>
+        <div><span>ENCOUNTERS</span><strong>${totalAnomEnc}</strong></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 240px;gap:20px;align-items:start;">
+        <div>${anomalyGroups}</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="tree-info-title">// SECTORS</div>
+          ${traitRows || '<div class="empty">// none yet</div>'}
+          <div class="tree-info-title" style="margin-top:8px;">// LIFETIME</div>
+          <div class="ring-row" style="border-left-color:var(--steel);"><span class="ring-name">Crew Found</span><span class="ring-progress">${totalCrew}</span></div>
+          <div class="ring-row" style="border-left-color:var(--gold);"><span class="ring-name">Engrams Decrypted</span><span class="ring-progress">${totalEng}</span></div>
+          <div class="ring-row" style="border-left-color:var(--magenta);"><span class="ring-name">Void Resets</span><span class="ring-progress">${meta.totalResets || 0}</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// --- SECTOR MAP UI ---
+// ============================================================
+// WAVE 9 — SHIP YARD & COSMIC PHENOMENA
+// ============================================================
+
+function shipUnlocked(id) {
+  if (!meta.shipsUnlocked) meta.shipsUnlocked = { athena: true };
+  return !!meta.shipsUnlocked[id];
+}
+
+function unlockShip(id) {
+  if (!meta.shipsUnlocked) meta.shipsUnlocked = { athena: true };
+  meta.shipsUnlocked[id] = true;
+  saveMeta();
+}
+
+function buyShipUnlock(id) {
+  const def = SHIP_DEFS[id]; if (!def || shipUnlocked(id)) return;
+  if ((meta.voidShards || 0) < (def.unlockCost || 0)) return;
+  meta.voidShards -= def.unlockCost;
+  unlockShip(id);
+  pushLog(`> ${def.name} commissioned from yard`);
+  flash(`◈ SHIP UNLOCKED // ${def.name}`);
+  saveMeta(); renderAll();
+}
+
+function switchShip(id) {
+  if (!shipUnlocked(id)) return;
+  if (meta.shipType === id) return;
+  meta.shipType = id;
+  // Re-seed ship art so the new class generates a fresh silhouette
+  meta.shipSeed = ((Date.now() * 7 + Math.floor(Math.random() * 9973)) % 99997) + 1;
+  // Refit: hull clamped to new max
+  const maxH = (typeof shipMaxHull === 'function') ? shipMaxHull() : 100;
+  if (state.hull > maxH) state.hull = maxH;
+  pushLog(`> active vessel: ${SHIP_DEFS[id].name}`);
+  flash(`◈ ACTIVE // ${SHIP_DEFS[id].name}`);
+  save(); saveMeta();
+  renderAll();
+}
+
+function shipYardHTML() {
+  if (!meta.shipsUnlocked) meta.shipsUnlocked = { athena: true };
+  const cards = Object.keys(SHIP_DEFS).map(id => {
+    const def = SHIP_DEFS[id];
+    const owned = shipUnlocked(id);
+    const active = meta.shipType === id;
+    const vs = meta.voidShards || 0;
+    const canBuy = !owned && vs >= def.unlockCost;
+    const previewSvg = generateShipSVG((meta.shipSeed || 1) ^ (id.length * 7919), id);
+    const stats = [
+      def.productionMult !== 1.0 ? `Prod ×${def.productionMult.toFixed(2)}` : null,
+      def.maxCrewBonus    !== 0 ? `Crew ${def.maxCrewBonus > 0 ? '+' : ''}${def.maxCrewBonus}` : null,
+      def.hullMaxBonus    !== 0 ? `Hull ${def.hullMaxBonus > 0 ? '+' : ''}${def.hullMaxBonus}%` : null,
+      def.knowledgeMult   !== 1.0 ? `K ×${def.knowledgeMult.toFixed(2)}` : null,
+      def.jumpHullDamageMult !== 1.0 ? `Jump dmg ×${def.jumpHullDamageMult.toFixed(2)}` : null,
+    ].filter(Boolean).join(' · ');
+    let actionBtn;
+    if (active) {
+      actionBtn = `<div style="text-align:center;padding:8px;color:var(--cyan);letter-spacing:0.2em;font-size:10px;border:1px solid var(--cyan);">◆ ACTIVE</div>`;
+    } else if (owned) {
+      actionBtn = `<button class="modal-btn" style="background:var(--cyan-dim);color:var(--bg);" onclick="switchShip('${id}')">BOARD VESSEL</button>`;
+    } else if (canBuy) {
+      actionBtn = `<button class="modal-btn" style="background:var(--magenta);" onclick="buyShipUnlock('${id}')">COMMISSION (${def.unlockCost} VS)</button>`;
+    } else {
+      actionBtn = `<div style="text-align:center;padding:8px;color:var(--text-dim);letter-spacing:0.2em;font-size:10px;border:1px solid var(--border);">${def.unlockCost} VS · LOCKED</div>`;
+    }
+    return `
+      <div style="background:rgba(5,8,16,0.55);border:1px solid ${active ? 'var(--cyan)' : 'var(--border)'};padding:12px;display:flex;flex-direction:column;gap:8px;${active ? 'box-shadow:0 0 18px rgba(94,226,255,0.25);' : ''}">
+        <div style="display:flex;justify-content:center;padding:8px;background:rgba(5,8,16,0.6);min-height:80px;">
+          <div style="transform:scale(0.55);transform-origin:center center;">${previewSvg}</div>
+        </div>
+        <div style="color:${active ? 'var(--cyan)' : 'var(--text)'};font-size:11px;letter-spacing:0.18em;font-weight:500;">${def.name}</div>
+        <div style="color:var(--text-dim);font-size:10px;letter-spacing:0.1em;">${def.sub.toUpperCase()}</div>
+        <div style="color:var(--text);font-size:11px;line-height:1.55;">${def.desc}</div>
+        ${stats ? `<div style="color:var(--cyan-dim);font-size:10px;letter-spacing:0.1em;">${stats}</div>` : ''}
+        ${actionBtn}
+      </div>
+    `;
+  }).join('');
+  return `
+    <div style="margin-top:18px;">
+      <div class="obj-cat-title" style="margin-bottom:10px;">// SHIP YARD</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+        ${cards}
+      </div>
+      <p style="color:var(--text-dim);font-size:10px;margin-top:8px;line-height:1.6;">
+        Commission new hulls with Void Shards. Switch any time — refit is instant. Crew and resources carry over.
+      </p>
+    </div>
+  `;
+}
+
+// --- COSMIC PHENOMENA ---
+const COSMIC_PHENOMENA = [
+  {
+    id: 'p_first_anomaly', atJump: 5, sectorTrait: 'signal',
+    title: 'First Anomaly',
+    desc: 'You have crossed a threshold. The signals here have a structure that wasn\'t there before. Something is paying attention.',
+    choices: [
+      { label: 'TRANSMIT', desc: 'Send a response on the same protocol.',
+        outcome: 'A reply arrives in your own voice, from a future you have not yet had. CETUS-CLASS schematics decompile in your archives.',
+        apply: (s, m) => { unlockShip('cetus'); m.voidShards = (m.voidShards || 0) + 5; s.knowledge += 10; } },
+      { label: 'RECEIVE', desc: 'Listen only. Don\'t answer.',
+        outcome: 'You decline to respond. The structure unwinds, leaving a deep silence and 8 Knowledge in your wake.',
+        apply: (s) => { s.knowledge += 8; } },
+    ],
+  },
+  {
+    id: 'p_event_horizon', atJump: 15, sectorTrait: 'singular',
+    title: 'Event Horizon',
+    desc: 'You\'ve reached the gravity well of a long-dead star. Time slows here. Your reactor sings a chord you don\'t know. Your crew dream the same dream.',
+    choices: [
+      { label: 'DESCEND', desc: 'Approach the horizon. Take what it offers.',
+        outcome: '+15 Void Shards. Hull takes 25% damage but you bring back something that was never written.',
+        apply: (s, m) => { m.voidShards = (m.voidShards || 0) + 15; damageHull(25); } },
+      { label: 'CIRCLE', desc: 'Hold orbit. Study the geometry of falling.',
+        outcome: '+8 Void Shards, +25 Knowledge. The hull repairs itself slightly.',
+        apply: (s, m) => { m.voidShards = (m.voidShards || 0) + 8; s.knowledge += 25; repairHull(15); } },
+    ],
+  },
+  {
+    id: 'p_heat_death', atJump: 30, sectorTrait: 'dead',
+    title: 'Heat Death Echo',
+    desc: 'The universe is older here. There are no other signals. Just yours, returning to you. The void is patient. The void is full.',
+    choices: [
+      { label: 'COMPOSE', desc: 'Send a message to be your only company.',
+        outcome: 'VESSEL-CLASS schematics arrive in the reply. The reply is in your handwriting. +20 Void Shards.',
+        apply: (s, m) => { unlockShip('vessel'); m.voidShards = (m.voidShards || 0) + 20; } },
+      { label: 'WITNESS', desc: 'Stay silent. Watch the dark.',
+        outcome: '+25 Knowledge. You understand a thing about the architecture of endings.',
+        apply: (s) => { s.knowledge += 25; } },
+    ],
+  },
+  {
+    id: 'p_first_ship', atJump: 60, sectorTrait: 'resonance',
+    title: 'The First Ship',
+    desc: 'A vessel older than the Collapse drifts in formation with you. Its captain salutes you in a language you have always known. You understand. You always have.',
+    choices: [
+      { label: 'JOIN FORMATION', desc: 'Match their course. Accept the gift.',
+        outcome: 'HALCYON-CLASS schematics. Full crew slots refreshed. +30 Void Shards. The first ship pulls ahead and vanishes.',
+        apply: (s, m) => {
+          unlockShip('halcyon');
+          m.voidShards = (m.voidShards || 0) + 30;
+          if (m.crew) m.crew.forEach(c => { if (c.alive) { c.injured = false; c.injuredUntil = null; } });
+          state.hull = (typeof shipMaxHull === 'function') ? shipMaxHull() : 100;
+        } },
+      { label: 'SALUTE BACK', desc: 'Mirror their gesture. Continue alone.',
+        outcome: '+20 Void Shards. Full hull restoration. The first ship waits for you, somewhere ahead.',
+        apply: (s, m) => {
+          m.voidShards = (m.voidShards || 0) + 20;
+          state.hull = (typeof shipMaxHull === 'function') ? shipMaxHull() : 100;
+        } },
+    ],
+  },
+  {
+    id: 'p_zero_protocol', atJump: 100, sectorTrait: 'singular',
+    title: 'Zero Protocol',
+    desc: 'You have reached the source. The first protocol. The one that was written before any of the others, in a language that no longer has speakers. It is asking what comes next.',
+    choices: [
+      { label: 'WRITE', desc: 'Author the next protocol yourself.',
+        outcome: 'PROMETHEUS-CLASS schematics. +50 Void Shards. +500 Knowledge. The next thing written is yours.',
+        apply: (s, m) => {
+          unlockShip('prometheus');
+          m.voidShards = (m.voidShards || 0) + 50;
+          s.knowledge += 500;
+        } },
+      { label: 'READ', desc: 'Receive what was already written.',
+        outcome: '+100 Void Shards. Full hull. All decryption costs −50% for the next run. The protocol blesses you.',
+        apply: (s, m) => {
+          m.voidShards = (m.voidShards || 0) + 100;
+          state.hull = (typeof shipMaxHull === 'function') ? shipMaxHull() : 100;
+          state._blessingDiscountUntil = Date.now() + 60 * 60 * 1000;
+        } },
+    ],
+  },
+  {
+    id: 'p_the_architect', atJump: 200, sectorTrait: 'resonance',
+    title: 'The Architect',
+    desc: 'You arrive in a sector that wasn\'t there before. A vast structure unfolds at the edge of your sensors — geometry beyond geometry. Something is here. It has been waiting for you longer than the universe has existed. It greets you in your own voice. It asks you: have you understood?',
+    choices: [
+      { label: 'YES', desc: 'You have. You always have. Show it what you became.',
+        outcome: 'The Architect approves. It gives you everything. +500 Void Shards. +5000 Knowledge. All resources to current maximum. Hull restored. The void has a new caretaker.',
+        apply: (s, m) => {
+          m.voidShards = (m.voidShards || 0) + 500;
+          s.knowledge += 5000;
+          RESOURCE_LIST.forEach(r => { s.resources[r] = Math.max(s.resources[r], 1e9); });
+          state.hull = (typeof shipMaxHull === 'function') ? shipMaxHull() : 100;
+        } },
+      { label: 'NO', desc: 'You don\'t understand. You never have. Tell it that.',
+        outcome: 'The Architect smiles. "Neither do I." +200 Void Shards. +1000 Knowledge. Hull at maximum. The Architect drifts onward — wherever it is going, it goes alone again.',
+        apply: (s, m) => {
+          m.voidShards = (m.voidShards || 0) + 200;
+          s.knowledge += 1000;
+          state.hull = (typeof shipMaxHull === 'function') ? shipMaxHull() : 100;
+        } },
+      { label: 'IT WAS YOU', desc: 'Speak the answer that was always yours.',
+        outcome: 'The Architect bows its impossible head. "Yes." +1000 Void Shards. The veil thins. You are not what you were. You are something that decided.',
+        apply: (s, m) => {
+          m.voidShards = (m.voidShards || 0) + 1000;
+          s.knowledge += 2000;
+          state.hull = (typeof shipMaxHull === 'function') ? shipMaxHull() : 100;
+          // Unlock everything (game completion flag)
+          if (!m.gameCompleted) m.gameCompleted = true;
+        } },
+    ],
+  },
+];
+
+function checkPhenomenonOnArrival() {
+  if (!meta.phenomenaSeen) meta.phenomenaSeen = {};
+  const phen = COSMIC_PHENOMENA.find(p => p.atJump === meta.totalJumps && !meta.phenomenaSeen[p.id]);
+  if (!phen) return null;
+  return phen;
+}
+
+function showPhenomenonModal(phen) {
+  _anomalyOpen = true;
+  // Force sector trait
+  state.sector.traitId = phen.sectorTrait;
+  updateStarfieldTrait(state.sector.traitId);
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg anomaly-bg';
+  bg.innerHTML = `
+    <div class="modal anomaly-modal" style="border-color:var(--gold);box-shadow:0 0 80px rgba(255,232,138,0.4);max-width:580px;">
+      <div class="anomaly-cat" style="color:var(--gold);">// COSMIC PHENOMENON · JUMP ${phen.atJump}</div>
+      <div class="modal-title" style="color:var(--gold);">${phen.title}</div>
+      <div class="modal-body">
+        <p class="anomaly-desc" style="border-left-color:var(--gold);background:rgba(255,232,138,0.05);">${phen.desc}</p>
+        <div class="anomaly-choices">
+          ${phen.choices.map((c, i) => `
+            <button class="anomaly-choice" data-choice="${i}" style="border-color:var(--gold);">
+              <div class="anomaly-choice-label" style="color:var(--gold);">${c.label}</div>
+              <div class="anomaly-choice-desc">${c.desc}</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+  bg.querySelectorAll('.anomaly-choice').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-choice'), 10);
+      bg.remove();
+      const choice = phen.choices[idx];
+      try { choice.apply(state, meta); } catch (e) { console.warn(e); }
+      meta.phenomenaSeen[phen.id] = { atJump: phen.atJump, completed: true, choice: choice.label };
+      pushLog(`> COSMIC PHENOMENON // ${phen.title.toUpperCase()} // ${choice.label}`);
+      flash(`✦ COSMIC // ${phen.title}`);
+      // Outcome modal
+      const outBg = document.createElement('div');
+      outBg.className = 'modal-bg anomaly-bg';
+      outBg.innerHTML = `
+        <div class="modal anomaly-modal" style="border-color:var(--gold);box-shadow:0 0 80px rgba(255,232,138,0.5);">
+          <div class="anomaly-cat" style="color:var(--gold);">// PHENOMENON RESOLVED</div>
+          <div class="modal-title" style="color:var(--gold);">${phen.title}</div>
+          <div class="modal-body">
+            <div class="anomaly-outcome" style="border-color:var(--gold);">${choice.outcome}</div>
+          </div>
+          <button class="modal-btn" id="phen-close" style="background:var(--gold);color:#000;">CONTINUE</button>
+        </div>`;
+      document.body.appendChild(outBg);
+      outBg.querySelector('#phen-close').addEventListener('click', () => {
+        outBg.remove();
+        _anomalyOpen = false;
+        save(); saveMeta();
+        renderAll();
+      });
+    });
+  });
+}
+
+// ============================================================
+// WAVE 11 — THE PANTHEON (achievements + rewards)
+// ============================================================
+const ACHIEVEMENTS = [
+  // JOURNEY
+  { id:'ach_j1',   cat:'JOURNEY', name:'First Steps',          desc:'Complete your first jump',                        vs:1, check:(s,m) => (m.totalJumps||0) >= 1 },
+  { id:'ach_j10',  cat:'JOURNEY', name:'Wanderer',             desc:'Complete 10 total jumps',                         vs:2, check:(s,m) => (m.totalJumps||0) >= 10 },
+  { id:'ach_j50',  cat:'JOURNEY', name:'Long Hauler',          desc:'Complete 50 total jumps',                         vs:5, check:(s,m) => (m.totalJumps||0) >= 50 },
+  { id:'ach_j100', cat:'JOURNEY', name:'Cartographer',         desc:'Complete 100 total jumps',                        vs:10, check:(s,m) => (m.totalJumps||0) >= 100 },
+  { id:'ach_sec5', cat:'JOURNEY', name:'Local Traveler',       desc:'Visit 5 distinct sector traits',                  vs:2, check:(s,m) => Object.keys(m.codex && m.codex.traitCounts || {}).length >= 5 },
+  { id:'ach_sec8', cat:'JOURNEY', name:'Trait Atlas',          desc:'Visit all 8 sector traits',                       vs:5, check:(s,m) => Object.keys(m.codex && m.codex.traitCounts || {}).length >= 8 },
+
+  // BUILDER
+  { id:'ach_b25',  cat:'BUILDER', name:'Construction Crew',    desc:'Own 25 buildings in one run',                     vs:2, check:(s) => Object.values(s.buildings).reduce((a,b)=>a+b,0) >= 25 },
+  { id:'ach_b100', cat:'BUILDER', name:'Empire',               desc:'Own 100 buildings in one run',                    vs:5, check:(s) => Object.values(s.buildings).reduce((a,b)=>a+b,0) >= 100 },
+  { id:'ach_b250', cat:'BUILDER', name:'Industrial Scale',     desc:'Own 250 buildings in one run',                    vs:8, check:(s) => Object.values(s.buildings).reduce((a,b)=>a+b,0) >= 250 },
+  { id:'ach_solar50', cat:'BUILDER', name:'Solar Farm',        desc:'Own 50 Solar Arrays',                             vs:3, check:(s) => (s.buildings.solar||0) >= 50 },
+  { id:'ach_diverse', cat:'BUILDER', name:'Diversified',       desc:'Own at least one of every base resource type',    vs:2, check:(s) => ['energy','data','alloy','plasma'].every(r => s.resources[r] > 0) },
+
+  // CREW
+  { id:'ach_cr1',  cat:'CREW', name:'First Survivor',          desc:'Find your first crewmate',                        vs:1, check:(s,m) => (m.crew||[]).length >= 1 },
+  { id:'ach_cr4',  cat:'CREW', name:'Full Bridge',             desc:'Have 4 crew aboard at once',                      vs:2, check:(s,m) => (m.crew||[]).filter(c=>c.alive).length >= 4 },
+  { id:'ach_cr5',  cat:'CREW', name:'Expanded Quarters',       desc:'Have 5 crew aboard at once',                      vs:3, check:(s,m) => (m.crew||[]).filter(c=>c.alive).length >= 5 },
+  { id:'ach_cr_l3',cat:'CREW', name:'Veteran Crew',            desc:'Have any crew member reach L3',                   vs:2, check:(s,m) => (m.crew||[]).some(c => (c.level||1) >= 3) },
+  { id:'ach_cr_l5',cat:'CREW', name:'Living Legend',           desc:'Have any crew member reach L5',                   vs:5, check:(s,m) => (m.crew||[]).some(c => (c.level||1) >= 5) },
+  { id:'ach_cr_5cls',cat:'CREW', name:'Five Disciplines',      desc:'Have all 5 base crew classes aboard at once',     vs:4, check:(s,m) => {
+      const alive = (m.crew||[]).filter(c => c.alive).map(c => c.class);
+      return ['engineer','scientist','navigator','ghost','medic'].every(cl => alive.includes(cl));
+  } },
+  { id:'ach_echo', cat:'CREW', name:'Touched by the Void',     desc:'Have an Echo aboard (via Echo Binding)',          vs:3, check:(s,m) => (m.crew||[]).some(c => c.alive && c.class === 'echo') },
+
+  // VOID
+  { id:'ach_vr1',  cat:'VOID', name:'First Reset',             desc:'Complete your first Void Reset',                  vs:2, check:(s,m) => (m.totalResets||0) >= 1 },
+  { id:'ach_vr5',  cat:'VOID', name:'Cycle of Returns',        desc:'Complete 5 Void Resets',                          vs:4, check:(s,m) => (m.totalResets||0) >= 5 },
+  { id:'ach_vr15', cat:'VOID', name:'Eternal Return',          desc:'Complete 15 Void Resets',                         vs:8, check:(s,m) => (m.totalResets||0) >= 15 },
+  { id:'ach_web5', cat:'VOID', name:'Initiate',                desc:'Install 5 Web Protocol nodes',                    vs:2, check:(s,m) => Object.keys(m.webOwned||{}).length >= 5 },
+  { id:'ach_web10',cat:'VOID', name:'Adept',                   desc:'Install 10 Web Protocol nodes',                   vs:4, check:(s,m) => Object.keys(m.webOwned||{}).length >= 10 },
+  { id:'ach_web_full',cat:'VOID', name:'The Whole Web',        desc:'Install every Web Protocol node (20 total)',      vs:25, check:(s,m) => Object.keys(m.webOwned||{}).length >= 20 },
+  { id:'ach_shards50',cat:'VOID', name:'Hoarder',              desc:'Hold 50 Void Shards at once',                     vs:5, check:(s,m) => (m.voidShards||0) >= 50 },
+
+  // LORE
+  { id:'ach_eng_d1', cat:'LORE', name:'First Decryption',      desc:'Decrypt your first engram',                       vs:1, check:(s,m) => (m.engrams||[]).some(e => !e.encrypted) },
+  { id:'ach_eng_mythic',cat:'LORE', name:'Mythic Echo',        desc:'Decrypt a Mythic engram',                         vs:8, check:(s,m) => (m.engrams||[]).some(e => !e.encrypted && e.rarity === 'mythic') },
+  { id:'ach_anom5',  cat:'LORE', name:'Curiosities',           desc:'Resolve 5 anomalies',                             vs:2, check:(s,m) => Object.keys(m.codex && m.codex.anomaliesSeen || {}).length >= 5 },
+  { id:'ach_anom15', cat:'LORE', name:'Archive of Strange',    desc:'Resolve 15 distinct anomalies',                   vs:5, check:(s,m) => Object.keys(m.codex && m.codex.anomaliesSeen || {}).length >= 15 },
+  { id:'ach_anomAll',cat:'LORE', name:'The Whole Archive',     desc:'Resolve every anomaly type at least once',        vs:15, check:(s,m) => Object.keys(m.codex && m.codex.anomaliesSeen || {}).length >= (typeof ANOMALIES !== 'undefined' ? ANOMALIES.length : 25) },
+  { id:'ach_phen1',  cat:'LORE', name:'Beyond the Threshold',  desc:'Encounter your first Cosmic Phenomenon',          vs:3, check:(s,m) => Object.keys(m.phenomenaSeen||{}).length >= 1 },
+  { id:'ach_phenAll',cat:'LORE', name:'Cosmic Witness',        desc:'Encounter all Cosmic Phenomena',                  vs:20, check:(s,m) => Object.keys(m.phenomenaSeen||{}).length >= 5 },
+
+  // MASTERY
+  { id:'ach_ship5',  cat:'MASTERY', name:'Naval History',      desc:'Unlock all 5 ship classes',                       vs:10, check:(s,m) => Object.keys(m.shipsUnlocked||{}).length >= 5 },
+  { id:'ach_hull0_survive',cat:'MASTERY', name:'Limp Home',    desc:'Jump while at 0% hull and survive',               vs:5, check:(s,m) => (m.lifetimeStats && m.lifetimeStats.hullZeroSurvived) || false },
+  { id:'ach_k500',   cat:'MASTERY', name:'Initiate of Mass',   desc:'Reach 500 Knowledge',                             vs:3, check:(s) => (s.knowledge||0) >= 500 },
+  { id:'ach_k2000',  cat:'MASTERY', name:'Compiler of Worlds', desc:'Reach 2000 Knowledge',                            vs:7, check:(s) => (s.knowledge||0) >= 2000 },
+  { id:'ach_ms_all', cat:'MASTERY', name:'Star Chart Complete',desc:'Earn every Milestone',                            vs:15, check:(s,m) => Object.keys(m.milestonesEarned||{}).length >= (typeof MILESTONES !== 'undefined' ? MILESTONES.length : 100) },
+  { id:'ach_completist',cat:'MASTERY', name:'The Pantheon',    desc:'Earn 30 achievements',                            vs:30, check:(s,m) => Object.keys(m.achievementsEarned||{}).length >= 30 },
+];
+
+function checkAchievements() {
+  if (!meta.achievementsEarned) meta.achievementsEarned = {};
+  const newly = [];
+  for (const a of ACHIEVEMENTS) {
+    if (meta.achievementsEarned[a.id]) continue;
+    try {
+      if (a.check(state, meta)) {
+        meta.achievementsEarned[a.id] = { earnedAt: Date.now() };
+        meta.voidShards = (meta.voidShards || 0) + a.vs;
+        newly.push(a);
+      }
+    } catch (e) { /* check failed silently */ }
+  }
+  if (newly.length) saveMeta();
+  return newly;
+}
+
+function achievementsHTML() {
+  if (!meta.achievementsEarned) meta.achievementsEarned = {};
+  const cats = ['JOURNEY','BUILDER','CREW','VOID','LORE','MASTERY'];
+  const catColors = {
+    JOURNEY:'var(--cyan)', BUILDER:'var(--amber)', CREW:'var(--steel)',
+    VOID:'var(--magenta)', LORE:'var(--gold)', MASTERY:'#88ffaa',
+  };
+  const earned = Object.keys(meta.achievementsEarned).length;
+  const total = ACHIEVEMENTS.length;
+  const vsTotal = ACHIEVEMENTS.reduce((a,x) => a + x.vs, 0);
+  const vsEarned = ACHIEVEMENTS.filter(a => meta.achievementsEarned[a.id]).reduce((a,x) => a + x.vs, 0);
+  const groups = cats.map(cat => {
+    const items = ACHIEVEMENTS.filter(a => a.cat === cat);
+    const earnedN = items.filter(a => meta.achievementsEarned[a.id]).length;
+    return `
+      <div style="margin-bottom:18px;">
+        <div class="obj-cat-title" style="color:${catColors[cat]};">// ${cat} (${earnedN}/${items.length})</div>
+        <div class="obj-list">
+          ${items.map(a => {
+            const done = !!meta.achievementsEarned[a.id];
+            return `<div class="obj ${done?'done':''}" style="${done ? `border-left-color:${catColors[cat]};` : ''}">
+              <div class="obj-marker" style="${done ? `color:${catColors[cat]};` : ''}">${done ? '◆' : '◇'}</div>
+              <div class="obj-text">
+                <div class="obj-name">${a.name}</div>
+                <div class="obj-desc">${a.desc}</div>
+              </div>
+              <div class="obj-pp" style="color:${done ? catColors[cat] : 'var(--magenta)'};">+${a.vs} VS</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="codex-summary">
+        <div><span>EARNED</span><strong>${earned} / ${total}</strong></div>
+        <div><span>VS COLLECTED</span><strong style="color:var(--magenta);">${vsEarned} / ${vsTotal}</strong></div>
+        <div><span>COMPLETION</span><strong>${Math.floor((earned/total)*100)}%</strong></div>
+      </div>
+      ${groups}
+    </div>
+  `;
+}
+
+// ============================================================
+// WAVE 12 — AUTO-SYSTEMS & TELEMETRY
+// ============================================================
+function toggleAutoBuy(id) {
+  if (!state.autoBuy) state.autoBuy = {};
+  state.autoBuy[id] = !state.autoBuy[id];
+  save();
+  renderTabPanel();
+}
+function isAutoBuy(id) { return !!(state && state.autoBuy && state.autoBuy[id]); }
+
+function runAutoBuy() {
+  if (!state.autoBuy) return;
+  for (const b of BUILDINGS) {
+    if (!state.autoBuy[b.id]) continue;
+    if (!b.unlock(state)) continue;
+    const owned = state.buildings[b.id];
+    // Buy single units while affordable (capped per tick to avoid runaway)
+    let purchased = 0;
+    while (purchased < 5 && canAffordBuildingN(b, state.buildings[b.id], state.resources, 1)) {
+      const cost = buildingCostBulk(b, state.buildings[b.id], 1);
+      for (const [res, amt] of Object.entries(cost)) state.resources[res] -= amt;
+      state.buildings[b.id] += 1;
+      purchased += 1;
+    }
+  }
+}
+
+function runAutoDecrypt() {
+  if (!meta.settings || !meta.settings.autoDecrypt) return;
+  if (!meta.engrams || meta.engrams.length === 0) return;
+  const order = ['salvage','signal','archive','relic','mythic'];
+  const minIdx = order.indexOf(meta.settings.autoDecryptMinRarity || 'salvage');
+  if (minIdx < 0) return;
+  // Decrypt at most one per tick to keep flash flow reasonable
+  for (const e of meta.engrams) {
+    if (!e.encrypted) continue;
+    const idx = order.indexOf(e.rarity);
+    if (idx < minIdx) continue;
+    const rd = ENGRAM_RARITIES.find(r => r.id === e.rarity); if (!rd) continue;
+    const dmult = (typeof webDecryptCostMult === 'function') ? webDecryptCostMult() : 1.0;
+    const effCost = Math.ceil(rd.kCost * dmult);
+    if (state.knowledge >= effCost) {
+      decryptEngram(e.uid);
+      break;
+    }
+  }
+}
+
+function toggleAutoDecrypt() {
+  if (!meta.settings) meta.settings = { autoDecrypt: false, autoDecryptMinRarity: 'salvage' };
+  meta.settings.autoDecrypt = !meta.settings.autoDecrypt;
+  saveMeta();
+  renderTabPanel();
+}
+
+function setAutoDecryptMinRarity(rarity) {
+  if (!meta.settings) meta.settings = { autoDecrypt: false, autoDecryptMinRarity: 'salvage' };
+  meta.settings.autoDecryptMinRarity = rarity;
+  saveMeta();
+  renderTabPanel();
+}
+
+// --- WAVE 13: THEMES ---
+const THEMES = [
+  { id: 'cyan',    name: 'CYAN',    color: '#5ee2ff' },
+  { id: 'amber',   name: 'AMBER',   color: '#ffb347' },
+  { id: 'magenta', name: 'NEBULA',  color: '#ff7ec0' },
+  { id: 'gold',    name: 'AETHER',  color: '#ffe88a' },
+  { id: 'steel',   name: 'STEEL',   color: '#a8b8cc' },
+];
+
+function applyTheme() {
+  const t = (meta.settings && meta.settings.theme) || 'cyan';
+  if (t === 'cyan') document.body.removeAttribute('data-theme');
+  else document.body.setAttribute('data-theme', t);
+}
+function setTheme(themeId) {
+  if (!meta.settings) meta.settings = { autoDecrypt: false, autoDecryptMinRarity: 'salvage', theme: 'cyan' };
+  meta.settings.theme = themeId;
+  saveMeta();
+  applyTheme();
+  renderTabPanel();
+}
+
+// --- TELEMETRY ---
+function telemetryHTML() {
+  const fmtTime = (s) => {
+    s = Math.floor(s);
+    if (s < 60) return s + 's';
+    const m = Math.floor(s / 60), sr = s % 60;
+    if (m < 60) return `${m}m ${sr}s`;
+    const h = Math.floor(m / 60), mr = m % 60;
+    return `${h}h ${mr}m`;
+  };
+  const runTime = (Date.now() - (state.runStartTime || Date.now())) / 1000;
+  const totalProduction = (() => {
+    const p = getProduction().production;
+    return RESOURCE_LIST.reduce((a, r) => a + (p[r] || 0), 0);
+  })();
+  const aliveCrew = (meta.crew || []).filter(c => c.alive).length;
+  const totalCrew = (meta.crew || []).length;
+  const totalBuildings = Object.values(state.buildings).reduce((a, b) => a + b, 0);
+  const decryptedEngrams = (meta.engrams || []).filter(e => !e.encrypted).length;
+  const totalEngrams = (meta.engrams || []).length;
+  const stats = [
+    { lab:'RUN TIME',          val: fmtTime(runTime) },
+    { lab:'TOTAL JUMPS',       val: (meta.totalJumps || 0).toLocaleString(), sub: `${state.jumps} this run` },
+    { lab:'VOID RESETS',       val: meta.totalResets || 0 },
+    { lab:'VOID SHARDS',       val: meta.voidShards || 0, sub:'unspent' },
+    { lab:'PROTOCOL POINTS',   val: meta.pp || 0, sub:'unspent' },
+    { lab:'BUILDINGS',         val: totalBuildings, sub:`across ${BUILDINGS.length} types` },
+    { lab:'PRODUCTION /S',     val: fmt(totalProduction), sub:'all resources sum' },
+    { lab:'KNOWLEDGE',         val: state.knowledge.toLocaleString(), sub:`×${knowledgeMult(state).toFixed(2)}` },
+    { lab:'HULL INTEGRITY',    val: `${Math.round(state.hull || 100)}%`, sub:`max ${(typeof shipMaxHull === 'function' ? shipMaxHull() : 100)}%` },
+    { lab:'CREW',              val: `${aliveCrew} / ${(typeof webMaxCrew === 'function' ? webMaxCrew() : 4)}`, sub:`${totalCrew} found ever` },
+    { lab:'ENGRAMS DECRYPTED', val: decryptedEngrams, sub:`${totalEngrams} total` },
+    { lab:'ANOMALIES SEEN',    val: Object.keys(meta.codex && meta.codex.anomaliesSeen || {}).length, sub:`${(meta.anomalyCount || 0)} encountered` },
+    { lab:'SECTORS LOGGED',    val: Object.keys(meta.codex && meta.codex.sectorsLogged || {}).length, sub:'unique' },
+    { lab:'WEB NODES',         val: Object.keys(meta.webOwned || {}).length, sub:'/ 20' },
+    { lab:'MILESTONES',        val: Object.keys(meta.milestonesEarned || {}).length, sub:`/ ${MILESTONES.length}` },
+    { lab:'ACHIEVEMENTS',      val: Object.keys(meta.achievementsEarned || {}).length, sub:`/ ${ACHIEVEMENTS.length}` },
+    { lab:'SHIPS UNLOCKED',    val: Object.keys(meta.shipsUnlocked || { athena: true }).length, sub:'/ 5' },
+    { lab:'PHENOMENA SEEN',    val: Object.keys(meta.phenomenaSeen || {}).length, sub:'/ 5' },
+    { lab:'ACTIVE VESSEL',     val: (SHIP_DEFS[meta.shipType || 'athena'] || SHIP_DEFS.athena).name, sub: meta.shipType || 'athena' },
+    { lab:'LIFETIME K MAX',    val: (meta.lifetimeKnowledgeMax || 0).toLocaleString() },
+  ];
+  // Settings panel
+  const settings = meta.settings || { autoDecrypt: false, autoDecryptMinRarity: 'salvage' };
+  const settingsHTML = `
+    <div style="margin-top:20px;">
+      <div class="obj-cat-title">// SETTINGS</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">AUTO-DECRYPT ENGRAMS</div>
+          <div class="setting-desc">Spend Knowledge automatically to decrypt new engrams. Only decrypts at or above your selected rarity.</div>
+        </div>
+        <button class="setting-toggle ${settings.autoDecrypt ? 'on' : ''}" onclick="toggleAutoDecrypt()">${settings.autoDecrypt ? 'ON' : 'OFF'}</button>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">MINIMUM AUTO-DECRYPT RARITY</div>
+          <div class="setting-desc">Only auto-decrypt engrams of at least this rarity. Higher rarities cost more Knowledge.</div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          ${['salvage','signal','archive','relic','mythic'].map(r => {
+            const rd = ENGRAM_RARITIES.find(x => x.id === r);
+            const isSel = settings.autoDecryptMinRarity === r;
+            return `<button class="setting-toggle ${isSel ? 'on' : ''}" style="${isSel ? `background:${rd ? rd.color : 'var(--cyan)'};` : ''}" onclick="setAutoDecryptMinRarity('${r}')">${r.toUpperCase()}</button>`;
+          }).join('')}
+        </div>
+      </div>
+      <p style="color:var(--text-dim);font-size:10px;margin-top:10px;line-height:1.6;">
+        Auto-buy toggles for individual buildings live on the BUILD tab — click the small "A" badge on any building card.
+      </p>
+
+      <div class="setting-row" style="margin-top:18px;">
+        <div>
+          <div class="setting-label">COLOR THEME</div>
+          <div class="setting-desc">Recolors the HUD. Affects highlight, panel, and accent colors only.</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          ${THEMES.map(t => {
+            const isSel = (settings.theme || 'cyan') === t.id;
+            return `<div class="theme-swatch ${isSel ? 'active' : ''}" style="background:${t.color};color:${t.color};" title="${t.name}" onclick="setTheme('${t.id}')"></div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  return `
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="obj-cat-title">// TELEMETRY</div>
+      <div class="stat-grid">
+        ${stats.map(s => `
+          <div class="stat-card">
+            <div class="stat-card-label">${s.lab}</div>
+            <div class="stat-card-val">${s.val}</div>
+            ${s.sub ? `<div class="stat-card-sub">${s.sub}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+      ${settingsHTML}
+    </div>
+  `;
+}
+
+// ============================================================
+// WAVE 10 — CREW RESONANCE (leveling, memories, titles)
+// ============================================================
+
+const CREW_LEVEL_XP = [0, 10, 25, 50, 100, 200]; // index = level; xp needed to REACH that level
+
+const CREW_TITLES = {
+  engineer:  ['Trainee','Tech','Master Wrench','Reactor-Saint','Forge-Touched'],
+  scientist: ['Initiate','Analyst','Theorist','Cartographer','Universe-Reader'],
+  navigator: ['Pilot','Wayfinder','Star-Reader','Pathmaker','Sector-Walker'],
+  ghost:     ['Drifter','Shade','Hollow','Echo-Weaver','The-Quiet-One'],
+  medic:     ['Aide','Healer','Saver','Last-Hand','The-One-Who-Stays'],
+  echo:      ['Echo','Persistent','Older Echo','Deep Echo','Final Echo'],
+};
+
+const CREW_MEMORIES = {
+  // class -> { level -> [memory strings] }
+  engineer: {
+    2: [
+      'You catch them tracing the reactor schematics with their finger, mouthing the names of components in a language you cannot place.',
+      'They keep a small bag of metal shavings from every ship they have served on. Yours is now in the bag.',
+    ],
+    3: [
+      'They tell you, quietly, about the first ship they built. It was a child\'s toy. It is still flying.',
+    ],
+    4: [
+      'They sleep less now. You find them in the engine room at 0300, watching the plasma like a slow river. They ask if you watch it too.',
+    ],
+    5: [
+      'They have rebuilt a part of the ship that you do not remember being there. It works. The hull thanks them.',
+    ],
+  },
+  scientist: {
+    2: [
+      'They are writing a paper for no one. It will never be read. They keep writing it.',
+    ],
+    3: [
+      'They show you a graph of something. You don\'t understand it. They smile and put it away. Days later you understand it.',
+    ],
+    4: [
+      'They believe the void is conscious. They are not sure if that is a comfort.',
+    ],
+    5: [
+      'They have a theory about you. They have not told you what it is. They look at you the way a parent looks at a child who has learned something it should not have.',
+    ],
+  },
+  navigator: {
+    2: [
+      'They sing under their breath while plotting courses. The song does not have words. You catch yourself humming it later.',
+    ],
+    3: [
+      'They have given each star a private name. They will not tell you what they are.',
+    ],
+    4: [
+      'They dream of a sector that does not exist. They have plotted a course there. They have not asked you to follow it.',
+    ],
+    5: [
+      'They tell you, in the dark, that you have always been heading somewhere specific. You have. You did not know.',
+    ],
+  },
+  ghost: {
+    2: [
+      'They are mostly silent. Mostly. Sometimes they say things you yourself were about to say.',
+    ],
+    3: [
+      'You find them in three places at once. They apologize. You forgive them. You don\'t know what for.',
+    ],
+    4: [
+      'They have started to leave faint impressions in the deck plating where they walk. The impressions are getting deeper.',
+    ],
+    5: [
+      'They are not entirely on the ship anymore. They are not entirely gone either. They are something the void allows. They are happy.',
+    ],
+  },
+  medic: {
+    2: [
+      'They keep a list of every crew member they have ever served with. The list is long. Some of the names are crossed out. Some are not.',
+    ],
+    3: [
+      'They are good with the dying. They are better with the living. They tell you to remember the difference.',
+    ],
+    4: [
+      'They have given you, in private, a small kit. It is for them, they say, if it ever comes to that.',
+    ],
+    5: [
+      'They tell you the worst thing they have ever done. You understand. The void understands.',
+    ],
+  },
+  echo: {
+    2: [
+      'They remember dying. They are not afraid. They will not say more.',
+    ],
+    3: [
+      'They are kinder now. The dying made them kinder.',
+    ],
+    4: [
+      'They are not the person they were before. They are something better. Something quieter.',
+    ],
+    5: [
+      'They thank you. You don\'t know what for. You thank them back.',
+    ],
+  },
+};
+
+function crewLevel(c) { return c.level || 1; }
+function crewXP(c)    { return c.xp || 0; }
+function crewMaxLevel() { return CREW_LEVEL_XP.length - 1; }
+
+function crewXPNeededForNext(c) {
+  const lvl = crewLevel(c);
+  if (lvl >= crewMaxLevel()) return null;
+  return CREW_LEVEL_XP[lvl + 1];
+}
+
+function crewTitle(c) {
+  const titles = CREW_TITLES[c.class] || [];
+  return titles[crewLevel(c) - 1] || titles[0] || '';
+}
+
+function crewLevelBonusMult(c) {
+  // Each level past 1 adds +5% to that crew's bonus contributions
+  return 1 + (crewLevel(c) - 1) * 0.05;
+}
+
+function awardCrewXP(amount) {
+  if (!meta.crew) return;
+  let leveledUp = [];
+  meta.crew.forEach(c => {
+    if (!c.alive) return;
+    c.xp = (c.xp || 0) + amount;
+    while (crewLevel(c) < crewMaxLevel() && c.xp >= CREW_LEVEL_XP[crewLevel(c) + 1]) {
+      c.level = crewLevel(c) + 1;
+      leveledUp.push(c);
+    }
+  });
+  if (leveledUp.length) {
+    leveledUp.forEach(c => {
+      const cls = CREW_CLASSES[c.class];
+      pushLog(`> ${c.name} advanced to L${crewLevel(c)} — ${crewTitle(c)}`);
+      flash(`✦ LEVEL UP // ${c.name} — ${crewTitle(c)}`);
+      // Random chance of triggering a memory event at certain levels
+      const mems = (CREW_MEMORIES[c.class] || {})[crewLevel(c)];
+      if (mems && mems.length && Math.random() < 0.75) {
+        const mem = mems[Math.floor(Math.random() * mems.length)];
+        setTimeout(() => showCrewMemory(c, mem), 400);
+      }
+    });
+    saveMeta();
+  }
+}
+
+function showCrewMemory(crewMember, text) {
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  const cls = CREW_CLASSES[crewMember.class];
+  const color = cls ? cls.color : 'var(--cyan-dim)';
+  bg.innerHTML = `
+    <div class="modal memory-modal">
+      <div style="color:${color};font-size:10px;letter-spacing:0.25em;margin-bottom:4px;">// MEMORY · L${crewLevel(crewMember)} · ${crewTitle(crewMember).toUpperCase()}</div>
+      <div class="modal-title" style="color:${color};">${crewMember.name}</div>
+      <div class="modal-body">
+        <div class="memory-text">${text}</div>
+      </div>
+      <button class="modal-btn" id="mem-close" style="background:${color};color:#000;">CONTINUE</button>
+    </div>`;
+  document.body.appendChild(bg);
+  bg.querySelector('#mem-close').addEventListener('click', () => bg.remove());
+}
+
+function sectorMapHTML() {
+  ensureCodex();
+  const items = [...(meta.recentSectors || [])].reverse(); // oldest first
+  if (items.length === 0) return '';
+  const dots = items.map((item, i) => {
+    const sky = TRAIT_SKY[item.traitId] || TRAIT_SKY.stable;
+    const isCurrent = (i === items.length - 1) && (item.id === state.sector.id);
+    const color = sky.accent || sky.star;
+    const title = `${item.id} — ${(SECTOR_TRAITS.find(t => t.id === item.traitId) || {}).name || ''} (J${item.jump})`;
+    return `<div class="sm-dot ${isCurrent ? 'current' : ''}" style="background:${color};color:${color};" title="${title}"></div>`;
+  });
+  let html = '<div class="sm-label">RECENT</div>';
+  dots.forEach((d, i) => {
+    html += d;
+    if (i < dots.length - 1) html += '<div class="sm-conn"></div>';
+  });
+  return `<div class="sector-map">${html}</div>`;
 }
 
 
@@ -1085,8 +3006,9 @@ const buildingCost = (b, owned) => {
   const totalBuilt = (typeof state !== 'undefined' && state && state.buildings)
     ? Object.values(state.buildings).reduce((a, c) => a + c, 0) : 0;
   const patchMult = (typeof state !== 'undefined' && state) ? patchFirstBuildDiscount(totalBuilt) : 1;
+  const growth = (typeof effectiveCostGrowth === 'function') ? effectiveCostGrowth() : COST_GROWTH;
   for (const [res, base] of Object.entries(b.costs)) {
-    out[res] = Math.ceil(base * Math.pow(COST_GROWTH, owned) * metaMult * patchMult);
+    out[res] = Math.ceil(base * Math.pow(growth, owned) * metaMult * patchMult);
   }
   return out;
 };
@@ -1176,6 +3098,15 @@ const AMBIENT_LOG = [
   '> static bloom on freq 14.4 // unknown origin',
   '> star pattern matched to archived charts',
   '> a fragment of recovered audio plays // unintelligible',
+  // Wave 14: hull/crew/anomaly themed ambient
+  '> hull breath cycle nominal',
+  '> a crew member sleeps. their dreams are not yours.',
+  '> the void answers when you do not call',
+  '> reactor whine settles to a low E-flat',
+  '> someone has rearranged the cargo bay. you did not authorize this. it is better arranged.',
+  '> the ship has been quiet for six minutes. you mark this in the log.',
+  '> a familiar pattern, three sectors back, repeats. you decide what it means later.',
+  '> aft sensors detect nothing. they are correct.',
 ];
 
 const FIRST_BUILD_FLAVOR = {
@@ -1321,8 +3252,53 @@ function seededRng(seed) {
 }
 
 const SHIP_DEFS = {
-  athena: { name:'ATHENA-CLASS', sub:'Derelict Transport', hull:'#1a2d3f', accent:'#5ee2ff', engine:'#ff6622', cockpit:'#3aafd4', W:26, H:12 },
+  athena: {
+    name:'ATHENA-CLASS', sub:'Derelict Transport',
+    hull:'#1a2d3f', accent:'#5ee2ff', engine:'#ff6622', cockpit:'#3aafd4', W:26, H:12,
+    desc:'Balanced derelict. Your starting hull. No stat modifiers.',
+    productionMult: 1.0, maxCrewBonus: 0, hullMaxBonus: 0, knowledgeMult: 1.0, jumpHullDamageMult: 1.0,
+    unlockCost: 0,
+  },
+  cetus: {
+    name:'CETUS-CLASS', sub:'Reinforced Freighter',
+    hull:'#3a3530', accent:'#aa6633', engine:'#ffaa44', cockpit:'#664433', W:28, H:14,
+    desc:'Heavy hull. +50% max hull. Takes 30% less damage on dangerous jumps. -10% production.',
+    productionMult: 0.90, maxCrewBonus: 0, hullMaxBonus: 50, knowledgeMult: 1.0, jumpHullDamageMult: 0.7,
+    unlockCost: 6,
+  },
+  vessel: {
+    name:'VESSEL-CLASS', sub:'Compact Lab Skiff',
+    hull:'#1a1a3a', accent:'#a8a4ff', engine:'#ff66cc', cockpit:'#ffaaff', W:22, H:10,
+    desc:'Tiny but efficient. +35% production. Max crew capped at 2.',
+    productionMult: 1.35, maxCrewBonus: -2, hullMaxBonus: -20, knowledgeMult: 1.0, jumpHullDamageMult: 1.2,
+    unlockCost: 8,
+  },
+  halcyon: {
+    name:'HALCYON-CLASS', sub:'Crew Transport',
+    hull:'#2a1a3a', accent:'#cc88ff', engine:'#88aaff', cockpit:'#aaccff', W:30, H:14,
+    desc:'Spacious. +3 max crew. Crew bonuses count for an extra +25%.',
+    productionMult: 1.0, maxCrewBonus: 3, hullMaxBonus: 20, knowledgeMult: 1.0, jumpHullDamageMult: 1.0,
+    unlockCost: 12,
+  },
+  prometheus: {
+    name:'PROMETHEUS-CLASS', sub:'Deep Survey Vessel',
+    hull:'#1a3a2a', accent:'#88ffcc', engine:'#ffe88a', cockpit:'#aaffaa', W:26, H:12,
+    desc:'Scholarly. +40% Knowledge gain. Engrams drop one rarity tier higher on average.',
+    productionMult: 1.0, maxCrewBonus: 1, hullMaxBonus: 0, knowledgeMult: 1.40, jumpHullDamageMult: 0.85,
+    unlockCost: 20,
+  },
 };
+
+function shipDef() {
+  return SHIP_DEFS[meta && meta.shipType] || SHIP_DEFS.athena;
+}
+function shipProductionMult()  { return shipDef().productionMult || 1.0; }
+function shipMaxCrewBonus()    { return shipDef().maxCrewBonus || 0; }
+function shipHullMaxBonus()    { return shipDef().hullMaxBonus || 0; }
+function shipKnowledgeMult()   { return shipDef().knowledgeMult || 1.0; }
+function shipJumpDamageMult()  { return shipDef().jumpHullDamageMult || 1.0; }
+function shipMaxHull()         { return 100 + shipHullMaxBonus(); }
+function shipCrewBonusBoost()  { return meta && meta.shipType === 'halcyon' ? 1.25 : 1.0; }
 
 function generateShipSVG(seed, type='athena') {
   const rng = seededRng(seed || 1);
@@ -1440,6 +3416,8 @@ function rollEngrams(sectorTraitId, sectorId, jumpNumber) {
   let count = 1;
   if (sectorTraitId === 'singular' || sectorTraitId === 'dead') count++;
   if (Math.random() < 0.12) count++;
+  // Wave 7: signal_t1 grants +1 engram per jump
+  if (typeof webExtraEngrams === 'function') count += webExtraEngrams();
   const result = [];
   for (let i = 0; i < count; i++) {
     const rarity = rollEngramRarity();
@@ -1463,8 +3441,11 @@ function decryptEngram(uid) {
   const engram = meta.engrams.find(e => e.uid === uid);
   if (!engram || !engram.encrypted) return;
   const rarityDef = ENGRAM_RARITIES.find(r => r.id === engram.rarity);
-  if (!rarityDef || state.knowledge < rarityDef.kCost) return;
-  state.knowledge -= rarityDef.kCost;
+  if (!rarityDef) return;
+  const dmult = (typeof webDecryptCostMult === 'function') ? webDecryptCostMult() : 1.0;
+  const effCost = Math.ceil(rarityDef.kCost * dmult);
+  if (state.knowledge < effCost) return;
+  state.knowledge -= effCost;
   engram.encrypted = false;
   const tpl = ENGRAM_POOL.find(t => t.id === engram.templateId);
   if (tpl && tpl.reward && tpl.reward.type === 'pp') {
@@ -1484,6 +3465,7 @@ const CREW_CLASSES = {
   navigator: { name:'Navigator', sym:'◇', color:'var(--steel)',   desc:'+15% Knowledge gained on each Jump',  weight: 22 },
   ghost:     { name:'Ghost',     sym:'✦', color:'var(--magenta)', desc:'+8% all production, finds more engrams', weight: 18 },
   medic:     { name:'Medic',     sym:'✚', color:'#88ffaa',        desc:'Converts one fatal hit to injury',    weight:  8 },
+  echo:      { name:'Echo',     sym:'◌', color:'var(--cyan-dim)', desc:'+5% all production, cannot die',      weight:  0 },
 };
 
 const CREW_FIRST = ['Ara','Solin','Dessa','Korvus','Mira','Talon','Vex','Lysa','Orik','Phen',
@@ -1497,10 +3479,17 @@ function crewProductionBonus(resource) {
   if (!meta || !meta.crew) return 0;
   let bonus = 0;
   meta.crew.filter(c => c.alive && !c.injured).forEach(c => {
-    if (c.class === 'engineer') bonus += 0.15;
-    if (c.class === 'scientist') { bonus += 0.10; if (resource === 'data') bonus += 0.10; }
-    if (c.class === 'ghost') bonus += 0.08;
+    const lvlMult = (typeof crewLevelBonusMult === 'function') ? crewLevelBonusMult(c) : 1.0;
+    if (c.class === 'engineer') bonus += 0.15 * lvlMult;
+    if (c.class === 'scientist') { bonus += 0.10 * lvlMult; if (resource === 'data') bonus += 0.10 * lvlMult; }
+    if (c.class === 'ghost') bonus += 0.08 * lvlMult;
+    if (c.class === 'echo')  bonus += 0.05 * lvlMult;
   });
+  if (typeof shipCrewBonusBoost === 'function') bonus *= shipCrewBonusBoost();
+  if (typeof webHas === 'function' && webHas('crew_t3')) {
+    const ac = meta.crew.filter(c => c.alive && !c.injured).length;
+    bonus += ac * 0.08;
+  }
   return bonus;
 }
 
@@ -1515,7 +3504,7 @@ function crewGhostEngramBonus() {
 }
 
 function rollCrewmate(sectorTraitId, jumpNumber) {
-  const maxCrew = 4;
+  const maxCrew = (typeof webMaxCrew === 'function') ? webMaxCrew() : 4;
   const activeCrew = (meta.crew || []).filter(c => c.alive).length;
   if (activeCrew >= maxCrew) return null;
 
@@ -1541,6 +3530,9 @@ function rollCrewmate(sectorTraitId, jumpNumber) {
     injured: false,
     injuredUntil: null,
     joinedJump: jumpNumber,
+    // Wave 10: leveling
+    level: 1,
+    xp: 0,
   };
 }
 
@@ -1552,7 +3544,7 @@ function applyJumpConsequences(traitId, jumpsDone) {
       c.injured = false; c.injuredUntil = null;
     }
   });
-  const active = meta.crew.filter(c => c.alive && !c.injured);
+  const active = meta.crew.filter(c => c.alive && !c.injured && c.class !== 'echo');
   if (active.length === 0) return null;
 
   let hitChance = 0, fatalChance = 0;
@@ -1563,15 +3555,21 @@ function applyJumpConsequences(traitId, jumpsDone) {
   const hasMedic = meta.crew.some(c => c.alive && !c.injured && c.class === 'medic');
   const target = active[Math.floor(Math.random() * active.length)];
 
+  const recoveryTime = (typeof webCrewRecoveryJumps === 'function') ? webCrewRecoveryJumps() : 2;
   if (Math.random() < fatalChance) {
     if (hasMedic) {
-      target.injured = true; target.injuredUntil = jumpsDone + 2;
+      target.injured = true; target.injuredUntil = jumpsDone + recoveryTime;
       return { type: 'saved', name: target.name };
+    }
+    // Echo Binding (crew_t4): fallen crew return as immortal Echoes
+    if (typeof webHas === 'function' && webHas('crew_t4')) {
+      target.class = 'echo'; target.alive = true; target.injured = false; target.injuredUntil = null;
+      return { type: 'echo', name: target.name };
     }
     target.alive = false;
     return { type: 'death', name: target.name, class: target.class };
   }
-  target.injured = true; target.injuredUntil = jumpsDone + 2;
+  target.injured = true; target.injuredUntil = jumpsDone + recoveryTime;
   return { type: 'injury', name: target.name };
 }
 
@@ -1615,6 +3613,10 @@ function freshRun(carryKnowledge = 0, carryJumps = 0) {
     challenges: rollChallenges(),               // [challengeId, ...] picked at run start
     challengeProgress: {},                      // { challengeId: { progress, done, pulses } }
     cascadeAccum: 0,                            // accumulator for nerfed Pulse Cascade (30s trickle)
+    // Wave 8
+    hull: 100,                                  // ship hull integrity (0-100)
+    // Wave 12
+    autoBuy: {},                                // { buildingId: true } — auto-purchase when affordable
   };
 }
 
@@ -1674,14 +3676,19 @@ function load() {
       // No resource resets, no PP refunds, no challenge resets.
       if (oldVer === 4 || oldVer === 5) {
         parsed.version = SAVE_VERSION;
-        // Make sure every building defined in BUILDINGS has an entry in state.buildings
-        // and state.mult. This is idempotent — only grafts on missing keys.
         if (!parsed.buildings) parsed.buildings = {};
         if (!parsed.mult) parsed.mult = {};
         for (const b of BUILDINGS) {
           if (!(b.id in parsed.buildings)) parsed.buildings[b.id] = 0;
           if (!(b.id in parsed.mult)) parsed.mult[b.id] = 1;
         }
+        return parsed;
+      }
+      // Wave 7-14: in-place migration.
+      if (oldVer >= 6 && oldVer <= 13) {
+        parsed.version = SAVE_VERSION;
+        if (typeof parsed.hull !== 'number') parsed.hull = 100;
+        if (!parsed.autoBuy) parsed.autoBuy = {};
         return parsed;
       }
       // Pre-v3 saves: reset run, preserve Knowledge and Jumps as before
@@ -1787,9 +3794,16 @@ function doPulseLogic(visual) {
     critMult = 10;
     if (visual) flash('◈ CRITICAL PULSE ×10');
   }
-  // Click-specific patch effects (pc1 Pulse Focus, pa3 Primed Capacitor) remain multiplicative;
-  // they're "this run is a clicker run" identity rather than stacking buffs.
-  const baseClick = state.clickPower * kMult * traitMod * addMult * clickMetaMult * dmMult * synMult * critMult
+  // Wave 7: Overload Spike (pulse_t3) — separate crit roll, stacks with r3_crit
+  let webCritMult = 1;
+  if (typeof webHas === 'function' && webHas('pulse_t3') && Math.random() < 0.08) {
+    webCritMult = 8;
+    if (visual) flash('◈ OVERLOAD SPIKE ×8');
+  }
+  // Wave 7: web pulse bonuses
+  const webBase = (typeof webClickBonus === 'function') ? webClickBonus() : 0;
+  const webMult = (typeof webClickMult === 'function') ? webClickMult() : 1;
+  const baseClick = (state.clickPower + webBase) * kMult * traitMod * addMult * clickMetaMult * dmMult * synMult * critMult * webCritMult * webMult
                   * patchClickMult() * patchPulseEarlyBonus();
   state.resources.energy += baseClick;
   // Wave 4b: track pulses for per-run challenges
@@ -1826,9 +3840,9 @@ function buildingCostBulk(b, owned, qty) {
   const totalBuilt = (typeof state !== 'undefined' && state && state.buildings)
     ? Object.values(state.buildings).reduce((a, c) => a + c, 0) : 0;
   const patchMult = (typeof state !== 'undefined' && state) ? patchFirstBuildDiscount(totalBuilt) : 1;
+  const g = (typeof effectiveCostGrowth === 'function') ? effectiveCostGrowth() : COST_GROWTH;
   for (const [res, base] of Object.entries(b.costs)) {
     const adj = base * metaMult * patchMult;
-    const g = COST_GROWTH;
     const total = adj * Math.pow(g, owned) * (Math.pow(g, qty) - 1) / (g - 1);
     out[res] = Math.ceil(total);
   }
@@ -1933,7 +3947,9 @@ function computeKnowledgeGain() {
   // Wave 4b: Star Mapper (pb4) +25% Knowledge gained
   const patchBonus = patchJumpKnowledgeBonus();
   const navBonus = 1 + crewNavigatorBonus();
-  return Math.floor((base + aetherBonus) * patchBonus * navBonus);
+  const webBonus = 1 + ((typeof webKnowledgeBonus === 'function') ? webKnowledgeBonus() : 0);
+  const shipMult = (typeof shipKnowledgeMult === 'function') ? shipKnowledgeMult() : 1.0;
+  return Math.floor((base + aetherBonus) * patchBonus * navBonus * webBonus * shipMult);
 }
 
 function jumpKnowledgeCostMult() {
@@ -1949,6 +3965,34 @@ function doJump() {
   // Capture departing sector before freshRun resets it
   const departingTraitId = state.sector.traitId;
   const departingSectorId = state.sector.id;
+  // Wave 8: hull damage/repair based on departing sector trait. Wave 9 ship modifies damage.
+  const wasHull = state.hull == null ? 100 : state.hull;
+  const dmgMult = (typeof shipJumpDamageMult === 'function') ? shipJumpDamageMult() : 1.0;
+  if (departingTraitId === 'singular')      damageHull(Math.round(18 * dmgMult));
+  else if (departingTraitId === 'dead')     damageHull(Math.round(10 * dmgMult));
+  else if (departingTraitId === 'signal')   damageHull(Math.round(4 * dmgMult));
+  else if (departingTraitId === 'stable')   repairHull(6);
+  else if (departingTraitId === 'resonance')repairHull(10);
+  // Cap hull at ship's max
+  const maxH = (typeof shipMaxHull === 'function') ? shipMaxHull() : 100;
+  if (state.hull > maxH) state.hull = maxH;
+  // At zero hull, lose 20% of each building (round down) before transit
+  if (wasHull > 0 && state.hull === 0) {
+    let lost = 0;
+    for (const b of BUILDINGS) {
+      const owned = state.buildings[b.id] || 0;
+      const dec = Math.floor(owned * 0.20);
+      if (dec > 0) { state.buildings[b.id] -= dec; lost += dec; }
+    }
+    if (lost > 0) {
+      pushLog(`> CATASTROPHIC HULL FAILURE // -${lost} buildings lost to vacuum`);
+      flash(`⚠ HULL FAILURE // -${lost} BUILDINGS LOST`);
+    }
+    state.hull = 25;
+    // Wave 11: track survival of hull-zero event
+    if (!meta.lifetimeStats) meta.lifetimeStats = {};
+    meta.lifetimeStats.hullZeroSurvived = true;
+  }
 
   // Apply sector consequences to crew (injury/death) before we leave
   const consequence = applyJumpConsequences(departingTraitId, newJumps);
@@ -1956,9 +4000,13 @@ function doJump() {
     if (consequence.type === 'death')
       pushLog(`> CASUALTY // ${consequence.name} [${consequence.class}] // lost in transit`);
     else if (consequence.type === 'injury')
-      pushLog(`> INJURY // ${consequence.name} // incapacitated for 2 jumps`);
+      pushLog(`> INJURY // ${consequence.name} // incapacitated`);
     else if (consequence.type === 'saved')
       pushLog(`> MEDIC INTERVENED // ${consequence.name} // injured, not lost`);
+    else if (consequence.type === 'echo') {
+      pushLog(`> ECHO BINDING // ${consequence.name} reborn as Echo // immortal`);
+      flash(`◌ ECHO // ${consequence.name}`);
+    }
   }
 
   // Roll engrams — Ghost crew members add +1 each
@@ -1975,9 +4023,26 @@ function doJump() {
   // Roll for a new crewmate in the arriving sector
   meta.totalJumps = (meta.totalJumps || 0) + 1;
   if (newK > meta.lifetimeKnowledgeMax) meta.lifetimeKnowledgeMax = newK;
+  // Wave 10: jumps grant +4 XP to every alive crew
+  if (typeof awardCrewXP === 'function') awardCrewXP(4);
+  // Wave 8: capture state values needed AFTER freshRun rebuilds state
+  const carriedHull = state.hull;  // post-damage value
+  const forced = state._forceNextSector;
   state = freshRun(newK, newJumps);
-  // Record new sector trait as visited
+  state.hull = Math.max(0, Math.min(100, carriedHull));
+  if (forced) {
+    const trait = SECTOR_TRAITS.find(t => t.id === forced);
+    if (trait) state.sector.traitId = forced;
+  }
   meta.traitsVisited[state.sector.traitId] = true;
+  // Wave 9: cosmic phenomenon check — overrides sector trait if milestone hit
+  if (typeof checkPhenomenonOnArrival === 'function') {
+    const phen = checkPhenomenonOnArrival();
+    if (phen) {
+      state._pendingPhenomenon = phen.id;
+    }
+  }
+  if (typeof recordSectorVisit === 'function') recordSectorVisit(state.sector);
 
   const newCrew = rollCrewmate(state.sector.traitId, newJumps);
   if (newCrew) {
@@ -1999,6 +4064,12 @@ function doJump() {
   save();
   currentTab = 'build';
   renderAll();
+  // Wave 9: if there's a pending cosmic phenomenon, trigger after a beat
+  if (state._pendingPhenomenon) {
+    const phen = COSMIC_PHENOMENA.find(p => p.id === state._pendingPhenomenon);
+    state._pendingPhenomenon = null;
+    if (phen) setTimeout(() => showPhenomenonModal(phen), 400);
+  }
 }
 
 function hardReset() {
@@ -2062,6 +4133,17 @@ function renderHeader() {
       </div>
     </div>
     <div class="hdr-right">
+      ${(state.hull != null && state.hull < 30) ? `
+        <div class="hull-alert" title="Repair in stable/resonance sectors or with anomaly choices">
+          <span>HULL</span>
+          <strong>${Math.round(state.hull)}%</strong>
+        </div>` : ''}
+      ${(meta.voidShards || 0) > 0 ? `
+        <div class="knowledge" style="border-color:rgba(255,79,163,0.4);background:linear-gradient(135deg,rgba(255,79,163,0.12),rgba(255,79,163,0.02));">
+          <span style="color:var(--magenta);">VOID SHARDS</span>
+          <strong style="color:#fff;">${meta.voidShards}</strong>
+          <em>×${meta.totalResets || 0}R</em>
+        </div>` : ''}
       ${state.knowledge > 0 ? `
         <div class="knowledge">
           <span>KNOWLEDGE</span>
@@ -2138,7 +4220,7 @@ function renderTabs() {
   `;
 }
 
-let protocolsSubTab = 'tree'; // 'tree' or 'objectives'
+let protocolsSubTab = 'web'; // 'web' | 'tree' (legacy) | 'patches' | 'objectives' | 'engrams'
 
 function setProtocolsSubTab(t) {
   protocolsSubTab = t;
@@ -2159,23 +4241,35 @@ function protocolsTabHTML() {
   const ppCount = state && typeof state.patchPoints === 'number' ? state.patchPoints : 0;
   const engramCount = (meta.engrams || []).filter(e => e.encrypted).length;
   const engramBadge = engramCount > 0 ? `<span class="badge" style="background:var(--gold);color:#000;">${engramCount}</span>` : '';
+  const vs = meta.voidShards || 0;
+  const vsBadge = vs > 0 ? `<span class="badge" style="background:var(--magenta);color:#000;">${vs}</span>` : '';
   const subnav = `
     <div class="sub-tabs">
-      <button class="sub-tab ${protocolsSubTab==='tree'?'active':''}" onclick="setProtocolsSubTab('tree')">CORE TREE</button>
-      <button class="sub-tab ${protocolsSubTab==='patches'?'active':''}" onclick="setProtocolsSubTab('patches')">PATCH GRID</button>
+      <button class="sub-tab ${protocolsSubTab==='web'?'active':''}" onclick="setProtocolsSubTab('web')" style="color:var(--magenta);">WEB${vsBadge}</button>
+      <button class="sub-tab ${protocolsSubTab==='tree'?'active':''}" onclick="setProtocolsSubTab('tree')">LEGACY</button>
+      <button class="sub-tab ${protocolsSubTab==='patches'?'active':''}" onclick="setProtocolsSubTab('patches')">PATCHES</button>
       <button class="sub-tab ${protocolsSubTab==='objectives'?'active':''}" onclick="setProtocolsSubTab('objectives')">OBJECTIVES</button>
       <button class="sub-tab ${protocolsSubTab==='engrams'?'active':''}" onclick="setProtocolsSubTab('engrams')" style="color:var(--gold);">ENGRAMS${engramBadge}</button>
+      <button class="sub-tab ${protocolsSubTab==='codex'?'active':''}" onclick="setProtocolsSubTab('codex')" style="color:var(--steel);">CODEX</button>
+      <button class="sub-tab ${protocolsSubTab==='achievements'?'active':''}" onclick="setProtocolsSubTab('achievements')" style="color:#88ffaa;">PANTHEON</button>
+      <button class="sub-tab ${protocolsSubTab==='telemetry'?'active':''}" onclick="setProtocolsSubTab('telemetry')">TELEMETRY</button>
       <div class="sub-tab-meter">
-        <span class="meter-label">UNSPENT PP</span>
+        <span class="meter-label">VOID SHARDS</span>
+        <span class="meter-val" style="color:var(--magenta);text-shadow:0 0 8px rgba(255,79,163,0.5);">${vs}</span>
+        <span class="meter-label" style="margin-left:16px;">PP</span>
         <span class="meter-val">${meta.pp}</span>
-        <span class="meter-label" style="margin-left:16px;">PATCH PTS</span>
+        <span class="meter-label" style="margin-left:16px;">PaP</span>
         <span class="meter-val" style="color:var(--amber);text-shadow:0 0 8px rgba(255,179,71,0.4);">${ppCount}</span>
       </div>
     </div>
   `;
+  if (protocolsSubTab === 'web') return subnav + webTreeHTML();
   if (protocolsSubTab === 'tree') return subnav + coreTreeHTML();
   if (protocolsSubTab === 'patches') return subnav + patchGridHTML();
   if (protocolsSubTab === 'engrams') return subnav + engramsHTML();
+  if (protocolsSubTab === 'codex') return subnav + codexHTML();
+  if (protocolsSubTab === 'achievements') return subnav + achievementsHTML();
+  if (protocolsSubTab === 'telemetry') return subnav + telemetryHTML();
   return subnav + objectivesHTML();
 }
 
@@ -2195,7 +4289,9 @@ function engramsHTML() {
     const rd = ENGRAM_RARITIES.find(r => r.id === e.rarity);
     const tpl = ENGRAM_POOL.find(t => t.id === e.templateId);
     const c = rd ? rd.color : 'var(--text-dim)';
-    const canDecrypt = e.encrypted && rd && k >= rd.kCost;
+    const dmult = (typeof webDecryptCostMult === 'function') ? webDecryptCostMult() : 1.0;
+    const effCost = rd ? Math.ceil(rd.kCost * dmult) : 0;
+    const canDecrypt = e.encrypted && rd && k >= effCost;
     return `
       <div class="engram ${e.encrypted ? '' : 'decrypted'}" style="--eg-c:${c};border-left-color:${c};">
         <div>
@@ -2208,7 +4304,7 @@ function engramsHTML() {
         ${e.encrypted
           ? `<button class="decrypt-btn" style="--eg-c:${c};border-color:${c};color:${c};"
                ${canDecrypt ? '' : 'disabled'} onclick="decryptEngram('${e.uid}')">
-               DECRYPT<br><span style="font-size:9px;">${rd ? rd.kCost : '?'} K</span>
+               DECRYPT<br><span style="font-size:9px;">${rd ? effCost : '?'} K</span>
              </button>`
           : `<div class="engram-done-mark" style="color:${c};">◆</div>`
         }
@@ -2470,20 +4566,24 @@ function buildTabHTML() {
       `<span class="cost-token" data-res="${res}" style="color:${(state.resources[res]||0) >= amt ? 'var(--text)' : 'var(--danger)'}">${fmt(amt)} ${RESOURCE_META[res].sym}</span>`
     ).join('  ');
     const qtyLabel = buyQty === 0 ? `×${qty}` : (qty > 1 ? `×${qty}` : `×${owned}`);
+    const isAuto = (typeof isAutoBuy === 'function') && isAutoBuy(b.id);
     return `
-      <button class="card ${afford?'afford':''}" data-id="${b.id}" ${afford?'':'disabled'}
-        onclick="buyBuilding('${b.id}')"
-        style="--c: ${RESOURCE_META[b.produces].color}">
-        <div class="card-row">
-          <div class="card-name">${b.name}</div>
-          <div class="card-owned">${buyQty === 1 ? `×${owned}` : `×${owned} <span style="color:var(--cyan-dim)">+${qty}</span>`}</div>
-        </div>
-        <div class="card-desc">${b.desc}</div>
-        <div class="card-row card-foot">
-          <div class="card-cost">COST: ${costStr}</div>
-          <div class="card-rate">+${effRate.toFixed(2)} ${RESOURCE_META[b.produces].sym}/s</div>
-        </div>
-      </button>
+      <div style="position:relative;">
+        <button class="card ${afford?'afford':''}" data-id="${b.id}" ${afford?'':'disabled'}
+          onclick="buyBuilding('${b.id}')"
+          style="--c: ${RESOURCE_META[b.produces].color};width:100%;">
+          <div class="card-row">
+            <div class="card-name">${b.name}</div>
+            <div class="card-owned">${buyQty === 1 ? `×${owned}` : `×${owned} <span style="color:var(--cyan-dim)">+${qty}</span>`}</div>
+          </div>
+          <div class="card-desc">${b.desc}</div>
+          <div class="card-row card-foot">
+            <div class="card-cost">COST: ${costStr}</div>
+            <div class="card-rate">+${effRate.toFixed(2)} ${RESOURCE_META[b.produces].sym}/s</div>
+          </div>
+        </button>
+        <button class="auto-toggle ${isAuto ? 'active' : ''}" onclick="event.stopPropagation(); toggleAutoBuy('${b.id}')" title="Auto-buy when affordable">A</button>
+      </div>
     `;
   }).join('');
   return qtyBar + `<div class="grid-list">` + cards + `</div>`;
@@ -2535,6 +4635,7 @@ function jumpTabHTML() {
   const kGain = computeKnowledgeGain();
   const trait = getTrait(state.sector.traitId);
   const jumpMultNote = trait.jumpMult ? ` <em style="color:var(--amber)">(${trait.name}: ×${trait.jumpMult})</em>` : '';
+  const shardPreview = (typeof computeVoidShards === 'function') ? computeVoidShards() : 1;
   // Wave 4c: aetherBonus now requires r4_aetheric protocol and uses sqrt
   const aetherBonus = metaHas('r4_aetheric')
     ? Math.floor(Math.sqrt(Math.max(0, state.resources.aether)))
@@ -2562,6 +4663,24 @@ function jumpTabHTML() {
           ? '// accumulate more plasma & alloy to enable jump'
           : '// jumps are irreversible. proceed with intention.'}
       </div>
+
+      <div class="void-reset-section">
+        <div class="void-reset-title">// VOID RESET</div>
+        <p style="font-size:11px;color:var(--text);line-height:1.6;margin:0 0 14px;">
+          Collapse this run entirely. All resources, buildings, research and Knowledge are wiped.
+          Crew, ship, engrams, and installed Protocols survive. You receive
+          <strong style="color:var(--magenta)">Void Shards</strong> — the only currency that buys nodes on the Protocol Web.
+        </p>
+        <div class="jump-stats" style="border-color:rgba(255,79,163,0.25);background:rgba(255,79,163,0.05);">
+          <div><span>SHARDS TO EARN</span><strong style="color:var(--magenta)">${shardPreview}</strong></div>
+          <div><span>JUMPS THIS RUN</span><strong>${state.jumps}</strong></div>
+          <div><span>TOTAL RESETS</span><strong>${meta.totalResets || 0}</strong></div>
+        </div>
+        <button class="void-btn" onclick="doVoidReset()">
+          ◈ INITIATE VOID RESET (+${shardPreview} VS)
+        </button>
+        <div class="jump-hint" style="color:rgba(255,79,163,0.5);">// crew survives. protocols survive. all else is lost.</div>
+      </div>
     </div>
   `;
 }
@@ -2572,14 +4691,27 @@ function renderCrewCard(c) {
   const isInjured = c.alive && c.injured;
   const statusColor = !c.alive ? 'var(--danger)' : isInjured ? 'var(--amber)' : 'var(--cyan)';
   const statusText = !c.alive ? '✕ KIA' : isInjured ? '⚠ INJURED' : '● ACTIVE';
+  const lvl = (typeof crewLevel === 'function') ? crewLevel(c) : 1;
+  const title = (typeof crewTitle === 'function') ? crewTitle(c) : '';
+  const xp = (typeof crewXP === 'function') ? crewXP(c) : 0;
+  const nextXp = (typeof crewXPNeededForNext === 'function') ? crewXPNeededForNext(c) : null;
+  const prevXp = lvl > 1 && CREW_LEVEL_XP ? (CREW_LEVEL_XP[lvl] || 0) : 0;
+  const intoLvl = xp - prevXp;
+  const lvlSpan = (nextXp != null) ? (nextXp - prevXp) : 1;
+  const xpPct = Math.max(0, Math.min(100, (intoLvl / lvlSpan) * 100));
   return `
     <div class="crewmate ${!c.alive ? 'dead' : ''} ${isInjured ? 'injured' : ''}"
          style="--cr-c:${color};">
       <div class="crew-sym">${cls ? cls.sym : '?'}</div>
       <div>
-        <div class="crew-name">${c.name}</div>
+        <div class="crew-name"><span class="crew-level-pill" style="--cr-c:${color};">L${lvl}</span>${c.name}</div>
         <div class="crew-class">${cls ? cls.name.toUpperCase() : 'UNKNOWN'}</div>
+        ${title ? `<div class="crew-title">${title.toUpperCase()}</div>` : ''}
         <div class="crew-desc">${cls ? cls.desc : ''}</div>
+        ${c.alive && nextXp != null ? `
+          <div class="crew-xp-bar"><div class="crew-xp-fill" style="--cr-c:${color};width:${xpPct}%;"></div></div>
+          <div class="crew-xp-label">${intoLvl} / ${lvlSpan} XP</div>
+        ` : (c.alive ? `<div class="crew-xp-label" style="color:var(--gold);">MAX LEVEL</div>` : '')}
       </div>
       <div>
         <div class="crew-status" style="color:${statusColor};">${statusText}</div>
@@ -2602,6 +4734,8 @@ function bridgeHTML() {
   return `
     <div class="bridge-view">
 
+      ${(meta.recentSectors && meta.recentSectors.length > 0) ? sectorMapHTML() : ''}
+
       <div class="ship-panel">
         <div class="ship-art">
           ${shipSvg}
@@ -2613,7 +4747,10 @@ function bridgeHTML() {
           <div class="ship-stats">
             <div class="ship-stat">
               <div class="ship-stat-label">HULL INTEGRITY</div>
-              <div class="ship-stat-val" style="color:var(--danger);">DEGRADED</div>
+              <div class="hull-pct" style="color:${(state.hull||100) >= 60 ? 'var(--cyan)' : (state.hull||100) >= 30 ? 'var(--amber)' : 'var(--danger)'};">${Math.round(state.hull == null ? 100 : state.hull)}%</div>
+              <div class="hull-bar-wrap">
+                <div class="hull-bar"><div class="hull-fill ${hullColorClass()}" style="width:${Math.max(0, Math.min(100, state.hull == null ? 100 : state.hull))}%;"></div></div>
+              </div>
             </div>
             <div class="ship-stat">
               <div class="ship-stat-label">CREW</div>
@@ -2665,6 +4802,8 @@ function bridgeHTML() {
           that is what you were built to do — and because somewhere, there may
           still be someone worth keeping it warm for.
         </p>` : ''}
+
+      ${(meta.shipsUnlocked && Object.keys(meta.shipsUnlocked).length >= 1) ? shipYardHTML() : ''}
     </div>`;
 }
 
@@ -2717,13 +4856,20 @@ function tick() {
   lastTick = now;
   const kMult = knowledgeMult(state);
   const trait = getTrait(state.sector.traitId);
+  // Wave 8: exotic boost from Singularity Sighting anomaly
+  let exoticMult = 1;
+  if (state._exoticBoost && state._exoticBoost.until > now) {
+    exoticMult = state._exoticBoost.mult || 1;
+  } else if (state._exoticBoost) {
+    state._exoticBoost = null;
+  }
   BUILDINGS.forEach(b => {
     const count = state.buildings[b.id];
     if (count > 0) {
       const traitMod = trait.mods[b.produces] || 1;
       const addMult = additiveProductionMult(b.produces);  // Wave 4c: combined meta+patch
       const plasmaDouble = patchPlasmaDoubler(b.produces);
-      const gain = b.rate * count * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * dt;
+      const gain = b.rate * count * state.mult[b.id] * kMult * traitMod * addMult * plasmaDouble * exoticMult * dt;
       state.resources[b.produces] += gain;
     }
   });
@@ -2760,6 +4906,14 @@ function tick() {
     if (newMs.length === 1) flash(`◆ MILESTONE // ${newMs[0].name}`);
     else flash(`◆ ${newMs.length} MILESTONES achieved`);
   }
+  // Wave 11: check achievements
+  if (typeof checkAchievements === 'function') {
+    const newAch = checkAchievements();
+    for (const a of newAch) {
+      pushLog(`> achievement: ${a.name} // +${a.vs} VS`);
+      flash(`✦ ACHIEVEMENT // ${a.name} (+${a.vs} VS)`);
+    }
+  }
   // Wave 4b: check per-run challenges
   const newCh = checkChallenges();
   if (newCh.length) {
@@ -2769,6 +4923,22 @@ function tick() {
   renderResources();
   refreshAffordability();
   maybeAmbientLog(now);
+  if (typeof maybeAnomaly === 'function') maybeAnomaly(now);
+  // Wave 10: passive crew XP — 1 XP every 6 seconds for each alive uninjured crew
+  if (typeof awardCrewXP === 'function' && meta.crew && meta.crew.length > 0) {
+    crewXpAccum = (crewXpAccum || 0) + dt;
+    while (crewXpAccum >= 6) {
+      crewXpAccum -= 6;
+      awardCrewXP(1);
+    }
+  }
+  // Wave 12: auto-buy & auto-decrypt run every tick
+  if (typeof runAutoBuy === 'function') runAutoBuy();
+  autoDecryptAccum = (autoDecryptAccum || 0) + dt;
+  if (autoDecryptAccum >= 2) {
+    autoDecryptAccum = 0;
+    if (typeof runAutoDecrypt === 'function') runAutoDecrypt();
+  }
   // periodic save every 5s
   if (now - lastSaveTime > 5000) {
     save();
@@ -2777,6 +4947,8 @@ function tick() {
     renderHeader();
   }
 }
+let crewXpAccum = 0;
+let autoDecryptAccum = 0;
 
 let windowBlurred = false;
 let autoPulseAccum = 0;
@@ -2870,7 +5042,19 @@ function init() {
       meta.traitsVisited[state.sector.traitId] = true;
       saveMeta();
     }
+    // Wave 8: record starting sector in codex (idempotent — only adds once)
+    if (typeof ensureCodex === 'function') {
+      ensureCodex();
+      if (!meta.codex.sectorsLogged[state.sector.id]) {
+        recordSectorVisit(state.sector);
+        saveMeta();
+      }
+    }
   }
+  // Wave 8: ensure hull defaults to 100 if missing
+  if (state && typeof state.hull !== 'number') state.hull = 100;
+  // Wave 13: apply saved theme
+  if (typeof applyTheme === 'function') applyTheme();
   // Run milestone check on load (handles save-format upgrades adding new milestones)
   checkMilestones();
   renderAll();
