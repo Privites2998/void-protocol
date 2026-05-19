@@ -680,6 +680,69 @@
   }
   .theme-swatch:hover { transform: scale(1.1); border-color: #fff; }
   .theme-swatch.active { border-color: #fff; box-shadow: 0 0 12px currentColor; }
+
+  /* WAVE 15 — RESONANCE UI */
+  .resonance-wrap { display: flex; flex-direction: column; gap: 16px; }
+  .res-progress-bar {
+    background: rgba(5,8,16,0.5); border: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+  .res-progress-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .res-progress-head span { color: var(--text-dim); font-size: 10px; letter-spacing: 0.2em; }
+  .res-progress-head strong { color: #fff; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .res-cats { display: flex; flex-direction: column; gap: 10px; }
+  .res-cat {
+    background: rgba(5,8,16,0.5); border: 1px solid var(--border);
+    border-left: 3px solid var(--res-c, var(--cyan-dim));
+    padding: 12px 14px;
+    transition: border-color 0.15s;
+  }
+  .res-cat:hover { border-color: var(--res-c, var(--cyan)); }
+  .res-cat-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .res-cat-name { font-size: 12px; letter-spacing: 0.22em; font-weight: 700; }
+  .res-cat-master {
+    margin-left: 10px; color: var(--gold); font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+  .res-cat-pts {
+    color: #fff; font-size: 13px; font-variant-numeric: tabular-nums;
+  }
+  .res-bar {
+    position: relative; height: 5px; background: rgba(5,8,16,0.6);
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .res-fill { height: 100%; transition: width 0.4s, background 0.4s; }
+  .res-cat-effect {
+    color: var(--text-dim); font-size: 11px; margin-top: 6px;
+  }
+  .res-cat-mastery {
+    color: var(--gold); font-size: 10px; margin-top: 4px;
+    letter-spacing: 0.1em; font-style: italic;
+  }
+  .res-cat-actions {
+    display: flex; gap: 6px; margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .res-buy {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); padding: 5px 12px;
+    font-family: inherit; font-size: 10px; letter-spacing: 0.12em;
+    cursor: pointer; transition: all 0.14s;
+  }
+  .res-buy:disabled { opacity: 0.4; cursor: not-allowed; }
+  .res-buy.afford {
+    border-color: var(--res-c, var(--cyan)); color: var(--res-c, var(--cyan));
+  }
+  .res-buy.afford:hover {
+    background: rgba(94,226,255,0.08);
+    box-shadow: 0 0 8px var(--res-c, var(--cyan));
+  }
   .tree-node.owned circle {
     fill: var(--cyan); stroke: #fff;
     filter: drop-shadow(0 0 8px var(--cyan));
@@ -863,7 +926,7 @@
 // VOID PROTOCOL v2 — Wave 4d (Knowledge rebalance + bridge buildings)
 // ============================================================
 
-const SAVE_VERSION = 14;
+const SAVE_VERSION = 16;
 const SAVE_KEY = 'voidProtocol';
 const META_KEY = 'voidProtocolMeta';
 const MAX_OFFLINE_SECONDS = 4 * 60 * 60; // 4h default (Hoarder extends to 6h)
@@ -1164,10 +1227,12 @@ function freshMeta() {
     crew: [],                       // crewmate objects
     shipSeed: 0,                    // seed for procedural ship art (set on first load)
     shipType: 'athena',             // current ship class
-    // Wave 7
+    // Wave 7 / Wave 15
     voidShards: 0,                  // prestige currency earned by Void Reset
     totalResets: 0,                 // how many Void Resets performed
-    webOwned: {},                   // { nodeId: true } for Protocol Web nodes
+    webOwned: {},                   // [Wave 15: deprecated, refunded on migration]
+    // Wave 15 — Resonance: 5 categories, 0-100 points each
+    resonance: { pulse: 0, systems: 0, signal: 0, crew: 0, void: 0 },
     // Wave 8
     codex: {                        // discovered lore & events
       anomaliesSeen: {},            // { anomalyId: { firstJump, choice, outcome, count } }
@@ -1208,12 +1273,36 @@ function loadMeta() {
     const raw = localStorage.getItem(META_KEY);
     if (!raw) return freshMeta();
     const parsed = JSON.parse(raw);
-    // future-proof migration if metaVersion is older
     if (!parsed.metaVersion) parsed.metaVersion = SAVE_VERSION;
-    // ensure all expected keys exist
     const fresh = freshMeta();
     for (const k of Object.keys(fresh)) {
       if (!(k in parsed)) parsed[k] = fresh[k];
+    }
+    // Wave 15: one-time migration — refund webOwned + PP into Void Shards
+    if ((parsed.metaVersion || 0) < 15) {
+      let refund = 0;
+      if (parsed.webOwned && typeof WEB_NODES !== 'undefined') {
+        for (const nodeId of Object.keys(parsed.webOwned)) {
+          const node = WEB_NODES.find(n => n.id === nodeId);
+          if (node) refund += node.cost;
+        }
+      }
+      // Refund PP at 1 PP = 1 VS (PP system retired)
+      if (parsed.pp && parsed.pp > 0) {
+        refund += parsed.pp;
+        parsed.pp = 0;
+      }
+      parsed.voidShards = (parsed.voidShards || 0) + refund;
+      parsed.webOwned = {};
+      // Ensure resonance object is shaped correctly
+      if (!parsed.resonance || typeof parsed.resonance !== 'object') {
+        parsed.resonance = { pulse: 0, systems: 0, signal: 0, crew: 0, void: 0 };
+      } else {
+        for (const k of ['pulse','systems','signal','crew','void']) {
+          if (typeof parsed.resonance[k] !== 'number') parsed.resonance[k] = 0;
+        }
+      }
+      parsed.metaVersion = SAVE_VERSION;
     }
     return parsed;
   } catch (e) {
@@ -1313,7 +1402,18 @@ function additiveProductionMult(resource) {
   const base = 1 + metaProductionBonus(resource) + patchProductionBonus(resource) + crewProductionBonus(resource) + web;
   // Wave 9: ship class multiplier applies on top of the additive stack
   const shipMult = (typeof shipProductionMult === 'function') ? shipProductionMult() : 1.0;
-  return base * shipMult;
+  // Wave 16: small ongoing Aether bonus (caps at +10%) — gives Aether a passive role
+  const aetherMult = (typeof aetherProductionBonus === 'function') ? (1 + aetherProductionBonus()) : 1.0;
+  return base * shipMult * aetherMult;
+}
+
+// Wave 16: ongoing Aether production bonus. Gentle log curve, capped at +10%.
+function aetherProductionBonus() {
+  if (!state || !state.resources) return 0;
+  const a = state.resources.aether || 0;
+  if (a < 1) return 0;
+  // log10(a + 1) * 0.015, capped at 0.10 (+10%)
+  return Math.min(0.10, Math.log10(a + 1) * 0.015);
 }
 
 // Check all milestones, award PP for newly earned ones, returns array of newly earned for toast/log.
@@ -1323,7 +1423,8 @@ function checkMilestones() {
     if (meta.milestonesEarned[m.id]) continue;
     if (m.check(state, meta)) {
       meta.milestonesEarned[m.id] = true;
-      meta.pp += m.pp;
+      // Wave 15: PP retired — milestones now grant Void Shards at 1:1 conversion
+      meta.voidShards = (meta.voidShards || 0) + m.pp;
       newly.push(m);
     }
   }
@@ -1440,44 +1541,65 @@ function buyWebNode(id) {
 }
 
 // --- WEB EFFECT FUNCTIONS ---
+// === WAVE 15 — RESONANCE EFFECT FUNCTIONS ===
+// (Replaces the old per-node Web effects. Continuous bonuses based on point allocation.)
+function resCount(cat) {
+  if (!meta.resonance) return 0;
+  return Math.max(0, Math.min(100, meta.resonance[cat] || 0));
+}
+function resMastered(cat) { return resCount(cat) >= 100; }
+
+// Per-point bonuses
+const RES_PER_POINT = {
+  pulse:   0.01,    // +1% click power per point
+  systems: 0.005,   // +0.5% production per point (additive)
+  signal:  0.005,   // +0.5% knowledge gain per point
+  crew:    0.005,   // +0.5% crew bonus multiplier per point
+  void:    0.003,   // +0.3% production per point (additive)
+};
+
+// Bonus describer strings (for UI)
+const RES_DESC = {
+  pulse:   pts => `+${pts}% manual pulse power`,
+  systems: pts => `+${(pts * 0.5).toFixed(1)}% resource production`,
+  signal:  pts => `+${(pts * 0.5).toFixed(1)}% Knowledge gained on Jump`,
+  crew:    pts => `+${(pts * 0.5).toFixed(1)}% to crew bonuses`,
+  void:    pts => `+${(pts * 0.3).toFixed(1)}% resource production`,
+};
+const RES_MASTERY = {
+  pulse:   '+5% critical pulse chance',
+  systems: 'Building cost growth ×1.075 (vs ×1.08)',
+  signal:  'Engram decrypt cost −50%',
+  crew:    'Crew cannot die (lethal hits become permanent injury that heals)',
+  void:    'Start each run with Knowledge = resets × 10',
+};
+
+// Compatibility shims — old code calls webX() functions; route to resonance equivalents.
 function webProductionBonus(resource) {
-  let bonus = 0;
-  if (webHas('systems_t2')) bonus += 0.15;
-  if (webHas('systems_t4')) bonus += 1.00;
-  if (webHas('void_t4'))    bonus += 0.50;
-  return bonus;
+  return (resCount('systems') * RES_PER_POINT.systems) + (resCount('void') * RES_PER_POINT.void);
 }
-function webClickBonus() { return webHas('pulse_t1') ? 2 : 0; }
-function webClickMult() {
-  let m = 1;
-  if (webHas('pulse_t2')) m *= 1.5;
-  if (webHas('pulse_t4')) {
-    const ac = (meta.crew || []).filter(c => c.alive && !c.injured).length;
-    m *= (ac + 1);
-  }
-  return m;
-}
-function webKnowledgeBonus()   { return webHas('signal_t2') ? 0.25 : 0; }
-function webDecryptCostMult()  { return webHas('signal_t3') ? 0.70 : 1.0; }
-function webExtraEngrams()     { return webHas('signal_t1') ? 1 : 0; }
-function webMaxCrew()          {
-  const base = webHas('crew_t1') ? 5 : 4;
+function webClickBonus()        { return 0; }
+function webClickMult()         { return 1 + (resCount('pulse') * RES_PER_POINT.pulse); }
+function webKnowledgeBonus()    { return resCount('signal') * RES_PER_POINT.signal; }
+function webDecryptCostMult()   { return resMastered('signal') ? 0.50 : 1.0; }
+function webExtraEngrams()      { return 0; }
+function webMaxCrew()           {
+  const base = 4;
   const shipBonus = (typeof shipMaxCrewBonus === 'function') ? shipMaxCrewBonus() : 0;
   return Math.max(1, base + shipBonus);
 }
-function webCrewRecoveryJumps(){ return webHas('crew_t2') ? 1 : 2; }
-function webVoidShardBonus() {
-  let b = 0;
-  if (webHas('signal_t4')) b += 1;
-  if (webHas('void_t3'))   b += 1;
-  return b;
-}
+function webCrewRecoveryJumps() { return resCount('crew') >= 50 ? 1 : 2; }
+function webVoidShardBonus()    { return 0; }
 function webStartingKnowledge() {
-  return webHas('void_t1') ? (meta.totalResets || 0) * 3 : 0;
+  return resMastered('void') ? (meta.totalResets || 0) * 10 : 0;
 }
-function webOfflineCap()       { return webHas('void_t2') ? 8 * 3600 : null; }
-function webBuildingCostMult() { return webHas('systems_t1') ? 0.90 : 1.0; }
-function effectiveCostGrowth() { return webHas('systems_t3') ? 1.07 : 1.08; }
+function webOfflineCap()        { return resCount('void') >= 25 ? 8 * 3600 : null; }
+function webBuildingCostMult()  { return 1.0; }
+function effectiveCostGrowth()  { return resMastered('systems') ? 1.075 : 1.08; }
+function resPulseCritBonus()    { return resMastered('pulse') ? 0.05 : 0; }
+function resCrewImmortal()      { return resMastered('crew'); }
+// Multiplier applied to crew bonuses
+function resCrewBonusMult()     { return 1 + (resCount('crew') * RES_PER_POINT.crew); }
 
 // --- VOID RESET ---
 function computeVoidShards() {
@@ -1530,7 +1652,161 @@ function doVoidReset() {
 }
 
 // --- WEB TREE UI ---
-function webTreeHTML() {
+// === WAVE 15 — RESONANCE PURCHASE & UI ===
+function resonanceCost(currentPts) {
+  if (currentPts >= 100) return Infinity;
+  return 1 + Math.floor(currentPts / 10);
+}
+function resonanceTotalCostTo(cat, targetPts) {
+  // sum of resonanceCost for points (current..target-1)
+  let sum = 0;
+  for (let i = resCount(cat); i < targetPts && i < 100; i++) sum += resonanceCost(i);
+  return sum;
+}
+function buyResonance(cat, qty) {
+  if (!meta.resonance) meta.resonance = { pulse:0, systems:0, signal:0, crew:0, void:0 };
+  let bought = 0;
+  let target = qty;
+  if (qty === 'max') {
+    // Buy as many as VS allows, up to 100
+    target = 100 - resCount(cat);
+  }
+  for (let i = 0; i < target; i++) {
+    const current = resCount(cat);
+    if (current >= 100) break;
+    const cost = resonanceCost(current);
+    if ((meta.voidShards || 0) < cost) break;
+    meta.voidShards -= cost;
+    meta.resonance[cat] = current + 1;
+    bought++;
+  }
+  if (bought > 0) {
+    saveMeta();
+    pushLog(`> resonance: ${cat} +${bought} (${resCount(cat)}/100)`);
+    if (bought > 1) flash(`◆ ${cat.toUpperCase()} +${bought} (${resCount(cat)}/100)`);
+    else flash(`◆ ${cat.toUpperCase()} +1`);
+    // Check for mastery on this category
+    if (resMastered(cat)) {
+      pushLog(`> ${cat.toUpperCase()} mastered // ${RES_MASTERY[cat]}`);
+    }
+    // Check for 100% completion
+    if (typeof checkResonanceCompletion === 'function') checkResonanceCompletion();
+    renderAll();
+  }
+}
+
+function checkResonanceCompletion() {
+  const cats = ['pulse','systems','signal','crew','void'];
+  const total = cats.reduce((a, c) => a + resCount(c), 0);
+  if (total >= 500 && !meta.resonanceCompleted) {
+    meta.resonanceCompleted = true;
+    saveMeta();
+    showResonanceTrophy();
+  }
+}
+
+function showResonanceTrophy() {
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg anomaly-bg';
+  bg.innerHTML = `
+    <div class="modal anomaly-modal" style="border-color:var(--gold);box-shadow:0 0 80px rgba(255,232,138,0.5);max-width:520px;">
+      <div class="anomaly-cat" style="color:var(--gold);">// RESONANCE COMPLETE</div>
+      <div class="modal-title" style="color:var(--gold);">100% RESONANCE</div>
+      <div class="modal-body">
+        <div class="anomaly-outcome" style="border-color:var(--gold);">
+          You have completed every Resonance category. The void hums in harmony with the ship,
+          and the ship hums back. A small trophy appears in your Pantheon — a quiet marker
+          for the longest journey.
+          <br><br>
+          <strong style="color:var(--gold);">+100 Void Shards</strong> awarded.
+        </div>
+      </div>
+      <button class="modal-btn" id="trophy-close" style="background:var(--gold);color:#000;">CONTINUE</button>
+    </div>`;
+  document.body.appendChild(bg);
+  bg.querySelector('#trophy-close').addEventListener('click', () => {
+    bg.remove();
+    meta.voidShards = (meta.voidShards || 0) + 100;
+    saveMeta();
+    renderAll();
+  });
+  pushLog('> RESONANCE COMPLETE // 500/500 // trophy unlocked');
+  flash('✦ RESONANCE COMPLETE // 100%');
+}
+
+const RES_CATS = [
+  { id:'pulse',   name:'PULSE',   color:'#5ee2ff', desc:'Manual pulse power' },
+  { id:'systems', name:'SYSTEMS', color:'#ffb347', desc:'Resource production' },
+  { id:'signal',  name:'SIGNAL',  color:'#ffe88a', desc:'Knowledge / engrams' },
+  { id:'crew',    name:'CREW',    color:'#a8b8cc', desc:'Crew bonuses & recovery' },
+  { id:'void',    name:'VOID',    color:'#ff4fa3', desc:'Foundational scaling' },
+];
+
+function resonanceHTML() {
+  if (!meta.resonance) meta.resonance = { pulse:0, systems:0, signal:0, crew:0, void:0 };
+  const vs = meta.voidShards || 0;
+  const totalPoints = RES_CATS.reduce((a, c) => a + resCount(c.id), 0);
+  const pctComplete = Math.floor((totalPoints / 500) * 100);
+  const rows = RES_CATS.map(cat => {
+    const pts = resCount(cat.id);
+    const maxed = pts >= 100;
+    const nextCost = maxed ? null : resonanceCost(pts);
+    const cost5 = maxed ? null : resonanceTotalCostTo(cat.id, Math.min(100, pts + 5));
+    const pct = pts;
+    const canBuy1 = !maxed && vs >= nextCost;
+    const canBuy5 = !maxed && cost5 > 0 && vs >= cost5;
+    const bonusText = RES_DESC[cat.id](pts);
+    return `
+      <div class="res-cat" style="--res-c:${cat.color};">
+        <div class="res-cat-head">
+          <div>
+            <span class="res-cat-name" style="color:${cat.color};">${cat.name}</span>
+            ${maxed ? `<span class="res-cat-master" title="${RES_MASTERY[cat.id]}">◆ MASTERED</span>` : ''}
+          </div>
+          <span class="res-cat-pts">${pts} / 100</span>
+        </div>
+        <div class="res-bar"><div class="res-fill" style="background:${cat.color};box-shadow:0 0 8px ${cat.color};width:${pct}%;"></div></div>
+        <div class="res-cat-effect">${bonusText}</div>
+        ${maxed ? `<div class="res-cat-mastery">★ Mastery: ${RES_MASTERY[cat.id]}</div>` : ''}
+        <div class="res-cat-actions">
+          ${maxed
+            ? '<div style="color:var(--gold);font-size:11px;letter-spacing:0.18em;">MAXIMUM ALLOCATION</div>'
+            : `
+              <button class="res-buy ${canBuy1 ? 'afford' : ''}" ${canBuy1 ? '' : 'disabled'} onclick="buyResonance('${cat.id}', 1)">+1 (${nextCost} VS)</button>
+              <button class="res-buy ${canBuy5 ? 'afford' : ''}" ${canBuy5 ? '' : 'disabled'} onclick="buyResonance('${cat.id}', 5)">+5 (${cost5} VS)</button>
+              <button class="res-buy" onclick="buyResonance('${cat.id}', 'max')">MAX</button>
+            `}
+        </div>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="resonance-wrap">
+      <div class="vs-display">
+        <div class="vs-label">VOID SHARDS</div>
+        <div class="vs-val">${vs}</div>
+        <div class="vs-sub">Spend on Resonance categories. Each point gives a small permanent bonus. Costs scale every 10 points.</div>
+      </div>
+      <div class="res-progress-bar">
+        <div class="res-progress-head">
+          <span>COMPLETION</span>
+          <strong>${totalPoints} / 500 · ${pctComplete}%</strong>
+          ${meta.resonanceCompleted ? '<span style="color:var(--gold);letter-spacing:0.2em;">◆ TROPHY</span>' : ''}
+        </div>
+        <div class="res-bar"><div class="res-fill" style="background:linear-gradient(90deg, #5ee2ff, #ffb347, #ffe88a, #a8b8cc, #ff4fa3);width:${pctComplete}%;"></div></div>
+      </div>
+      <div class="res-cats">${rows}</div>
+      <p style="color:var(--text-dim);font-size:10px;line-height:1.6;margin:8px 0 0;">
+        Cost per point: <strong>${1} VS</strong> at 0-9 owned, <strong>${2} VS</strong> at 10-19, … <strong>${10} VS</strong> at 90-99.
+        Reach 100 in any category to unlock its <strong style="color:var(--gold);">Mastery</strong>.
+        Reach 500 / 500 total for the completion trophy.
+      </p>
+    </div>
+  `;
+}
+
+// Replaced — old SVG webTreeHTML retired in Wave 15
+function _retired_webTreeHTML() {
   const SIZE = 740, C = SIZE / 2, NR = 18;
   let orbits = '';
   [90, 170, 250, 330].forEach(r => {
@@ -2514,9 +2790,9 @@ const ACHIEVEMENTS = [
   { id:'ach_vr1',  cat:'VOID', name:'First Reset',             desc:'Complete your first Void Reset',                  vs:2, check:(s,m) => (m.totalResets||0) >= 1 },
   { id:'ach_vr5',  cat:'VOID', name:'Cycle of Returns',        desc:'Complete 5 Void Resets',                          vs:4, check:(s,m) => (m.totalResets||0) >= 5 },
   { id:'ach_vr15', cat:'VOID', name:'Eternal Return',          desc:'Complete 15 Void Resets',                         vs:8, check:(s,m) => (m.totalResets||0) >= 15 },
-  { id:'ach_web5', cat:'VOID', name:'Initiate',                desc:'Install 5 Web Protocol nodes',                    vs:2, check:(s,m) => Object.keys(m.webOwned||{}).length >= 5 },
-  { id:'ach_web10',cat:'VOID', name:'Adept',                   desc:'Install 10 Web Protocol nodes',                   vs:4, check:(s,m) => Object.keys(m.webOwned||{}).length >= 10 },
-  { id:'ach_web_full',cat:'VOID', name:'The Whole Web',        desc:'Install every Web Protocol node (20 total)',      vs:25, check:(s,m) => Object.keys(m.webOwned||{}).length >= 20 },
+  { id:'ach_web5', cat:'VOID', name:'Initiate',                desc:'Allocate 25 Resonance points total',              vs:2, check:(s,m) => ['pulse','systems','signal','crew','void'].reduce((a,c) => a + (m.resonance && m.resonance[c] || 0), 0) >= 25 },
+  { id:'ach_web10',cat:'VOID', name:'Adept',                   desc:'Allocate 100 Resonance points total',             vs:4, check:(s,m) => ['pulse','systems','signal','crew','void'].reduce((a,c) => a + (m.resonance && m.resonance[c] || 0), 0) >= 100 },
+  { id:'ach_web_full',cat:'VOID', name:'Resonance Master',     desc:'Allocate the full 500 Resonance points',          vs:50, check:(s,m) => ['pulse','systems','signal','crew','void'].reduce((a,c) => a + (m.resonance && m.resonance[c] || 0), 0) >= 500 },
   { id:'ach_shards50',cat:'VOID', name:'Hoarder',              desc:'Hold 50 Void Shards at once',                     vs:5, check:(s,m) => (m.voidShards||0) >= 50 },
 
   // LORE
@@ -2602,30 +2878,10 @@ function achievementsHTML() {
 // ============================================================
 // WAVE 12 — AUTO-SYSTEMS & TELEMETRY
 // ============================================================
-function toggleAutoBuy(id) {
-  if (!state.autoBuy) state.autoBuy = {};
-  state.autoBuy[id] = !state.autoBuy[id];
-  save();
-  renderTabPanel();
-}
-function isAutoBuy(id) { return !!(state && state.autoBuy && state.autoBuy[id]); }
-
-function runAutoBuy() {
-  if (!state.autoBuy) return;
-  for (const b of BUILDINGS) {
-    if (!state.autoBuy[b.id]) continue;
-    if (!b.unlock(state)) continue;
-    const owned = state.buildings[b.id];
-    // Buy single units while affordable (capped per tick to avoid runaway)
-    let purchased = 0;
-    while (purchased < 5 && canAffordBuildingN(b, state.buildings[b.id], state.resources, 1)) {
-      const cost = buildingCostBulk(b, state.buildings[b.id], 1);
-      for (const [res, amt] of Object.entries(cost)) state.resources[res] -= amt;
-      state.buildings[b.id] += 1;
-      purchased += 1;
-    }
-  }
-}
+// Auto-buy retired in Wave 15 — stubs kept to avoid breaking anything that referenced them
+function toggleAutoBuy() {}
+function isAutoBuy() { return false; }
+function runAutoBuy() {}
 
 function runAutoDecrypt() {
   if (!meta.settings || !meta.settings.autoDecrypt) return;
@@ -2709,7 +2965,7 @@ function telemetryHTML() {
     { lab:'TOTAL JUMPS',       val: (meta.totalJumps || 0).toLocaleString(), sub: `${state.jumps} this run` },
     { lab:'VOID RESETS',       val: meta.totalResets || 0 },
     { lab:'VOID SHARDS',       val: meta.voidShards || 0, sub:'unspent' },
-    { lab:'PROTOCOL POINTS',   val: meta.pp || 0, sub:'unspent' },
+    { lab:'RESONANCE POINTS',  val: ['pulse','systems','signal','crew','void'].reduce((a,c)=>a+(meta.resonance && meta.resonance[c] || 0),0), sub:'/ 500' },
     { lab:'BUILDINGS',         val: totalBuildings, sub:`across ${BUILDINGS.length} types` },
     { lab:'PRODUCTION /S',     val: fmt(totalProduction), sub:'all resources sum' },
     { lab:'KNOWLEDGE',         val: state.knowledge.toLocaleString(), sub:`×${knowledgeMult(state).toFixed(2)}` },
@@ -2718,7 +2974,7 @@ function telemetryHTML() {
     { lab:'ENGRAMS DECRYPTED', val: decryptedEngrams, sub:`${totalEngrams} total` },
     { lab:'ANOMALIES SEEN',    val: Object.keys(meta.codex && meta.codex.anomaliesSeen || {}).length, sub:`${(meta.anomalyCount || 0)} encountered` },
     { lab:'SECTORS LOGGED',    val: Object.keys(meta.codex && meta.codex.sectorsLogged || {}).length, sub:'unique' },
-    { lab:'WEB NODES',         val: Object.keys(meta.webOwned || {}).length, sub:'/ 20' },
+    { lab:'RESONANCE COMPLETE',val: meta.resonanceCompleted ? 'YES' : 'NO', sub: meta.resonanceCompleted ? '◆ trophy' : 'reach 500/500' },
     { lab:'MILESTONES',        val: Object.keys(meta.milestonesEarned || {}).length, sub:`/ ${MILESTONES.length}` },
     { lab:'ACHIEVEMENTS',      val: Object.keys(meta.achievementsEarned || {}).length, sub:`/ ${ACHIEVEMENTS.length}` },
     { lab:'SHIPS UNLOCKED',    val: Object.keys(meta.shipsUnlocked || { athena: true }).length, sub:'/ 5' },
@@ -3449,9 +3705,10 @@ function decryptEngram(uid) {
   engram.encrypted = false;
   const tpl = ENGRAM_POOL.find(t => t.id === engram.templateId);
   if (tpl && tpl.reward && tpl.reward.type === 'pp') {
-    meta.pp += tpl.reward.val;
-    pushLog(`> engram decrypted: ${engram.name} // +${tpl.reward.val} PP`);
-    flash(`◈ DECRYPTED // ${engram.name} // +${tpl.reward.val} PP`);
+    // Wave 15: PP retired — engram rewards convert to Void Shards at 1:1
+    meta.voidShards = (meta.voidShards || 0) + tpl.reward.val;
+    pushLog(`> engram decrypted: ${engram.name} // +${tpl.reward.val} VS`);
+    flash(`◈ DECRYPTED // ${engram.name} // +${tpl.reward.val} VS`);
   }
   saveMeta();
   save();
@@ -3486,10 +3743,8 @@ function crewProductionBonus(resource) {
     if (c.class === 'echo')  bonus += 0.05 * lvlMult;
   });
   if (typeof shipCrewBonusBoost === 'function') bonus *= shipCrewBonusBoost();
-  if (typeof webHas === 'function' && webHas('crew_t3')) {
-    const ac = meta.crew.filter(c => c.alive && !c.injured).length;
-    bonus += ac * 0.08;
-  }
+  // Wave 15: Resonance CREW multiplier (per-point bonus)
+  if (typeof resCrewBonusMult === 'function') bonus *= resCrewBonusMult();
   return bonus;
 }
 
@@ -3561,10 +3816,10 @@ function applyJumpConsequences(traitId, jumpsDone) {
       target.injured = true; target.injuredUntil = jumpsDone + recoveryTime;
       return { type: 'saved', name: target.name };
     }
-    // Echo Binding (crew_t4): fallen crew return as immortal Echoes
-    if (typeof webHas === 'function' && webHas('crew_t4')) {
-      target.class = 'echo'; target.alive = true; target.injured = false; target.injuredUntil = null;
-      return { type: 'echo', name: target.name };
+    // Wave 15: CREW mastery — fatal hits become permanent-feeling injuries (crew can't die)
+    if (typeof resCrewImmortal === 'function' && resCrewImmortal()) {
+      target.injured = true; target.injuredUntil = jumpsDone + 3;
+      return { type: 'saved', name: target.name };
     }
     target.alive = false;
     return { type: 'death', name: target.name, class: target.class };
@@ -3615,8 +3870,6 @@ function freshRun(carryKnowledge = 0, carryJumps = 0) {
     cascadeAccum: 0,                            // accumulator for nerfed Pulse Cascade (30s trickle)
     // Wave 8
     hull: 100,                                  // ship hull integrity (0-100)
-    // Wave 12
-    autoBuy: {},                                // { buildingId: true } — auto-purchase when affordable
   };
 }
 
@@ -3684,11 +3937,12 @@ function load() {
         }
         return parsed;
       }
-      // Wave 7-14: in-place migration.
-      if (oldVer >= 6 && oldVer <= 13) {
+      // Wave 7-15: in-place migration.
+      if (oldVer >= 6 && oldVer <= 15) {
         parsed.version = SAVE_VERSION;
         if (typeof parsed.hull !== 'number') parsed.hull = 100;
-        if (!parsed.autoBuy) parsed.autoBuy = {};
+        // Wave 15: auto-buy data is no longer used; remove it
+        delete parsed.autoBuy;
         return parsed;
       }
       // Pre-v3 saves: reset run, preserve Knowledge and Jumps as before
@@ -3794,11 +4048,12 @@ function doPulseLogic(visual) {
     critMult = 10;
     if (visual) flash('◈ CRITICAL PULSE ×10');
   }
-  // Wave 7: Overload Spike (pulse_t3) — separate crit roll, stacks with r3_crit
+  // Wave 15: PULSE mastery adds +5% crit chance (x5)
   let webCritMult = 1;
-  if (typeof webHas === 'function' && webHas('pulse_t3') && Math.random() < 0.08) {
-    webCritMult = 8;
-    if (visual) flash('◈ OVERLOAD SPIKE ×8');
+  const masterCrit = (typeof resPulseCritBonus === 'function') ? resPulseCritBonus() : 0;
+  if (masterCrit > 0 && Math.random() < masterCrit) {
+    webCritMult = 5;
+    if (visual) flash('◈ RESONANCE CRIT ×5');
   }
   // Wave 7: web pulse bonuses
   const webBase = (typeof webClickBonus === 'function') ? webClickBonus() : 0;
@@ -3939,10 +4194,10 @@ function computeKnowledgeGain() {
   if (totalScore >= 1000) {
     base = Math.floor(Math.log10(totalScore / 10) * 2.5 * jumpMult);
   }
-  // Wave 4c: Aether Knowledge bonus is GATED behind r4_aetheric protocol (was +10/Aether
-  // automatic, gave 432K K in 2min). Sqrt curve, modest endgame supplement only.
+  // Wave 16: Aether Knowledge bonus capped at +25 per jump (was unbounded sqrt — too snowbally).
+  // New formula: floor(sqrt(Aether) / 2), capped at 25. Reaches the cap at ~2500 Aether.
   const aetherBonus = metaHas('r4_aetheric')
-    ? Math.floor(Math.sqrt(Math.max(0, state.resources.aether)))
+    ? Math.min(25, Math.floor(Math.sqrt(Math.max(0, state.resources.aether)) / 2))
     : 0;
   // Wave 4b: Star Mapper (pb4) +25% Knowledge gained
   const patchBonus = patchJumpKnowledgeBonus();
@@ -4060,7 +4315,7 @@ function doJump() {
   pushLog(`> ${newEngrams.length} engram${newEngrams.length !== 1 ? 's' : ''} recovered from ${departingSectorId}`);
   // Run milestone check after jump (totalJumps may unlock some)
   const newMs = checkMilestones();
-  for (const m of newMs) pushLog(`> milestone: ${m.name} // +${m.pp} PP`);
+  for (const m of newMs) pushLog(`> milestone: ${m.name} // +${m.pp} VS`);
   save();
   currentTab = 'build';
   renderAll();
@@ -4164,16 +4419,23 @@ function renderResources() {
   if (!el) return;
   const { production } = getProduction();
   const visible = RESOURCE_LIST.filter(r => r === 'energy' || state.unlocked[r] || state.resources[r] > 0);
-  el.innerHTML = visible.map(r => `
-    <div class="res" style="--c: ${RESOURCE_META[r].color}">
-      <div class="res-head">
-        <span class="res-sym">${RESOURCE_META[r].sym}</span>
-        <span class="res-lab">${RESOURCE_META[r].label}</span>
+  const aetherBoost = (typeof aetherProductionBonus === 'function') ? aetherProductionBonus() : 0;
+  el.innerHTML = visible.map(r => {
+    const extra = (r === 'aether' && aetherBoost > 0)
+      ? `<div class="res-rate" style="color:var(--gold);">all prod ×${(1 + aetherBoost).toFixed(3)}</div>`
+      : '';
+    return `
+      <div class="res" style="--c: ${RESOURCE_META[r].color}">
+        <div class="res-head">
+          <span class="res-sym">${RESOURCE_META[r].sym}</span>
+          <span class="res-lab">${RESOURCE_META[r].label}</span>
+        </div>
+        <div class="res-val">${fmt(state.resources[r])}</div>
+        <div class="res-rate">${production[r] > 0 ? '+' + fmt(production[r]) + '/s' : '—'}</div>
+        ${extra}
       </div>
-      <div class="res-val">${fmt(state.resources[r])}</div>
-      <div class="res-rate">${production[r] > 0 ? '+' + fmt(production[r]) + '/s' : '—'}</div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderReactor() {
@@ -4245,8 +4507,7 @@ function protocolsTabHTML() {
   const vsBadge = vs > 0 ? `<span class="badge" style="background:var(--magenta);color:#000;">${vs}</span>` : '';
   const subnav = `
     <div class="sub-tabs">
-      <button class="sub-tab ${protocolsSubTab==='web'?'active':''}" onclick="setProtocolsSubTab('web')" style="color:var(--magenta);">WEB${vsBadge}</button>
-      <button class="sub-tab ${protocolsSubTab==='tree'?'active':''}" onclick="setProtocolsSubTab('tree')">LEGACY</button>
+      <button class="sub-tab ${protocolsSubTab==='web'?'active':''}" onclick="setProtocolsSubTab('web')" style="color:var(--magenta);">RESONANCE${vsBadge}</button>
       <button class="sub-tab ${protocolsSubTab==='patches'?'active':''}" onclick="setProtocolsSubTab('patches')">PATCHES</button>
       <button class="sub-tab ${protocolsSubTab==='objectives'?'active':''}" onclick="setProtocolsSubTab('objectives')">OBJECTIVES</button>
       <button class="sub-tab ${protocolsSubTab==='engrams'?'active':''}" onclick="setProtocolsSubTab('engrams')" style="color:var(--gold);">ENGRAMS${engramBadge}</button>
@@ -4256,15 +4517,12 @@ function protocolsTabHTML() {
       <div class="sub-tab-meter">
         <span class="meter-label">VOID SHARDS</span>
         <span class="meter-val" style="color:var(--magenta);text-shadow:0 0 8px rgba(255,79,163,0.5);">${vs}</span>
-        <span class="meter-label" style="margin-left:16px;">PP</span>
-        <span class="meter-val">${meta.pp}</span>
         <span class="meter-label" style="margin-left:16px;">PaP</span>
         <span class="meter-val" style="color:var(--amber);text-shadow:0 0 8px rgba(255,179,71,0.4);">${ppCount}</span>
       </div>
     </div>
   `;
-  if (protocolsSubTab === 'web') return subnav + webTreeHTML();
-  if (protocolsSubTab === 'tree') return subnav + coreTreeHTML();
+  if (protocolsSubTab === 'web' || protocolsSubTab === 'tree') return subnav + resonanceHTML();
   if (protocolsSubTab === 'patches') return subnav + patchGridHTML();
   if (protocolsSubTab === 'engrams') return subnav + engramsHTML();
   if (protocolsSubTab === 'codex') return subnav + codexHTML();
@@ -4298,7 +4556,7 @@ function engramsHTML() {
           <div class="engram-rarity">${rd ? rd.name : '???'}</div>
           <div class="engram-name">${e.encrypted ? '[ ENCRYPTED ]' : e.name}</div>
           ${!e.encrypted && tpl ? `<div class="engram-flavor">"${tpl.flavor}"</div>` : ''}
-          ${!e.encrypted && tpl && tpl.reward.type === 'pp' ? `<div class="engram-claimed">+${tpl.reward.val} PP claimed</div>` : ''}
+          ${!e.encrypted && tpl && tpl.reward.type === 'pp' ? `<div class="engram-claimed">+${tpl.reward.val} VS claimed</div>` : ''}
         </div>
         <div class="engram-meta">JUMP ${e.jump}<br><span style="font-size:9px;">${e.sectorId || ''}</span></div>
         ${e.encrypted
@@ -4320,7 +4578,7 @@ function engramsHTML() {
       </div>
       <p style="font-size:11px;color:var(--text-dim);margin:0;line-height:1.6;">
         Engrams are recovered on every Jump. Decrypt them by spending <strong style="color:var(--cyan);">Knowledge</strong> —
-        reducing your multiplier temporarily in exchange for Protocol Points and lore.
+        reducing your multiplier temporarily in exchange for Void Shards and lore.
         Current Knowledge: <strong style="color:var(--cyan);">${k}</strong>
       </p>
       ${encrypted.length > 0 ? `
@@ -4441,7 +4699,7 @@ function objectivesHTML() {
     <div class="obj-wrap">
       <div class="obj-summary">
         <div><span>EARNED</span><strong>${totalEarned} / ${MILESTONES.length}</strong></div>
-        <div><span>PP COLLECTED</span><strong>${totalPP} / ${totalAvailable}</strong></div>
+        <div><span>VS FROM MILESTONES</span><strong style="color:var(--magenta);">${totalPP} / ${totalAvailable}</strong></div>
       </div>
       ${cats.map(c => {
         const items = MILESTONES.filter(m => m.cat === c);
@@ -4458,7 +4716,7 @@ function objectivesHTML() {
                     <div class="obj-name">${m.name}</div>
                     <div class="obj-desc">${m.desc}</div>
                   </div>
-                  <div class="obj-pp">+${m.pp} PP</div>
+                  <div class="obj-pp" style="color:var(--magenta);">+${m.pp} VS</div>
                 </div>`;
               }).join('')}
             </div>
@@ -4566,24 +4824,20 @@ function buildTabHTML() {
       `<span class="cost-token" data-res="${res}" style="color:${(state.resources[res]||0) >= amt ? 'var(--text)' : 'var(--danger)'}">${fmt(amt)} ${RESOURCE_META[res].sym}</span>`
     ).join('  ');
     const qtyLabel = buyQty === 0 ? `×${qty}` : (qty > 1 ? `×${qty}` : `×${owned}`);
-    const isAuto = (typeof isAutoBuy === 'function') && isAutoBuy(b.id);
     return `
-      <div style="position:relative;">
-        <button class="card ${afford?'afford':''}" data-id="${b.id}" ${afford?'':'disabled'}
-          onclick="buyBuilding('${b.id}')"
-          style="--c: ${RESOURCE_META[b.produces].color};width:100%;">
-          <div class="card-row">
-            <div class="card-name">${b.name}</div>
-            <div class="card-owned">${buyQty === 1 ? `×${owned}` : `×${owned} <span style="color:var(--cyan-dim)">+${qty}</span>`}</div>
-          </div>
-          <div class="card-desc">${b.desc}</div>
-          <div class="card-row card-foot">
-            <div class="card-cost">COST: ${costStr}</div>
-            <div class="card-rate">+${effRate.toFixed(2)} ${RESOURCE_META[b.produces].sym}/s</div>
-          </div>
-        </button>
-        <button class="auto-toggle ${isAuto ? 'active' : ''}" onclick="event.stopPropagation(); toggleAutoBuy('${b.id}')" title="Auto-buy when affordable">A</button>
-      </div>
+      <button class="card ${afford?'afford':''}" data-id="${b.id}" ${afford?'':'disabled'}
+        onclick="buyBuilding('${b.id}')"
+        style="--c: ${RESOURCE_META[b.produces].color}">
+        <div class="card-row">
+          <div class="card-name">${b.name}</div>
+          <div class="card-owned">${buyQty === 1 ? `×${owned}` : `×${owned} <span style="color:var(--cyan-dim)">+${qty}</span>`}</div>
+        </div>
+        <div class="card-desc">${b.desc}</div>
+        <div class="card-row card-foot">
+          <div class="card-cost">COST: ${costStr}</div>
+          <div class="card-rate">+${effRate.toFixed(2)} ${RESOURCE_META[b.produces].sym}/s</div>
+        </div>
+      </button>
     `;
   }).join('');
   return qtyBar + `<div class="grid-list">` + cards + `</div>`;
@@ -4636,9 +4890,9 @@ function jumpTabHTML() {
   const trait = getTrait(state.sector.traitId);
   const jumpMultNote = trait.jumpMult ? ` <em style="color:var(--amber)">(${trait.name}: ×${trait.jumpMult})</em>` : '';
   const shardPreview = (typeof computeVoidShards === 'function') ? computeVoidShards() : 1;
-  // Wave 4c: aetherBonus now requires r4_aetheric protocol and uses sqrt
+  // Wave 16: Aether bonus capped at +25 (same formula as in computeKnowledgeGain)
   const aetherBonus = metaHas('r4_aetheric')
-    ? Math.floor(Math.sqrt(Math.max(0, state.resources.aether)))
+    ? Math.min(25, Math.floor(Math.sqrt(Math.max(0, state.resources.aether)) / 2))
     : 0;
   const projected = { knowledge: state.knowledge + kGain, _causalEng: state._causalEng };
   return `
@@ -4654,7 +4908,7 @@ function jumpTabHTML() {
         <div><span>GAIN ON JUMP${jumpMultNote}</span><strong class="gain">+${kGain}</strong></div>
         <div><span>NEW MULTIPLIER</span><strong>×${knowledgeMult(projected).toFixed(2)}</strong></div>
       </div>
-      ${aetherBonus > 0 ? `<div class="jump-hint" style="color:var(--gold);margin-bottom:12px">// AETHERIC RESONANCE protocol: +${aetherBonus} Knowledge from Aether (√)</div>` : ''}
+      ${aetherBonus > 0 ? `<div class="jump-hint" style="color:var(--gold);margin-bottom:12px">// AETHERIC RESONANCE: +${aetherBonus} Knowledge from Aether (capped at +25)</div>` : ''}
       <button class="jump-btn" ${kGain < 1 ? 'disabled' : ''} onclick="doJump()">
         ${kGain < 1 ? '✦ INSUFFICIENT MASS' : `✦ INITIATE JUMP (+${kGain})`}
       </button>
@@ -4901,7 +5155,7 @@ function tick() {
   const newMs = checkMilestones();
   if (newMs.length) {
     for (const m of newMs) {
-      pushLog(`> milestone: ${m.name} // +${m.pp} PP`);
+      pushLog(`> milestone: ${m.name} // +${m.pp} VS`);
     }
     if (newMs.length === 1) flash(`◆ MILESTONE // ${newMs[0].name}`);
     else flash(`◆ ${newMs.length} MILESTONES achieved`);
@@ -4932,8 +5186,7 @@ function tick() {
       awardCrewXP(1);
     }
   }
-  // Wave 12: auto-buy & auto-decrypt run every tick
-  if (typeof runAutoBuy === 'function') runAutoBuy();
+  // Wave 12 (auto-decrypt only — auto-buy removed in Wave 15)
   autoDecryptAccum = (autoDecryptAccum || 0) + dt;
   if (autoDecryptAccum >= 2) {
     autoDecryptAccum = 0;
