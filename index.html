@@ -681,6 +681,39 @@
   .theme-swatch:hover { transform: scale(1.1); border-color: #fff; }
   .theme-swatch.active { border-color: #fff; box-shadow: 0 0 12px currentColor; }
 
+  /* WAVE 19 — ASCII SHIP RENDERING */
+  .ship-ascii {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.05;
+    letter-spacing: 0;
+    color: var(--ship-c);
+    margin: 0;
+    text-align: center;
+    white-space: pre;
+    text-shadow: 0 0 6px rgba(94,226,255,0.15);
+  }
+  .ship-ascii .s-fr  { color: var(--ship-c); opacity: 0.85; }
+  .ship-ascii .s-hi  { color: var(--ship-c); opacity: 1; text-shadow: 0 0 4px var(--ship-c); }
+  .ship-ascii .s-md  { color: var(--ship-c); opacity: 0.65; }
+  .ship-ascii .s-lo  { color: var(--ship-c); opacity: 0.38; }
+  .ship-ascii .s-cg  { color: var(--ship-ck); opacity: 0.9; }
+  .ship-ascii .s-ec  { color: var(--ship-eng); opacity: 0.95; text-shadow: 0 0 5px var(--ship-eng); }
+  .ship-ascii .s-eng {
+    color: var(--ship-eng);
+    animation: engine-flare 1.3s ease-in-out infinite;
+    text-shadow: 0 0 6px var(--ship-eng);
+  }
+  @keyframes engine-flare {
+    0%, 100% { opacity: 1; text-shadow: 0 0 4px var(--ship-eng); }
+    50%      { opacity: 0.55; text-shadow: 0 0 10px var(--ship-eng); }
+  }
+  /* Smaller scale variant for the Ship Yard preview cards */
+  .ship-ascii.ship-ascii-mini {
+    font-size: 7px;
+    line-height: 1.05;
+  }
+
   /* WAVE 15 — RESONANCE UI */
   .resonance-wrap { display: flex; flex-direction: column; gap: 16px; }
   .res-progress-bar {
@@ -926,7 +959,7 @@
 // VOID PROTOCOL v2 — Wave 4d (Knowledge rebalance + bridge buildings)
 // ============================================================
 
-const SAVE_VERSION = 18;
+const SAVE_VERSION = 19;
 const SAVE_KEY = 'voidProtocol';
 const META_KEY = 'voidProtocolMeta';
 const MAX_OFFLINE_SECONDS = 4 * 60 * 60; // 4h default (Hoarder extends to 6h)
@@ -1249,9 +1282,13 @@ function freshMeta() {
     // Wave 12-13
     settings: {                     // QoL settings
       autoDecrypt: false,           // auto-decrypt engrams when affordable
-      autoDecryptMinRarity: 'salvage', // 'salvage'|'signal'|'archive'|'relic'|'mythic' — only decrypt this or higher
-      theme: 'cyan',                // Wave 13: color theme — cyan|amber|magenta|gold|steel
+      autoDecryptMinRarity: 'salvage',
+      theme: 'cyan',
     },
+    // Wave 19 QoL
+    paused: false,                  // pause toggle
+    lastDailyEcho: 0,               // ms timestamp of last Daily Echo
+    dailyEchoCount: 0,              // lifetime Daily Echoes encountered
     lifetimeStats: {                // aggregate stats for achievement tracking
       totalBuildings: 0,            // ever built
       totalAnomalies: 0,            // resolved
@@ -2312,8 +2349,12 @@ let _anomalyOpen = false;
 
 function maybeAnomaly(now) {
   if (_anomalyOpen) return;
+  // Wave 19: Daily Echo gets priority — fire on first eligible check
+  if (typeof dailyEchoReady === 'function' && dailyEchoReady() && Object.values(state.buildings).reduce((a, b) => a + b, 0) >= 3) {
+    fireDailyEcho();
+    return;
+  }
   if (now - lastAnomaly < nextAnomalyGap) return;
-  // Need some buildings to be online (game has started)
   if (Object.values(state.buildings).reduce((a, b) => a + b, 0) < 3) return;
   triggerAnomaly();
 }
@@ -2552,8 +2593,8 @@ function shipYardHTML() {
     }
     return `
       <div style="background:rgba(5,8,16,0.55);border:1px solid ${active ? 'var(--cyan)' : 'var(--border)'};padding:12px;display:flex;flex-direction:column;gap:8px;${active ? 'box-shadow:0 0 18px rgba(94,226,255,0.25);' : ''}">
-        <div style="display:flex;justify-content:center;padding:8px;background:rgba(5,8,16,0.6);min-height:80px;">
-          <div style="transform:scale(0.55);transform-origin:center center;">${previewSvg}</div>
+        <div style="display:flex;justify-content:center;padding:8px;background:rgba(5,8,16,0.6);min-height:140px;max-height:240px;overflow:hidden;">
+          ${previewSvg.replace('class="ship-ascii"', 'class="ship-ascii ship-ascii-mini"')}
         </div>
         <div style="color:${active ? 'var(--cyan)' : 'var(--text)'};font-size:11px;letter-spacing:0.18em;font-weight:500;">${def.name}</div>
         <div style="color:var(--text-dim);font-size:10px;letter-spacing:0.1em;">${def.sub.toUpperCase()}</div>
@@ -2932,6 +2973,207 @@ function applyTheme() {
   if (t === 'cyan') document.body.removeAttribute('data-theme');
   else document.body.setAttribute('data-theme', t);
 }
+// ============================================================
+// WAVE 19 — QoL FEATURES (Export/Import, Pause, Daily Echo)
+// ============================================================
+
+// --- EXPORT / IMPORT SAVE ---
+function exportSave() {
+  try {
+    const payload = {
+      version: SAVE_VERSION,
+      timestamp: Date.now(),
+      state: state,
+      meta: meta,
+    };
+    const json = JSON.stringify(payload);
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+    // Show a modal with the encoded save and try to copy to clipboard
+    const bg = document.createElement('div');
+    bg.className = 'modal-bg';
+    bg.innerHTML = `
+      <div class="modal" style="max-width:560px;">
+        <div class="modal-title">◈ EXPORT SAVE</div>
+        <div class="modal-body">
+          <p style="font-size:11px;color:var(--text-dim);">Copy this string and store it somewhere safe. Paste it into IMPORT SAVE to restore.</p>
+          <textarea id="export-text" readonly style="width:100%;height:160px;background:rgba(5,8,16,0.7);color:var(--cyan);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:10px;resize:none;word-break:break-all;">${b64}</textarea>
+          <p style="font-size:10px;color:var(--text-dim);margin-top:6px;" id="export-status">// click COPY to put it on the clipboard</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="modal-btn" id="export-copy" style="background:var(--cyan);">COPY</button>
+          <button class="modal-btn" id="export-close" style="background:transparent;color:var(--text);border:1px solid var(--border);">CLOSE</button>
+        </div>
+      </div>`;
+    document.body.appendChild(bg);
+    bg.querySelector('#export-close').addEventListener('click', () => bg.remove());
+    bg.querySelector('#export-copy').addEventListener('click', () => {
+      const ta = bg.querySelector('#export-text');
+      ta.select();
+      try {
+        navigator.clipboard.writeText(b64).then(() => {
+          bg.querySelector('#export-status').textContent = '// copied to clipboard';
+          bg.querySelector('#export-status').style.color = 'var(--cyan)';
+        }).catch(() => {
+          document.execCommand('copy');
+          bg.querySelector('#export-status').textContent = '// copied (fallback)';
+        });
+      } catch (e) {
+        try { document.execCommand('copy'); } catch (e2) {}
+        bg.querySelector('#export-status').textContent = '// select all + copy manually if needed';
+      }
+    });
+  } catch (e) {
+    flash('export failed');
+    console.warn('exportSave error', e);
+  }
+}
+
+function importSave() {
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML = `
+    <div class="modal" style="max-width:560px;border-color:var(--magenta);">
+      <div class="modal-title" style="color:var(--magenta);">◈ IMPORT SAVE</div>
+      <div class="modal-body">
+        <p style="font-size:11px;color:var(--danger);">⚠ This OVERWRITES your current save. Export first if you want a backup.</p>
+        <textarea id="import-text" placeholder="paste exported save string here…" style="width:100%;height:160px;background:rgba(5,8,16,0.7);color:var(--text);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:10px;resize:none;word-break:break-all;"></textarea>
+        <p style="font-size:10px;color:var(--text-dim);margin-top:6px;" id="import-status">// paste a save string and click IMPORT</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="modal-btn" id="import-do" style="background:var(--magenta);">IMPORT</button>
+        <button class="modal-btn" id="import-close" style="background:transparent;color:var(--text);border:1px solid var(--border);">CANCEL</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+  bg.querySelector('#import-close').addEventListener('click', () => bg.remove());
+  bg.querySelector('#import-do').addEventListener('click', () => {
+    const txt = bg.querySelector('#import-text').value.trim();
+    if (!txt) {
+      bg.querySelector('#import-status').textContent = '// no data pasted'; return;
+    }
+    try {
+      const json = decodeURIComponent(escape(atob(txt)));
+      const payload = JSON.parse(json);
+      if (!payload || !payload.state || !payload.meta) throw new Error('invalid structure');
+      // Persist to localStorage and reload
+      localStorage.setItem(SAVE_KEY, JSON.stringify(payload.state));
+      localStorage.setItem(META_KEY, JSON.stringify(payload.meta));
+      bg.querySelector('#import-status').textContent = '// imported — reloading…';
+      bg.querySelector('#import-status').style.color = 'var(--cyan)';
+      setTimeout(() => location.reload(), 500);
+    } catch (e) {
+      bg.querySelector('#import-status').textContent = '// import failed: ' + (e.message || 'unknown error');
+      bg.querySelector('#import-status').style.color = 'var(--danger)';
+    }
+  });
+}
+
+// --- PAUSE TOGGLE ---
+function togglePause() {
+  meta.paused = !meta.paused;
+  saveMeta();
+  if (meta.paused) {
+    pushLog('> system pause engaged // production halted');
+    flash('⏸ PAUSED');
+  } else {
+    pushLog('> resume // production online');
+    flash('▶ RESUMED');
+    lastTick = Date.now(); // avoid burst gain when unpausing
+  }
+  renderAll();
+}
+function isPaused() { return !!(meta && meta.paused); }
+
+// --- DAILY ECHO ---
+const DAILY_ECHO_TEMPLATES = [
+  {
+    id: 'de_signal_from_self',
+    title: 'Daily Signal // From Yourself',
+    desc: 'A message from you, sent yesterday, arrives now on a back-channel only you would know to listen on. You did not send it. You will not send it. But you have.',
+    apply: (s, m) => { m.voidShards = (m.voidShards || 0) + 5; s.knowledge += 25; },
+    outcome: 'You receive +5 Void Shards and +25 Knowledge. The next message is queued for tomorrow.',
+  },
+  {
+    id: 'de_cache_drop',
+    title: 'Daily Cache // Resource Drop',
+    desc: 'A small drone you don\'t remember launching returns to dock, hold full. Routine for it. Strange for you.',
+    apply: (s) => {
+      s.resources.energy = (s.resources.energy || 0) + 5000;
+      s.resources.alloy  = (s.resources.alloy  || 0) + 2000;
+      s.resources.plasma = (s.resources.plasma || 0) + 500;
+    },
+    outcome: 'Cargo: +5000 Energy, +2000 Alloy, +500 Plasma.',
+  },
+  {
+    id: 'de_clean_horizon',
+    title: 'Daily Horizon // Quiet Day',
+    desc: 'No anomalies. No transmissions. The void has decided, today, to leave you alone. You should rest. You will not rest.',
+    apply: (s, m) => { m.voidShards = (m.voidShards || 0) + 3; if (state.hull < 100) state.hull = Math.min((typeof shipMaxHull === 'function' ? shipMaxHull() : 100), state.hull + 25); },
+    outcome: '+3 Void Shards. Hull restored by 25%.',
+  },
+  {
+    id: 'de_warm_drift',
+    title: 'Daily Drift // Warm Current',
+    desc: 'You catch a slipstream of high-energy particles that wasn\'t on any chart. The reactor sings briefly. You can hear it from the bridge.',
+    apply: (s) => {
+      // 60s of "double production" via a temporary exotic boost
+      state._exoticBoost = { mult: 2, until: Date.now() + 60000 };
+    },
+    outcome: 'Production ×2 for the next 60 seconds.',
+  },
+  {
+    id: 'de_engram_burst',
+    title: 'Daily Pulse // Engram Burst',
+    desc: 'Three faint signals overlap on a frequency that should not exist. You record them all. They are entries.',
+    apply: (s, m) => {
+      if (!m.engrams) m.engrams = [];
+      for (let i = 0; i < 3; i++) {
+        const e = rollEngrams(s.sector.traitId, s.sector.id, s.jumps);
+        if (e.length) m.engrams.unshift(e[0]);
+      }
+    },
+    outcome: '+3 engrams added to the archive.',
+  },
+];
+
+function dailyEchoReady() {
+  const now = Date.now();
+  return (now - (meta.lastDailyEcho || 0)) >= 24 * 60 * 60 * 1000;
+}
+function dailyEchoNextIn() {
+  const remaining = (24 * 60 * 60 * 1000) - (Date.now() - (meta.lastDailyEcho || 0));
+  return Math.max(0, remaining);
+}
+function fireDailyEcho() {
+  if (_anomalyOpen) return;
+  const echo = DAILY_ECHO_TEMPLATES[Math.floor(Math.random() * DAILY_ECHO_TEMPLATES.length)];
+  _anomalyOpen = true;
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg anomaly-bg';
+  bg.innerHTML = `
+    <div class="modal anomaly-modal" style="border-color:var(--gold);box-shadow:0 0 80px rgba(255,232,138,0.4);max-width:520px;">
+      <div class="anomaly-cat" style="color:var(--gold);">// DAILY ECHO · DAY ${(meta.dailyEchoCount || 0) + 1}</div>
+      <div class="modal-title" style="color:var(--gold);">${echo.title}</div>
+      <div class="modal-body">
+        <p class="anomaly-desc" style="border-left-color:var(--gold);background:rgba(255,232,138,0.04);">${echo.desc}</p>
+        <div class="anomaly-outcome" style="border-color:var(--gold);">${echo.outcome}</div>
+      </div>
+      <button class="modal-btn" id="de-close" style="background:var(--gold);color:#000;">ACCEPT</button>
+    </div>`;
+  document.body.appendChild(bg);
+  bg.querySelector('#de-close').addEventListener('click', () => {
+    try { echo.apply(state, meta); } catch (e) { console.warn(e); }
+    meta.lastDailyEcho = Date.now();
+    meta.dailyEchoCount = (meta.dailyEchoCount || 0) + 1;
+    pushLog(`> DAILY ECHO ${meta.dailyEchoCount} // ${echo.title}`);
+    flash(`✦ DAILY ECHO // ${echo.title}`);
+    bg.remove();
+    _anomalyOpen = false;
+    save(); saveMeta();
+    renderAll();
+  });
+}
+
 function setTheme(themeId) {
   if (!meta.settings) meta.settings = { autoDecrypt: false, autoDecryptMinRarity: 'salvage', theme: 'cyan' };
   meta.settings.theme = themeId;
@@ -3012,6 +3254,25 @@ function telemetryHTML() {
       </p>
 
       <div class="setting-row" style="margin-top:18px;">
+        <div>
+          <div class="setting-label">DAILY ECHO</div>
+          <div class="setting-desc">A special encounter once per real-world day with bonus rewards. ${dailyEchoReady() ? '<span style="color:var(--gold);">// READY — fires on next anomaly window</span>' : `// next in <strong style="color:var(--gold);">${Math.floor(dailyEchoNextIn() / 3600000)}h ${Math.floor((dailyEchoNextIn() % 3600000) / 60000)}m</strong>`}</div>
+        </div>
+        <div style="color:var(--gold);font-size:14px;font-variant-numeric:tabular-nums;">×${meta.dailyEchoCount || 0}</div>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">SAVE BACKUP</div>
+          <div class="setting-desc">Export your current save as a string you can store; import to restore.</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="setting-toggle on" style="background:var(--cyan);" onclick="exportSave()">EXPORT</button>
+          <button class="setting-toggle" style="border-color:var(--magenta);color:var(--magenta);" onclick="importSave()">IMPORT</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
         <div>
           <div class="setting-label">COLOR THEME</div>
           <div class="setting-desc">Recolors the HUD. Affects highlight, panel, and accent colors only.</div>
@@ -3557,198 +3818,287 @@ function shipMaxHull()         { return 100 + shipHullMaxBonus(); }
 function shipCrewBonusBoost()  { return meta && meta.shipType === 'halcyon' ? 1.25 : 1.0; }
 
 // ============================================================
-// WAVE 18 — HAND-DESIGNED PIXEL SHIPS
+// WAVE 19 — ASCII SHIP TEMPLATES (replacing pixel art)
 // ============================================================
-// Each ship is a fixed silhouette per class. The seed varies *details*:
-//   - which 'W' (windows) are lit (gold) vs dark
-//   - which 'D' (detail/lights) render
-//   - which 'T' (antenna) render
-//   - subtle paint scuffs ('s') and trim recolors
-// Pixel legend:
-//   . / space = empty           H = hull (base)
-//   S = shaded hull (-20%)      L = highlight hull (+20%)
-//   A = accent stripe color     C = cockpit color
-//   E = engine block            G = engine highlight (lighter engine)
-//   W = window (procedural: lit or dark)
-//   T = antenna (procedural: shows or not)
-//   D = detail panel/light (procedural: shows or not, sometimes tinted)
-//   s = scuff (procedural: dark spot, rare)
 const SHIP_TEMPLATES = {
   athena: [
-    "..............T.................",
-    "..............T.................",
-    "GG..HHHHHHHHHHHHHHHHHHHHHHHC....",
-    "GGEEHHAAAAAAAAAAAAAAAAAAHHHCC...",
-    "GGEEHWHHHHHWHHHHHWHHHHWHHHCCC...",
-    "..EEHHHHHHHHHHHHHHHHHHHHHHHCC...",
-    "EEEEHHHHHHHHHHHHHHHHHHHHHHHCCC..",
-    "EEEEHHHHHHHHHHHHHHHHHHHHHHHCCC..",
-    "..EEHHHHHHHHHHHHHHHHHHHHHHHCC...",
-    "GGEEHWHHHHHWHHHHHWHHHHWHHHCCC...",
-    "GGEEHHAAAAAAAAAAAAAAAAAAHHHCC...",
-    "GG..HHHHHHHHHHHHHHHHHHHHHHHC....",
-    "..............T.................",
-    "................................",
+    "               ║               ",
+    "              ╔═╗              ",
+    "              ║▓║              ",
+    "             ╔╝▒╚╗             ",
+    "             ║░▒░║             ",
+    "            ╔╝▒░▒╚╗            ",
+    "            ║▓░▒░▓║            ",
+    "           ╔╝░▒░▒░╚╗           ",
+    "           ║░▒▒░▒▒░║           ",
+    "          ╔╝▒░░▣░░▒╚╗          ",
+    "          ║░▒░░░░░▒░║          ",
+    "        ┌─╨─░░░░░░░─╨─┐        ",
+    "       ┌┤░░░▒▒▒▒▒▒▒░░░├┐       ",
+    "      ╔╧═══════════════╧╗      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▒▒▒▒▒▒▒▒▒▒▒░▒▓║      ",
+    "      ║▓▒░▒░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▒░▓░▓░▓░▓░▓░▒▓║      ",
+    "      ║▓▒░▒░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▒░▣ ▣ ▣ ▣ ▣░▒▓║      ",
+    "      ║▓▒░▒░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▒▒▒▒▒▒▒▒▒▒▒░▒▓║      ",
+    "      ╠═════════════════╣      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▣░▣░▣░▣░▣░▣░▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▣░▣░▣░▣░▣░▣░▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ╠═════════════════╣      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▣░▣░▣░▣░▣░▣░▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▣░▣░▣░▣░▣░▣░▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ╠═════════════════╣      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▣░▣░▣░▣░▣░▣░▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▣░▣░▣░▣░▣░▣░▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ╠═════════════════╣      ",
+    "      ║▓▒░▒▒▒▒▒▒▒▒▒▒▒░▒▓║      ",
+    "      ║▓▒░▒░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▒░█░█░█░█░█░▒▓║      ",
+    "      ║▓▒░▒░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▒▒▒▒▒▒▒▒▒▒▒░▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░░░▒▓║      ",
+    "      ╚╤════╤═════╤════╤╝      ",
+    "       │    │     │    │       ",
+    "     ╔═╧═╗ ╔╧═════╧╗ ╔═╧═╗     ",
+    "     ║░░░║ ║░░░░░░░║ ║░░░║     ",
+    "     ║▓█▓║ ║▓█████▓║ ║▓█▓║     ",
+    "     ║▓█▓║ ║▓█████▓║ ║▓█▓║     ",
+    "     ╚╤═╤╝ ╚╤═════╤╝ ╚╤═╤╝     ",
+    "      ▼ ▼   ▼     ▼   ▼ ▼      ",
+    "      ▼ ▼   ▼     ▼   ▼ ▼      ",
+    "      ▼ ▼   ▼     ▼   ▼ ▼      ",
+    "      ▼ ▼   ▼     ▼   ▼ ▼      ",
   ],
   cetus: [
-    "..............................",
-    "GG..AAHHHHHHHHHHHHHHHHHHHCC...",
-    "GG.AAHHHHHHHHHHHHHHHHHHHHCCC..",
-    "GGEEAAHHHHHHHHHHHHHHHHHHHHCCC.",
-    "EEEEAAHHHHHHHWHHHHHWHHHHHHCCC.",
-    "EEEEAAHHHHHHHHHHHHHHHHHHHHCCC.",
-    "EEEEAAHHHHHHHHHHHHHHHHHHHHCCCC",
-    "EEEEAAHHHHHHHHHHHHHHHHHHHHCCCC",
-    "EEEEAAHHHHHHHHHHHHHHHHHHHHCCC.",
-    "EEEEAAHHHHHHHWHHHHHWHHHHHHCCC.",
-    "GGEEAAHHHHHHHHHHHHHHHHHHHHCCC.",
-    "GG.AAHHHHHHHHHHHHHHHHHHHHCCC..",
-    "GG..AAHHHHHHHHHHHHHHHHHHHCC...",
-    "..............................",
+    "              ║              ",
+    "            ╔═╩═╗            ",
+    "            ║▓░▓║            ",
+    "            ║▒░▒║            ",
+    "          ╔═╝▓░▓╚═╗          ",
+    "          ║░░░░░░░║          ",
+    "          ║▒▒░▣░▒▒║          ",
+    "          ║░░░░░░░║          ",
+    "        ┌─╨───────╨─┐        ",
+    "       ┌┤░░░░░░░░░░░├┐       ",
+    "      ╔╧═════════════╧╗      ",
+    "      ║▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓║      ",
+    "      ║▓░░░░░░░░░░░░░▓║      ",
+    "    ╔═╣▒░░░░░░░░░░░░░▒╠═╗    ",
+    "    ║▓║░░░░░░░░░░░░░░░║▓║    ",
+    "    ║▓║░░█▓███████▓█░░║▓║    ",
+    "    ║▓║░░█░░░░░░░░░█░░║▓║    ",
+    "    ║▓║░░█░░██▓██░░█░░║▓║    ",
+    "    ║▓║░░█░░██▓██░░█░░║▓║    ",
+    "    ║▓║░░█░░██▓██░░█░░║▓║    ",
+    "    ║▓║░░█░░░░░░░░░█░░║▓║    ",
+    "    ║▓║░░█▓███████▓█░░║▓║    ",
+    "    ║▓║░░░░░░░░░░░░░░░║▓║    ",
+    "    ╚═╣▒░░░░░░░░░░░░░▒╠═╝    ",
+    "      ║▓░░░░░░░░░░░░░▓║      ",
+    "      ║▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓║      ",
+    "      ╠═══════════════╣      ",
+    "      ║▓▒░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▣ ▣ ▣ ▣ ▣ ▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░▒▓║      ",
+    "      ║▓▒░▣ ▣ ▣ ▣ ▣ ▒▓║      ",
+    "      ║▓▒░░░░░░░░░░░▒▓║      ",
+    "      ╠═══════════════╣      ",
+    "      ║▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓║      ",
+    "      ║▓░░░░░░░░░░░░░▓║      ",
+    "      ║▓░▒▒▒▒▒▒▒▒▒▒▒░▓║      ",
+    "      ║▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓║      ",
+    "      ╚╤═══╤═════╤═══╤╝      ",
+    "       │   │     │   │       ",
+    "    ╔══╧═══╧═╗ ╔═╧═══╧══╗    ",
+    "    ║░░░░░░░░║ ║░░░░░░░░║    ",
+    "    ║▓██████▓║ ║▓██████▓║    ",
+    "    ║▓██████▓║ ║▓██████▓║    ",
+    "    ║▓██████▓║ ║▓██████▓║    ",
+    "    ╚╤══════╤╝ ╚╤══════╤╝    ",
+    "     ▼      ▼   ▼      ▼     ",
+    "     ▼      ▼   ▼      ▼     ",
+    "     ▼      ▼   ▼      ▼     ",
+    "     ▼      ▼   ▼      ▼     ",
+    "     ▼      ▼   ▼      ▼     ",
   ],
   vessel: [
-    "........................",
-    "..........T.............",
-    "G.EEHHHHHHHHHHHHCC......",
-    "GGEEHHHHHHWHHHHHHCCC....",
-    "GGEEHHHHHHHHHHHHHHCCCC..",
-    "GGEEHHHHHHHHHHHHHHCCCC..",
-    "GGEEHHHHHHWHHHHHHCCC....",
-    "G.EEHHHHHHHHHHHHCC......",
-    "..........T.............",
-    "........................",
+    "         ║         ",
+    "        ╔═╗        ",
+    "        ║▓║        ",
+    "       ╔╝░╚╗       ",
+    "       ║▒░▒║       ",
+    "      ╔╝▒░▒╚╗      ",
+    "      ║░▒▒▒░║      ",
+    "    ┌─╨─░░░─╨─┐    ",
+    "   ┌┤░░░░▒░░░░├┐   ",
+    "  ╔╧═════════════╧╗  ",
+    "  ║▓▒░░░░░░░░░░░▒▓║  ",
+    "  ║▓▒░▒▒▒▒▒▒▒▒▒░▒▓║  ",
+    "  ║▓▒░▒░░░░░░░░░▒▓║  ",
+    "  ║▓▒░▒░▣ ▣ ▣ ▣░▒▓║  ",
+    "  ║▓▒░▒░░░░░░░░░▒▓║  ",
+    "  ║▓▒░▒░▣ ▣ ▣ ▣░▒▓║  ",
+    "  ║▓▒░▒░░░░░░░░░▒▓║  ",
+    "  ║▓▒░▒▒▒▒▒▒▒▒▒░▒▓║  ",
+    "  ║▓▒░░░░░░░░░░░▒▓║  ",
+    "  ╚╤═════════════╤╝  ",
+    "   │             │   ",
+    "  ╔╧══╗       ╔══╧╗  ",
+    "  ║░░░║       ║░░░║  ",
+    "  ║▓█▓║       ║▓█▓║  ",
+    "  ╚╤═╤╝       ╚╤═╤╝  ",
+    "   ▼ ▼         ▼ ▼   ",
+    "   ▼ ▼         ▼ ▼   ",
+    "   ▼ ▼         ▼ ▼   ",
   ],
   halcyon: [
-    "....................................",
-    ".....HHHHHHHHHHHHHHHHHHHHHHHC.......",
-    "GG.HHHHHHHHHHHHHHHHHHHHHHHHHCC......",
-    "GGHHWHWHWHWHWHWHWHWHWHWHWHWHHCC.....",
-    "GGHHHHHHHHHHHHHHHHHHHHHHHHHHHCCC....",
-    "GGEEHHHHHHHHHHHHHHHHHHHHHHHHHHCCC...",
-    "GGEEHHHHHHHHHHHHHHHHHHHHHHHHHHCCC...",
-    "GGEEHHHHHHHHHHHHHHHHHHHHHHHHHHCCC...",
-    "GGEEHHHHHHHHHHHHHHHHHHHHHHHHHHCCC...",
-    "GGHHHHHHHHHHHHHHHHHHHHHHHHHHHCCC....",
-    "GGHHWHWHWHWHWHWHWHWHWHWHWHWHHCC.....",
-    "GG.HHHHHHHHHHHHHHHHHHHHHHHHHCC......",
-    ".....HHHHHHHHHHHHHHHHHHHHHHHC.......",
-    "....................................",
+    "                 ║                 ",
+    "                ╔═╗                ",
+    "               ╔╝▓╚╗               ",
+    "               ║░▒░║               ",
+    "              ╔╝▒░▒╚╗              ",
+    "              ║░▒░▒░║              ",
+    "             ╔╝░░▒░░╚╗             ",
+    "             ║▒░░░░░▒║             ",
+    "           ┌─╨───────╨─┐           ",
+    "          ┌┤░░░░░░░░░░░├┐          ",
+    "         ╔╧═════════════╧╗         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▒▒▒▒▒▒▒▒▒░▒▓║         ",
+    "         ║▓▒░▒░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▒░▣░▣░▣░▣░▒▓║         ",
+    "         ║▓▒░▒░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▒▒▒▒▒▒▒▒▒░▒▓║         ",
+    "         ╠═══════════════╣         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▣░▣░▣░▣░▣░▒▓║         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▣░▣░▣░▣░▣░▒▓║         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ╠═══════════════╣         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▣░▣░▣░▣░▣░▒▓║         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▣░▣░▣░▣░▣░▒▓║         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ╠═══════════════╣         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▣░▣░▣░▣░▣░▒▓║         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▣░▣░▣░▣░▣░▒▓║         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ╠═══════════════╣         ",
+    "         ║▓▒░▒▒▒▒▒▒▒▒▒░▒▓║         ",
+    "         ║▓▒░▒░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▒░█░█░█░█░▒▓║         ",
+    "         ║▓▒░▒░░░░░░░░░▒▓║         ",
+    "         ║▓▒░▒▒▒▒▒▒▒▒▒░▒▓║         ",
+    "         ║▓▒░░░░░░░░░░░▒▓║         ",
+    "         ╚╤═══╤═════╤═══╤╝         ",
+    "          │   │     │   │          ",
+    "       ╔══╧═══╧═╗ ╔═╧═══╧══╗       ",
+    "       ║░░░░░░░░║ ║░░░░░░░░║       ",
+    "       ║▓██████▓║ ║▓██████▓║       ",
+    "       ║▓██████▓║ ║▓██████▓║       ",
+    "       ╚╤══════╤╝ ╚╤══════╤╝       ",
+    "        ▼      ▼   ▼      ▼        ",
+    "        ▼      ▼   ▼      ▼        ",
+    "        ▼      ▼   ▼      ▼        ",
+    "        ▼      ▼   ▼      ▼        ",
+    "        ▼      ▼   ▼      ▼        ",
   ],
   prometheus: [
-    "..........T.....................",
-    ".........TTT.D..................",
-    "........TTTTTT..................",
-    "........DTTTTT..................",
-    "...HHHHHHHHHHHHHHHHHHHHCC.......",
-    "GGEEHHHHHHHHHWHHHHWHHHHHCCC.....",
-    "GGEEHHHHHHHHHHHHHHHHHHHHHCCCC...",
-    "GGEEHHHHHHHHHHHHHHHHHHHHHCCCC...",
-    "GGEEHHHHHHHHHWHHHHWHHHHHCCC.....",
-    "...HHHHHHHHHHHHHHHHHHHHCC.......",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
+    "              ║              ",
+    "           ╔══╩══╗           ",
+    "           ║░▒░▒░║           ",
+    "        ╔══╝▓▒░▒▓╚══╗        ",
+    "        ║░░░░░░░░░░░║        ",
+    "     ═══╣▒▒░░░░░░░▒▒╠═══     ",
+    "        ║░░░░░░░░░░░║        ",
+    "        ╚══╗▓▒░▒▓╔══╝        ",
+    "           ║░▒░▒░║           ",
+    "           ║▒▒░▒▒║           ",
+    "         ┌─╨─░▣░─╨─┐         ",
+    "        ┌┤░░░▒▒▒░░░├┐        ",
+    "       ╔╧═════════════╧╗       ",
+    "       ║▓▒░░░░░░░░░░░▒▓║       ",
+    "       ║▓▒░▒▒▒▒▒▒▒▒▒░▒▓║       ",
+    "       ║▓▒░▒░░░░░░░░░▒▓║       ",
+    "       ║▓▒░▒░▓░▓░▓░▓░▒▓║       ",
+    "       ║▓▒░▒░░░░░░░░░▒▓║       ",
+    "       ║▓▒░▒░▣ ▣ ▣ ▣░▒▓║       ",
+    "       ║▓▒░▒░░░░░░░░░▒▓║       ",
+    "       ║▓▒░▒░▣ ▣ ▣ ▣░▒▓║       ",
+    "       ║▓▒░▒░░░░░░░░░▒▓║       ",
+    "       ║▓▒░▒▒▒▒▒▒▒▒▒░▒▓║       ",
+    "       ╠═══════════════╣       ",
+    "       ║▓▒░░░░░░░░░░░▒▓║       ",
+    "       ║▓▒░░▒▒▒░▒▒▒░░▒▓║       ",
+    "       ║▓▒░▒░░░░░░░░░▒▓║       ",
+    "       ║▓▒░▒░░ ░░ ░░░▒▓║       ",
+    "       ║▓▒░▒░░░░░░░░░▒▓║       ",
+    "       ║▓▒░░▒▒▒░▒▒▒░░▒▓║       ",
+    "       ║▓▒░░░░░░░░░░░▒▓║       ",
+    "       ╚╤═══════════╤╝       ",
+    "        │           │        ",
+    "     ╔══╧═══════════╧══╗     ",
+    "     ║░░░░░░░░░░░░░░░░░║     ",
+    "     ║▓█████░█░█████▓║     ",
+    "     ║▓█████░█░█████▓║     ",
+    "     ╚╤════╤═════╤════╤╝     ",
+    "      ▼    ▼     ▼    ▼      ",
+    "      ▼    ▼     ▼    ▼      ",
+    "      ▼    ▼     ▼    ▼      ",
+    "      ▼    ▼     ▼    ▼      ",
+    "      ▼    ▼     ▼    ▼      ",
   ],
 };
 
-// Helper: shift a hex color brightness by amt (-1..1)
-function shadeHex(hex, amt) {
-  if (!hex || hex[0] !== '#') return hex;
-  let h = hex.slice(1);
-  if (h.length === 3) h = h.split('').map(c => c+c).join('');
-  let r = parseInt(h.substr(0,2), 16);
-  let g = parseInt(h.substr(2,2), 16);
-  let b = parseInt(h.substr(4,2), 16);
-  r = Math.max(0, Math.min(255, Math.round(r + r * amt)));
-  g = Math.max(0, Math.min(255, Math.round(g + g * amt)));
-  b = Math.max(0, Math.min(255, Math.round(b + b * amt)));
-  return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
-}
-
+// Renderer: returns HTML <pre> (the function name stays generateShipSVG for callers).
 function generateShipSVG(seed, type='athena') {
-  const rng = seededRng(seed || 1);
   const def = SHIP_DEFS[type] || SHIP_DEFS.athena;
   const template = SHIP_TEMPLATES[type] || SHIP_TEMPLATES.athena;
-  const PX = 5;
-
-  // Seeded palette tweaks — keep them subtle so the class identity stays clear
-  const hullShade  = (rng() - 0.5) * 0.10;       // ±5% hull brightness
-  const accentTint = (rng() - 0.5) * 0.20;       // ±10% accent brightness
-  const cockpitTint= (rng() - 0.5) * 0.15;
-  const colors = {
-    H: shadeHex(def.hull,    hullShade),
-    S: shadeHex(def.hull,    hullShade - 0.25),  // shading (darker hull)
-    L: shadeHex(def.hull,    hullShade + 0.25),  // highlight hull
-    A: shadeHex(def.accent,  accentTint),
-    C: shadeHex(def.cockpit, cockpitTint),
-    E: def.engine,
-    G: shadeHex(def.engine,  0.35),               // engine highlight
-    T: shadeHex(def.hull,    -0.45),              // antenna (dark hull-ish)
-    s: shadeHex(def.hull,    -0.35),              // scuff (dark hull)
-  };
-  const windowLitColor  = '#ffe88a';
-  const windowDarkColor = shadeHex(def.hull, -0.55);
-
-  const H = template.length;
-  const W = template.reduce((max, row) => Math.max(max, row.length), 0);
-  let content = '';
-
-  // Pre-roll detail decisions so the same seed always produces the same ship
-  const detailRoll = (key) => {
-    // Use a stable per-position randomness via repeated rng() calls
-    return rng();
-  };
-
-  // First pass: collect every coordinate for stable rolling
-  const coords = [];
-  template.forEach((row, y) => {
-    for (let x = 0; x < row.length; x++) coords.push({ x, y, ch: row[x] });
+  const rng = seededRng(seed || 1);
+  // Seeded detail variation: some cargo blocks vanish, some heavy plates lighten.
+  const lines = template.map(line => {
+    let out = '';
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '▣' && rng() < 0.25) out += ' ';
+      else if (ch === '█' && rng() < 0.18) out += '▓';
+      else if (ch === '▓' && rng() < 0.10) out += '▒';
+      else out += ch;
+    }
+    return out;
   });
-
-  coords.forEach(({ x, y, ch }) => {
-    if (ch === '.' || ch === ' ') return;
-    let color;
-    if (ch === 'W') {
-      color = (rng() < 0.45) ? windowLitColor : windowDarkColor;
-    } else if (ch === 'T') {
-      if (rng() < 0.35) return; // skip 35% of antennas
-      color = colors.T;
-    } else if (ch === 'D') {
-      if (rng() < 0.45) return;
-      // detail spot — 40% chance to be a lit panel
-      color = (rng() < 0.40) ? shadeHex(def.accent, 0.30) : colors.L;
-    } else if (ch === 's') {
-      if (rng() < 0.6) return;
-      color = colors.s;
-    } else {
-      color = colors[ch] || def.hull;
+  // Wrap characters in spans so CSS can color them.
+  const colored = lines.map(line => {
+    let out = '';
+    for (const ch of line) {
+      if (ch === '▼')      out += `<span class="s-eng">${ch}</span>`;
+      else if (ch === '█') out += `<span class="s-ec">${ch}</span>`;
+      else if (ch === '▓') out += `<span class="s-hi">${ch}</span>`;
+      else if (ch === '▒') out += `<span class="s-md">${ch}</span>`;
+      else if (ch === '░') out += `<span class="s-lo">${ch}</span>`;
+      else if (ch === '▣') out += `<span class="s-cg">${ch}</span>`;
+      else if (ch === ' ') out += ' ';
+      else                 out += `<span class="s-fr">${ch}</span>`;
     }
-    // Small chance of a paint scuff on a regular hull pixel
-    if (ch === 'H' && rng() < 0.03) color = shadeHex(def.hull, -0.4);
-
-    const px = x * PX, py = y * PX;
-    content += `<rect x="${px}" y="${py}" width="${PX}" height="${PX}" fill="${color}"/>`;
-    // Tiny top-edge highlight for depth (skip for T/D/W to keep them cleaner)
-    if (ch === 'H' || ch === 'A' || ch === 'C' || ch === 'E' || ch === 'G') {
-      content += `<rect x="${px}" y="${py}" width="${PX}" height="1" fill="rgba(255,255,255,0.13)"/>`;
-    }
-    // Tiny bottom-edge shadow for further depth on hull
-    if (ch === 'H') {
-      content += `<rect x="${px}" y="${py + PX - 1}" width="${PX}" height="1" fill="rgba(0,0,0,0.18)"/>`;
-    }
-  });
-
-  // Engine glow at the back (left side of ship)
-  const cy = (H / 2) * PX;
-  content += `<ellipse cx="0" cy="${cy}" rx="${PX * 3.2}" ry="${PX * 2.6}" fill="${def.engine}" opacity="0.42"/>`;
-  content += `<ellipse cx="0" cy="${cy}" rx="${PX * 1.6}" ry="${PX * 1.3}" fill="${shadeHex(def.engine, 0.4)}" opacity="0.55"/>`;
-
-  const svgW = W * PX, svgH = H * PX;
-  // Display scale — bigger ships render at a slightly smaller scale so they fit
-  const scale = W > 32 ? 2.2 : (W > 26 ? 2.5 : 2.8);
-  return `<svg viewBox="0 0 ${svgW} ${svgH}" width="${svgW * scale}" height="${svgH * scale}"
-    xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block;">${content}</svg>`;
+    return out;
+  }).join('\n');
+  return `<pre class="ship-ascii" style="--ship-c:${def.accent};--ship-eng:${def.engine};--ship-ck:${def.cockpit};">${colored}</pre>`;
 }
 
 // --- ENGRAMS ------------------------------------------------
@@ -4064,7 +4414,7 @@ function load() {
         return parsed;
       }
       // Wave 7-15: in-place migration.
-      if (oldVer >= 6 && oldVer <= 17) {
+      if (oldVer >= 6 && oldVer <= 18) {
         parsed.version = SAVE_VERSION;
         if (typeof parsed.hull !== 'number') parsed.hull = 100;
         // Wave 15: auto-buy data is no longer used; remove it
@@ -4535,6 +4885,7 @@ function renderHeader() {
         <span class="save-dot ${saveFlash ? 'active' : ''}"></span>
         SAVED
       </div>
+      <button class="reset-btn" onclick="togglePause()" style="${isPaused() ? 'border-color:var(--amber);color:var(--amber);' : ''}">${isPaused() ? '▶ RESUME' : '⏸ PAUSE'}</button>
       <button class="reset-btn" onclick="hardReset()">RESET</button>
     </div>
   `;
@@ -5234,6 +5585,13 @@ function tick() {
   const now = Date.now();
   const dt = (now - lastTick) / 1000;
   lastTick = now;
+  // Wave 19: skip the tick body entirely while paused (still keeps the interval running)
+  if (typeof isPaused === 'function' && isPaused()) {
+    if (now - lastSaveTime > 5000) {
+      save(); saveMeta(); lastSaveTime = now;
+    }
+    return;
+  }
   const kMult = knowledgeMult(state);
   const trait = getTrait(state.sector.traitId);
   // Wave 8: exotic boost from Singularity Sighting anomaly
