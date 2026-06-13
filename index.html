@@ -2342,6 +2342,55 @@ const ANOMALIES = [
         outcome:'Hull restored to 100%. The archive thanks you.',
         apply:(s) => { s.hull = 100; } },
     ]},
+
+  // Wave 21 — 3 new anomalies
+  { id:'a_colony', cat:'DISCOVERY', title:'Frozen Colony Ship',
+    desc:'A generation vessel, stopped mid-journey. The population is in stasis. Two hundred and forty thousand people dreaming of a world that may no longer exist.',
+    triggers: () => true,
+    choices: [
+      { label:'BROADCAST', desc:'Send a wake-up signal. Let them choose.',
+        outcome:'+2 engrams from the ship\'s archive. Hull takes 6% debris damage on approach. They are not grateful. They are terrified.',
+        apply:(s, m) => {
+          if (!m.engrams) m.engrams = [];
+          const e1 = rollEngrams(s.sector.traitId, s.sector.id, s.jumps);
+          const e2 = rollEngrams(s.sector.traitId, s.sector.id, s.jumps);
+          if (e1.length) m.engrams.unshift(e1[0]);
+          if (e2.length) m.engrams.unshift(e2[0]);
+          damageHull(6);
+        } },
+      { label:'PASS',      desc:'Leave them to their dream.',
+        outcome:'+5 Knowledge. You note their course. Someone should know where they are going.',
+        apply:(s) => { s.knowledge += 5; } },
+    ]},
+  { id:'a_drain', cat:'CRISIS', title:'Power Drain',
+    desc:'A sector anomaly feeds on static charge. Your energy stores are dropping at a rate that has no explanation and no end.',
+    triggers: (s) => s.resources.energy > 300,
+    choices: [
+      { label:'PURGE',    desc:'Discharge everything to break the drain.',
+        outcome:'Energy reset to 0. Systems rebooted. The anomaly moves on.',
+        apply:(s) => { s.resources.energy = 0; } },
+      { label:'REDIRECT', desc:'Route the drain through the drive. Use it.',
+        outcome:'Energy halved. +300 alloy from the converted charge. The lights flicker for days.',
+        apply:(s) => { s.resources.energy = Math.floor(s.resources.energy * 0.5); s.resources.alloy += 300; } },
+    ]},
+  { id:'a_cartographer', cat:'STORY', title:'The Cartographer',
+    desc:'An automated mapping drone, centuries old, still updating its atlas. It has been everywhere you are going. It offers to share what it knows.',
+    triggers: (s) => s.knowledge >= 10,
+    choices: [
+      { label:'TRADE',  desc:'Spend 10 Knowledge. Receive its engrams.',
+        outcome:'A compressed packet arrives: two engrams from the deep archive. The drone continues its survey. It will outlast you.',
+        apply:(s, m) => {
+          s.knowledge = Math.max(0, s.knowledge - 10);
+          if (!m.engrams) m.engrams = [];
+          const e1 = rollEngrams(s.sector.traitId, s.sector.id, s.jumps);
+          const e2 = rollEngrams(s.sector.traitId, s.sector.id, s.jumps);
+          if (e1.length) m.engrams.unshift(e1[0]);
+          if (e2.length) m.engrams.unshift(e2[0]);
+        } },
+      { label:'LISTEN', desc:'Ask what it has seen.',
+        outcome:'+14 Knowledge. It has been further than you are going. It does not know the way back.',
+        apply:(s) => { s.knowledge += 14; } },
+    ]},
 ];
 
 const ANOMALY_INTERVAL_MIN = 120 * 1000;  // 2 min
@@ -4228,6 +4277,12 @@ const ENGRAM_POOL = [
   { id:'eo3', rarity:'origin', name:'The Hand That Held', reward:{type:'pp',val:90}, flavor:'A memory of touch encoded in old data. You remember being held. You remember letting go. You do not remember the choosing.' },
   { id:'eo4', rarity:'origin', name:'Coordinates of Home',reward:{type:'pp',val:100},flavor:'The location you came from. It is not where you thought it was. It is closer. You have been there before. You will not return.' },
   { id:'eo5', rarity:'origin', name:'Architect\'s Promise',reward:{type:'pp',val:120},flavor:'What was agreed to, before the void. Two parties. One signature. Yours.' },
+  // Wave 21 — 5 new engrams (2 salvage, 1 signal, 1 archive, 1 relic)
+  { id:'es6', rarity:'salvage', name:'Flight Recorder',        reward:{type:'pp',val:1},  flavor:'Eight hours of standard operations. An emergency beacon test. Then nothing.' },
+  { id:'es7', rarity:'salvage', name:'Crew Manifest',          reward:{type:'pp',val:2},  flavor:'146 names. Three have been crossed out by hand. The handwriting changes each time.' },
+  { id:'eg6', rarity:'signal',  name:'Final Coordinates',      reward:{type:'pp',val:4},  flavor:'Two routes. They diverge after jump 47. Only one set of coordinates continues.' },
+  { id:'ea5', rarity:'archive', name:'Colonial Charter',       reward:{type:'pp',val:7},  flavor:'Legal documentation for a world that was never reached. Signed by people who are gone.' },
+  { id:'er4', rarity:'relic',   name:'The Architect\'s Journal',reward:{type:'pp',val:13},flavor:'Margin notes in the void\'s original survey. The handwriting is yours. The date precedes your birth.' },
 ];
 
 function rollEngramRarity() {
